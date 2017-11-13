@@ -2,16 +2,16 @@
 
 #include "Scene/Scene.h"
 #include "Camera\Camera.h"
-#include "Object\Item\Item.h"
+#include "Object\Unit\Unit.h"
 
-class CTestScene :
+class CMainScene :
 	public CScene
 {
 public:
 	using Base = CScene;
 public:
-	CTestScene();
-	~CTestScene();
+	CMainScene();
+	~CMainScene();
 
 	bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)	override;
 	bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)		override;
@@ -35,6 +35,6 @@ private:
 	D2D_POINT_2F					m_ptPlayer{ Point2F(0,0) };
 	CCamera							m_Camera;
 
-	unique_ptr<CItem>				m_upItem;
+	unique_ptr<CUnit>				m_upItem;
 };
 

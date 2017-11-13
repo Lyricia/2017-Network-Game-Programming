@@ -28,20 +28,26 @@
     <Filter Include="Framework\Timer">
       <UniqueIdentifier>{92314c98-6708-438b-9e83-de3df90d46e5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Scene\Test">
-      <UniqueIdentifier>{d4f8df80-95d7-4026-bf53-2a57c3d3b862}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Camera">
       <UniqueIdentifier>{50248688-72a4-4456-a1c4-660c691fd23f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Object">
       <UniqueIdentifier>{fc7a65a5-66cb-48af-9572-b096f209e414}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Object\Item">
+    <Filter Include="Object\Unit">
       <UniqueIdentifier>{712bb1ec-0362-4984-a2b3-bd5d96b53d4f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Object\Unit">
-      <UniqueIdentifier>{28e0039f-d327-4f35-bc4c-357f0d707666}</UniqueIdentifier>
+    <Filter Include="Object\Unit\Agent">
+      <UniqueIdentifier>{6d1edc05-6f0c-47ce-9719-ea8e059f2324}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Unit\Brick">
+      <UniqueIdentifier>{198bedeb-3331-48d8-8203-d2e2c03fb19a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Unit\Player">
+      <UniqueIdentifier>{1cb662fb-d9bc-4f2f-ac1f-a42ed3ef57f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene\Main">
+      <UniqueIdentifier>{d4f8df80-95d7-4026-bf53-2a57c3d3b862}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -72,9 +78,6 @@
     <ClInclude Include="Scene\Scene.h">
       <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Scene\Test\TestScene.h">
-      <Filter>Scene\Test</Filter>
-    </ClInclude>
     <ClInclude Include="Camera\Camera.h">
       <Filter>Camera</Filter>
     </ClInclude>
@@ -84,17 +87,17 @@
     <ClInclude Include="Object\Object.h">
       <Filter>Object</Filter>
     </ClInclude>
-    <ClInclude Include="Object\Item\Item.h">
-      <Filter>Object\Item</Filter>
-    </ClInclude>
-    <ClInclude Include="Object\Unit\Unit.h">
-      <Filter>Object\Unit</Filter>
-    </ClInclude>
     <ClInclude Include="Framework\Framework.h">
       <Filter>Framework</Filter>
     </ClInclude>
     <ClInclude Include="pch\D2DLoadBitmap.h">
       <Filter>pch</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Unit\Unit.h">
+      <Filter>Object\Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Main\MainScene.h">
+      <Filter>Scene\Main</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -113,23 +116,20 @@
     <ClCompile Include="Scene\Scene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Scene\Test\TestScene.cpp">
-      <Filter>Scene\Test</Filter>
-    </ClCompile>
     <ClCompile Include="Camera\Camera.cpp">
       <Filter>Camera</Filter>
     </ClCompile>
     <ClCompile Include="Object\Object.cpp">
       <Filter>Object</Filter>
     </ClCompile>
-    <ClCompile Include="Object\Item\Item.cpp">
-      <Filter>Object\Item</Filter>
+    <ClCompile Include="Framework\Framework.cpp">
+      <Filter>Framework</Filter>
     </ClCompile>
     <ClCompile Include="Object\Unit\Unit.cpp">
       <Filter>Object\Unit</Filter>
     </ClCompile>
-    <ClCompile Include="Framework\Framework.cpp">
-      <Filter>Framework</Filter>
+    <ClCompile Include="Scene\Main\MainScene.cpp">
+      <Filter>Scene\Main</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

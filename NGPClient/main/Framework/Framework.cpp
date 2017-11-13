@@ -3,7 +3,7 @@
 #include "IndRes/IndRes.h"
 #include "Timer/Timer.h"
 #include "Scene/Scene.h"
-#include "Scene/Test/TestScene.h"
+#include "Scene/Main/MainScene.h"
 
 #include "Framework.h"
 
@@ -29,7 +29,7 @@ void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst, shared_ptr<CIndRes> indres
 
 	m_pIndRes->CreateHwndRenderTarget(hWnd, &m_pd2dRenderTarget);
 
-	BuildScene<CTestScene>(L"Test"s);
+	BuildScene<CMainScene>(L"Main"s);
 }
 
 void CFramework::BuildScene(wstring Tag, const unique_ptr<CScene>& scene)

@@ -3,17 +3,17 @@
 #include "Framework/Framework.h"
 #include "Framework/IndRes/IndRes.h"
 
-#include "TestScene.h"
+#include "MainScene.h"
 
 
-CTestScene::CTestScene()
+CMainScene::CMainScene()
 {
 }
-CTestScene::~CTestScene()
+CMainScene::~CMainScene()
 {
 }
 
-bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+bool CMainScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	switch (nMessageID)
 	{
@@ -33,7 +33,7 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 	return(true);
 }
 
-bool CTestScene::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+bool CMainScene::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	switch (nMessageID)
 	{
@@ -65,7 +65,7 @@ bool CTestScene::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 	return true;
 }
 
-bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+bool CMainScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	switch (nMessageID)
 	{
@@ -94,7 +94,7 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 	return(true);
 }
 
-bool CTestScene::OnCreate(wstring && tag, CFramework * pFramework)
+bool CMainScene::OnCreate(wstring && tag, CFramework * pFramework)
 {
 	if (!Base::OnCreate(std::move(tag), pFramework)) return false;
 
@@ -109,7 +109,7 @@ bool CTestScene::OnCreate(wstring && tag, CFramework * pFramework)
 	m_Camera.SetPosition(m_ptPlayer);
 	m_Camera.SetAnchor(Point2F(0.0f, 0.0f));
 
-	m_upItem = make_unique<CItem>(
+	m_upItem = make_unique<CUnit>(
 		Point2F(100, 100)
 		, RectF(-10, -10, 10, 10));
 	m_upItem->RegisterImage(
@@ -150,7 +150,7 @@ bool CTestScene::OnCreate(wstring && tag, CFramework * pFramework)
 	return true;
 }
 
-void CTestScene::Update(float fTimeElapsed)
+void CMainScene::Update(float fTimeElapsed)
 {
 	//fPositionX += (100 * fTimeElapsed);
 	//if (fPositionX > 800) fPositionX -= 800.f;
@@ -161,7 +161,7 @@ void CTestScene::Update(float fTimeElapsed)
 	m_upItem->Update(fTimeElapsed);
 }
 
-void CTestScene::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
+void CMainScene::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
 {
 	auto cameramtx = m_Camera.RegenerateViewMatrix();
 	pd2dRenderTarget->SetTransform(cameramtx);
