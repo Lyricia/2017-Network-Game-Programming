@@ -17,7 +17,7 @@ public:
 	bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)		override;
 	bool OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)	override;
 
-	bool OnCreate(wstring&& tag, CWarp2DFramework* pFramework) override;
+	bool OnCreate(wstring&& tag, CFramework* pFramework) override;
 	void Update(float fTimeElapsed) override;
 	void Draw(ID2D1HwndRenderTarget * pd2dRenderTarget) override;
 

@@ -1,6 +1,6 @@
 #pragma once
 
-class CWarp2DFramework;
+class CFramework;
 class CIndRes;
 
 class CScene
@@ -9,7 +9,7 @@ public:
 	CScene();
 	virtual ~CScene();
 
-	virtual bool OnCreate(wstring&& tag, CWarp2DFramework* pFramework);
+	virtual bool OnCreate(wstring&& tag, CFramework* pFramework);
 
 	virtual bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
@@ -24,7 +24,7 @@ public:
 
 protected:
 
-	CWarp2DFramework*		m_pFramework	{ nullptr }	;
+	CFramework*		m_pFramework	{ nullptr }	;
 	HWND					m_hWnd			{ NULL }	;
 	shared_ptr<CIndRes>		m_pIndRes		{ nullptr }	;
 

@@ -35,7 +35,7 @@ constexpr LONG CLIENT_MINIMUM_HEIGHT = 600;
 #define TITLE_MAX_LENGTH 64
 
 #if USE_TITLE_STRING
-#define TITLESTRING	TEXT("Network Game Programming")
+#define TITLESTRING	TEXT("NGPClient")
 #endif
 
 #define DEBUG_CLIENT_WIDTH	400

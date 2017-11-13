@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#include "Framework/Warp2DFramework.h"
+#include "Framework/Framework.h"
 #include "Framework/IndRes/IndRes.h"
 
 #include "Scene.h"
@@ -57,7 +57,7 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 	return(true);
 }
 
-bool CScene::OnCreate(wstring&& tag, CWarp2DFramework * framework)
+bool CScene::OnCreate(wstring&& tag, CFramework * framework)
 {
 	m_strTag = move(tag);
 

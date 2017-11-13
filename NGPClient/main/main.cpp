@@ -5,13 +5,11 @@
 
 #include "Framework/IndRes/IndRes.h"
 #include "Framework/Timer/Timer.h"
-#include "Framework/Warp2DFramework.h"
+#include "Framework/Framework.h"
 
 #include "main.h"
 
 #define MAX_LOADSTRING 100
-
-
 
 namespace 
 {
@@ -21,7 +19,7 @@ namespace
 
 	shared_ptr<CIndRes> ind = make_shared<CIndRes>();
 	shared_ptr<CTimer> timer = make_shared<CTimer>();
-	CWarp2DFramework framework;
+	CFramework framework;
 
 	int g_iMarginWidth = 0;
 	int g_iMarginHeight = 0;
@@ -35,10 +33,11 @@ int GetMarginWidth() { return g_iMarginWidth; }
 int GetMarginHeight() { return g_iMarginHeight; }
 HINSTANCE GetHInstance() { return hInst; }
 
-int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
-                     _In_opt_ HINSTANCE hPrevInstance,
-                     _In_ LPWSTR    lpCmdLine,
-                     _In_ int       nCmdShow)
+int APIENTRY wWinMain(
+	  _In_		HINSTANCE hInstance
+    , _In_opt_	HINSTANCE hPrevInstance
+    , _In_		LPWSTR    lpCmdLine
+    , _In_		int       nCmdShow)
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
@@ -96,7 +95,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.cbSize = sizeof(WNDCLASSEX);
 
     wcex.style          = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc    = CWarp2DFramework::WndProc;
+    wcex.lpfnWndProc    = CFramework::WndProc;
     wcex.cbClsExtra     = 0;
     wcex.cbWndExtra     = 0;
     wcex.hInstance      = hInstance;

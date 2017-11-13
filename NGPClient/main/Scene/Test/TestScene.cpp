@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#include "Framework/Warp2DFramework.h"
+#include "Framework/Framework.h"
 #include "Framework/IndRes/IndRes.h"
 
 #include "TestScene.h"
@@ -94,7 +94,7 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 	return(true);
 }
 
-bool CTestScene::OnCreate(wstring && tag, CWarp2DFramework * pFramework)
+bool CTestScene::OnCreate(wstring && tag, CFramework * pFramework)
 {
 	if (!Base::OnCreate(std::move(tag), pFramework)) return false;
 

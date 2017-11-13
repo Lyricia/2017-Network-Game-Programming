@@ -7,12 +7,12 @@ class CScene;
 
 
 
-class CWarp2DFramework
+class CFramework
 {
 
 public:
-	CWarp2DFramework();
-	~CWarp2DFramework();
+	CFramework();
+	~CFramework();
 
 	void RegisterIndRes(shared_ptr<CIndRes> indres) { m_pIndRes = indres; }
 	void RegisterTimer(shared_ptr<CTimer> timer) { m_pTimer = timer; }

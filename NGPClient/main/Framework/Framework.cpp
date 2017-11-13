@@ -5,17 +5,17 @@
 #include "Scene/Scene.h"
 #include "Scene/Test/TestScene.h"
 
-#include "Warp2DFramework.h"
+#include "Framework.h"
 
-CWarp2DFramework::CWarp2DFramework() 
+CFramework::CFramework() 
 {
 }
 
-CWarp2DFramework::~CWarp2DFramework()
+CFramework::~CFramework()
 {
 }
 
-void CWarp2DFramework::OnCreate(HWND hWnd, HINSTANCE hInst, shared_ptr<CIndRes> indres, shared_ptr<CTimer> timer)
+void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst, shared_ptr<CIndRes> indres, shared_ptr<CTimer> timer)
 {
 	RegisterIndRes(indres);
 	RegisterTimer(timer);
@@ -32,18 +32,18 @@ void CWarp2DFramework::OnCreate(HWND hWnd, HINSTANCE hInst, shared_ptr<CIndRes> 
 	BuildScene<CTestScene>(L"Test"s);
 }
 
-void CWarp2DFramework::BuildScene(wstring Tag, const unique_ptr<CScene>& scene)
+void CFramework::BuildScene(wstring Tag, const unique_ptr<CScene>& scene)
 {
 	scene->OnCreate(move(Tag), this);
 }
 
-void CWarp2DFramework::FrameAdvance()
+void CFramework::FrameAdvance()
 {
 	Update(m_pTimer->GetTimeElapsed());
 	Draw();
 }
 
-void CWarp2DFramework::Draw()
+void CFramework::Draw()
 {
 	m_pd2dRenderTarget->BeginDraw();
 	m_pd2dRenderTarget->Clear(ColorF{ ColorF::LightGray });
@@ -54,12 +54,12 @@ void CWarp2DFramework::Draw()
 
 }
 
-void CWarp2DFramework::Update(float fTimeElapsed)
+void CFramework::Update(float fTimeElapsed)
 {
 	if (m_pCurrentScene) m_pCurrentScene->Update(fTimeElapsed);
 }
 
-bool CWarp2DFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+bool CFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	switch (nMessageID)
 	{
@@ -78,7 +78,7 @@ bool CWarp2DFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPAR
 	return true;
 }
 
-bool CWarp2DFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+bool CFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	switch (nMessageID)
 	{
@@ -99,7 +99,7 @@ bool CWarp2DFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, W
 	return true;
 }
 
-LRESULT CWarp2DFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+LRESULT CFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	// 선처리 구문 : 개별 Scene에서 처리할 것인지 확인
 	switch (nMessageID)
@@ -162,7 +162,7 @@ LRESULT CWarp2DFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, 
 	return DefWindowProc(hWnd, nMessageID, wParam, lParam);
 }
 
-void CWarp2DFramework::ChangeScene(wstring Tag, bool bDestroyPostScene)
+void CFramework::ChangeScene(wstring Tag, bool bDestroyPostScene)
 {
 	auto pChangeScene = FindScene(Tag);
 	if (!pChangeScene) return _DEBUG_ERROR("생성되지 않은 Scene을 참조하려 했습니다!");
@@ -181,7 +181,7 @@ void CWarp2DFramework::ChangeScene(wstring Tag, bool bDestroyPostScene)
 	m_pCurrentScene = pChangeScene;
 }
 
-CScene * CWarp2DFramework::FindScene(std::wstring Tag)
+CScene * CFramework::FindScene(std::wstring Tag)
 {
 	auto ChangeScene = find_if(begin(m_lstScenes), end(m_lstScenes),
 		[&] (const unique_ptr<CScene>& s)
@@ -190,9 +190,9 @@ CScene * CWarp2DFramework::FindScene(std::wstring Tag)
 	return ChangeScene == end(m_lstScenes) ? nullptr : ChangeScene->get();
 }
 
-LRESULT CALLBACK CWarp2DFramework::WndProc(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK CFramework::WndProc(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	auto self = ::GetUserDataPtr<CWarp2DFramework*>(hWnd);
+	auto self = ::GetUserDataPtr<CFramework*>(hWnd);
 	if (!self) return ::DefWindowProc(hWnd, nMessageID, wParam, lParam);
 
 	static auto DestroyWindow = [&] ()

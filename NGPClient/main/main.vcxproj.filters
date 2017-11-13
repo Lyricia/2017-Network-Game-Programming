@@ -54,12 +54,6 @@
     <ClInclude Include="main.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="D2DLoadBitmap.h">
-      <Filter>pch</Filter>
-    </ClInclude>
-    <ClInclude Include="Framework\Warp2DFramework.h">
-      <Filter>Framework</Filter>
-    </ClInclude>
     <ClInclude Include="Framework\IndRes\IndRes.h">
       <Filter>Framework\IndRes</Filter>
     </ClInclude>
@@ -96,13 +90,16 @@
     <ClInclude Include="Object\Unit\Unit.h">
       <Filter>Object\Unit</Filter>
     </ClInclude>
+    <ClInclude Include="Framework\Framework.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="pch\D2DLoadBitmap.h">
+      <Filter>pch</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Framework\Warp2DFramework.cpp">
-      <Filter>Framework</Filter>
     </ClCompile>
     <ClCompile Include="Framework\IndRes\IndRes.cpp">
       <Filter>Framework\IndRes</Filter>
@@ -130,6 +127,9 @@
     </ClCompile>
     <ClCompile Include="Object\Unit\Unit.cpp">
       <Filter>Object\Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\Framework.cpp">
+      <Filter>Framework</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
