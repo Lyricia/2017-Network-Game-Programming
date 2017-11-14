@@ -17,10 +17,18 @@ bool CMainScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 {
 	switch (nMessageID)
 	{
-	case WM_LBUTTONDOWN:	
-	case WM_MBUTTONDOWN:	
-	case WM_RBUTTONDOWN:	
-	case WM_MOUSEMOVE:		
+	case WM_LBUTTONDOWN:
+	case WM_MBUTTONDOWN:
+	case WM_RBUTTONDOWN:
+		break;
+	case WM_MOUSEMOVE:
+	{
+		auto rcClient = m_pFramework->GetClientSize();
+		auto pt = Point2F(LOWORD(lParam)- rcClient.right/2
+			, HIWORD(lParam)- rcClient.bottom/2);
+		m_upItem->LookAt(pt);
+		break;
+	}
 	case WM_LBUTTONUP:		
 	case WM_MBUTTONUP:		
 	case WM_RBUTTONUP:		
@@ -117,36 +125,6 @@ bool CMainScene::OnCreate(wstring && tag, CFramework * pFramework)
 		, rendertarget.Get()
 		, "Assets/Buckler.png");
 
-	//auto dwFactoy = m_pIndRes->dwFactory();
-	//
-	//dwFactoy->CreateTextFormat(
-	//  L"Arial"
-	//, nullptr
-	//, DWRITE_FONT_WEIGHT_NORMAL
-	//, DWRITE_FONT_STYLE_NORMAL
-	//, DWRITE_FONT_STRETCH_NORMAL
-	//, 30
-	//, L"ko-kr"
-	//, &m_pdwTextFormat);
-	//
-	//m_pdwTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-	//m_pdwTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
-	//
-	//dwFactoy->CreateTextLayout(
-	//	  L"Hello, World!"
-	//	, 13
-	//	, m_pdwTextFormat.Get()
-	//	, 300
-	//	, 100
-	//	, &m_pdwTextLayout);
-	//
-	//auto wicFactory = m_pIndRes->wicFactory();
-	//LoadImageFromFile(wicFactory
-	//	, rendertarget.Get()
-	//	, L"Hit1.png"
-	//	, &m_pd2dbmpTest
-	//);
-
 	return true;
 }
 
@@ -189,34 +167,4 @@ void CMainScene::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
 		, m_pd2dsbrDefault.Get());
 
 	m_upItem->Draw(pd2dRenderTarget);
-
-	//pd2dRenderTarget->DrawRectangle(
-	//	RectF(-50 + fPositionX, 100, 50 + fPositionX, 200)
-	//	, m_pd2dsbrDefault.Get());
-	//
-	//pd2dRenderTarget->DrawTextLayout(
-	//	  Point2F(0, 0)
-	//	, m_pdwTextLayout.Get()
-	//	, m_pd2dsbrDefault.Get()
-	//);
-	//
-	//pd2dRenderTarget->DrawText(
-	//	  L"text"
-	//	, 4
-	//	, m_pdwTextFormat.Get()
-	//	, RectF(400, 500, 600, 600)
-	//	, m_pd2dsbrDefault.Get()
-	//);
-	//
-	//auto bmpSize = m_pd2dbmpTest->GetSize();
-	//
-	//pd2dRenderTarget->DrawBitmap(
-	//	  m_pd2dbmpTest.Get()
-	//	, RectF(100, 100, 100 + bmpSize.width * 0.25f, 100 + bmpSize.height)
-	//	, min(1.f, currImg * 0.5f)
-	//	, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR
-	//	, RectF(  bmpSize.width * (int)currImg * 0.25f, 0
-	//			, bmpSize.width * ((int)currImg + 1) * 0.25f, bmpSize.height)
-	//);
-
 }

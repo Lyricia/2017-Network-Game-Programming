@@ -157,6 +157,7 @@
     <ClInclude Include="Framework\Timer\Timer.h" />
     <ClInclude Include="Framework\Framework.h" />
     <ClInclude Include="main.h" />
+    <ClInclude Include="Object\Brick\Brick.h" />
     <ClInclude Include="Object\Object.h" />
     <ClInclude Include="Object\Unit\Unit.h" />
     <ClInclude Include="pch\D2DLoadBitmap.h" />
@@ -175,6 +176,7 @@
     <ClCompile Include="Framework\Timer\Timer.cpp" />
     <ClCompile Include="Framework\Framework.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Object\Brick\Brick.cpp" />
     <ClCompile Include="Object\Object.cpp" />
     <ClCompile Include="Object\Unit\Unit.cpp" />
     <ClCompile Include="pch\stdafx.cpp">

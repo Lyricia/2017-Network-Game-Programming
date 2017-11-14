@@ -40,14 +40,14 @@
     <Filter Include="Object\Unit\Agent">
       <UniqueIdentifier>{6d1edc05-6f0c-47ce-9719-ea8e059f2324}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Object\Unit\Brick">
-      <UniqueIdentifier>{198bedeb-3331-48d8-8203-d2e2c03fb19a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Object\Unit\Player">
       <UniqueIdentifier>{1cb662fb-d9bc-4f2f-ac1f-a42ed3ef57f0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scene\Main">
       <UniqueIdentifier>{d4f8df80-95d7-4026-bf53-2a57c3d3b862}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Brick">
+      <UniqueIdentifier>{198bedeb-3331-48d8-8203-d2e2c03fb19a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -99,6 +99,9 @@
     <ClInclude Include="Scene\Main\MainScene.h">
       <Filter>Scene\Main</Filter>
     </ClInclude>
+    <ClInclude Include="Object\Brick\Brick.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -130,6 +133,9 @@
     </ClCompile>
     <ClCompile Include="Scene\Main\MainScene.cpp">
       <Filter>Scene\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Brick\Brick.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

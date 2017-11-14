@@ -5,6 +5,9 @@
 
 CUnit::CUnit(D2D_POINT_2F pt, D2D_RECT_F rc)
 	: CObject(pt, rc)
+	, m_ptDirection(Point2F())
+	, m_mtxRotate(Matrix3x2F::Identity())
+	, m_bmpImage(nullptr)
 {
 }
 CUnit::~CUnit()
@@ -13,18 +16,16 @@ CUnit::~CUnit()
 
 void CUnit::Update(float fTimeElapsed)
 {
-	//m_angle = acosf(m_ptDirection*Point2F(1,0));
 }
 void CUnit::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
 {
-	//D2D_MATRIX_3X2_F transform;
-	//pd2dRenderTarget->GetTransform(&transform);
-	//auto tr = Matrix3x2F::Rotation(m_angle, m_ptPos)*transform;
-	//pd2dRenderTarget->SetTransform(tr);
+	D2D_MATRIX_3X2_F transform;
+	pd2dRenderTarget->GetTransform(&transform);
+	pd2dRenderTarget->SetTransform(m_mtxRotate*transform);
 	pd2dRenderTarget->DrawBitmap(
 		  m_bmpImage.Get()
 		, m_rcSize + m_ptPos);
-	//pd2dRenderTarget->SetTransform(transform);
+	pd2dRenderTarget->SetTransform(transform);
 }
 
 void CUnit::RegisterImage(
@@ -53,7 +54,17 @@ void CUnit::RegisterImage(const ComPtr<ID2D1Bitmap1>& bmp)
 void CUnit::RegisterImage(ComPtr<ID2D1Bitmap1>&& bmp) noexcept
 {
 	m_bmpImage = move(bmp);
-	
 	if (IsRectValid(m_rcSize))
 		m_rcSize = SizeToRect(m_bmpImage->GetSize());
+}
+
+void CUnit::LookAt(const D2D1_POINT_2F& target_pos)
+{
+	if(Point2F() == target_pos) return;
+	m_ptDirection = Normalize(target_pos);
+	float angle = -acosf(m_ptDirection*Point2F(1, 0)); 
+	if (m_ptDirection.y > 0)
+		angle = -angle;
+	m_mtxRotate = Matrix3x2F::Rotation(
+		RADIAN_TO_DEGREE(angle), m_ptPos);
 }

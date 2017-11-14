@@ -42,6 +42,12 @@ int APIENTRY wWinMain(
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
+	if (!AllocConsole())
+		MessageBox(NULL, L"The console window was not created"
+			, NULL, MB_ICONEXCLAMATION);
+	FILE* fp;
+	freopen_s(&fp, "CONOUT$", "w", stdout);
+	
     // TODO: 여기에 코드를 입력합니다.
 	if (!ind->Initialize()) return FALSE;
 	
@@ -77,7 +83,10 @@ int APIENTRY wWinMain(
 		framework.FrameAdvance();
 
     }
-
+	fclose(fp);
+	if (!FreeConsole())
+		MessageBox(NULL, L"Failed to free the console!"
+			, NULL, MB_ICONEXCLAMATION);
     return (int) msg.wParam;
 }
 
