@@ -28,6 +28,12 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
+    <Filter Include="Agent">
+      <UniqueIdentifier>{d3f10ff6-4335-4b65-b4bb-7f23a3ad3aff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="RoomInfo">
+      <UniqueIdentifier>{7c2f29bc-55cb-4ab0-8d77-0ec85b660f64}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -63,6 +69,21 @@
     <ClInclude Include="IndRes\IndRes.h">
       <Filter>Indres</Filter>
     </ClInclude>
+    <ClInclude Include="AgentFSM.h">
+      <Filter>Agent</Filter>
+    </ClInclude>
+    <ClInclude Include="Agent.h">
+      <Filter>Agent</Filter>
+    </ClInclude>
+    <ClInclude Include="RoomInfo.h">
+      <Filter>RoomInfo</Filter>
+    </ClInclude>
+    <ClInclude Include="State.h">
+      <Filter>Agent</Filter>
+    </ClInclude>
+    <ClInclude Include="StateMachine.h">
+      <Filter>Agent</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -85,6 +106,12 @@
     </ClCompile>
     <ClCompile Include="IndRes\IndRes.cpp">
       <Filter>Indres</Filter>
+    </ClCompile>
+    <ClCompile Include="AgentFSM.cpp">
+      <Filter>Agent</Filter>
+    </ClCompile>
+    <ClCompile Include="Agent.cpp">
+      <Filter>Agent</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

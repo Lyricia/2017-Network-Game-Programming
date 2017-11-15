@@ -7,7 +7,8 @@ public:
 	~CIndRes();
 
 	bool Initialize();
-	bool CreateHwndRenderTarget(HWND hWnd, ID2D1HwndRenderTarget** m_pd2dRenderTarget, D2D1_RENDER_TARGET_PROPERTIES prop = D2D1::RenderTargetProperties(), D2D1_PRESENT_OPTIONS presentOpt = D2D1_PRESENT_OPTIONS_IMMEDIATELY);
+	bool CreateHwndRenderTarget(HWND hWnd, ID2D1HwndRenderTarget** m_pd2dRenderTarget, 
+		D2D1_RENDER_TARGET_PROPERTIES prop = D2D1::RenderTargetProperties(), D2D1_PRESENT_OPTIONS presentOpt = D2D1_PRESENT_OPTIONS_IMMEDIATELY);
 
 	ID2D1Factory3*		d2dFactory()	const { return m_pd2dFactory.Get(); }
 	IDWriteFactory3*	dwFactory()		const { return m_pdwFactory.Get(); }

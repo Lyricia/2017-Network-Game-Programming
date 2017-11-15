@@ -1,6 +1,15 @@
 #pragma once
 #include "stdafx.h"
 
+struct ConnectedServerInfo
+{
+	SOCKET 	   		sock;
+	SOCKADDR_IN  	addr;
+	HANDLE 	    	hReceiver;
+	//MsgQueue      *pMsgQueue;
+};
+
+
 // 서버의 가장 기본적인 구성요소들과 메서드들을 가지고 있는 서버 인터페이스 객체.
 // 이 객체를 상속받는 자식 서버 객체들의 기본적인 틀을 정해준다.
 class Server

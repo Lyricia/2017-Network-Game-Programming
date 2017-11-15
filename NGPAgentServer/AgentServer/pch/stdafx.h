@@ -27,6 +27,7 @@
 #include <memory>
 #include <functional>
 #include <string>
+#include <assert.h>
 using namespace std;
 
 #include <filesystem>
