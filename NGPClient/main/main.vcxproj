@@ -159,6 +159,7 @@
     <ClInclude Include="main.h" />
     <ClInclude Include="Object\Brick\Brick.h" />
     <ClInclude Include="Object\Object.h" />
+    <ClInclude Include="Object\Unit\Player\Player.h" />
     <ClInclude Include="Object\Unit\Unit.h" />
     <ClInclude Include="pch\D2DLoadBitmap.h" />
     <ClInclude Include="pch\D2D_Operator.h" />
@@ -178,6 +179,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Object\Brick\Brick.cpp" />
     <ClCompile Include="Object\Object.cpp" />
+    <ClCompile Include="Object\Unit\Player\Player.cpp" />
     <ClCompile Include="Object\Unit\Unit.cpp" />
     <ClCompile Include="pch\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

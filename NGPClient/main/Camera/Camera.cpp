@@ -58,3 +58,19 @@ D2D_MATRIX_3X2_F CCamera::RegenerateViewMatrix()
 	m_d2dmtxView._32 = -(pos * m_vUp);
 	return m_d2dmtxView;
 }
+
+D2D1_POINT_2F CCamera::GetInterpolatedPosFromCamera(const D2D1_POINT_2F & pt)
+{
+	float fClientScaleFactor = (1.f / m_fScale) * 0.5f;
+	return Point2F
+	(
+		Interpolation(
+			  pt.x - m_d2dptClientSize.x * fClientScaleFactor
+			, pt.x + m_d2dptClientSize.x * fClientScaleFactor
+			, -m_d2dptAnchor.x * 0.5f)
+		, Interpolation(
+			  pt.y - m_d2dptClientSize.y * fClientScaleFactor
+			, pt.y + m_d2dptClientSize.y * fClientScaleFactor
+			, -m_d2dptAnchor.y * 0.5f)
+	);
+}

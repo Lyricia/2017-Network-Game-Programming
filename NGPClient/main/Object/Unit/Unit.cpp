@@ -8,6 +8,8 @@ CUnit::CUnit(D2D_POINT_2F pt, D2D_RECT_F rc)
 	, m_ptDirection(Point2F())
 	, m_mtxRotate(Matrix3x2F::Identity())
 	, m_bmpImage(nullptr)
+	, m_fHP(0)
+	, m_fBlockStunTimer(0)
 {
 }
 CUnit::~CUnit()
@@ -40,21 +42,21 @@ void CUnit::RegisterImage(
 		, &m_bmpImage
 	);
 
-	if (IsRectValid(m_rcSize))
+	if (IsRectInvalid(m_rcSize))
 		m_rcSize = SizeToRect(m_bmpImage->GetSize());
 }
 
 void CUnit::RegisterImage(const ComPtr<ID2D1Bitmap1>& bmp)
 {
 	m_bmpImage = bmp;
-	if (IsRectValid(m_rcSize))
+	if (IsRectInvalid(m_rcSize))
 		m_rcSize = SizeToRect(m_bmpImage->GetSize());
 }
 
 void CUnit::RegisterImage(ComPtr<ID2D1Bitmap1>&& bmp) noexcept
 {
 	m_bmpImage = move(bmp);
-	if (IsRectValid(m_rcSize))
+	if (IsRectInvalid(m_rcSize))
 		m_rcSize = SizeToRect(m_bmpImage->GetSize());
 }
 

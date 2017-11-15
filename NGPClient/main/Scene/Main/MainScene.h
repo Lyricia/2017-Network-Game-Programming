@@ -2,8 +2,9 @@
 
 #include "Scene/Scene.h"
 #include "Camera\Camera.h"
-#include "Object\Unit\Unit.h"
 
+class CBrick;
+class CPlayer;
 class CMainScene :
 	public CScene
 {
@@ -22,19 +23,15 @@ public:
 	void Draw(ID2D1HwndRenderTarget * pd2dRenderTarget) override;
 
 private:
-
-	ComPtr<ID2D1SolidColorBrush>	m_pd2dsbrDefault	{ nullptr };
 	ComPtr<ID2D1SolidColorBrush>	m_pd2dsbrGrid1		{ nullptr };
 	ComPtr<ID2D1SolidColorBrush>	m_pd2dsbrGrid2		{ nullptr }	;
-	//ComPtr<IDWriteTextFormat>		m_pdwTextFormat		{ nullptr }	;
-	//ComPtr<IDWriteTextLayout>		m_pdwTextLayout		{ nullptr }	;
-	//
-	//ComPtr<ID2D1Bitmap1>			m_pd2dbmpTest		{ nullptr }	;
-	//float							currImg{ 0 };
-	//float							fPositionX{ 100.f };
-	D2D_POINT_2F					m_ptPlayer{ Point2F(0,0) };
-	CCamera							m_Camera;
 
-	unique_ptr<CUnit>				m_upItem;
+	ComPtr<ID2D1Bitmap1>			m_bmpCrossHair;
+	D2D1_POINT_2F					m_ptMouseCursor;
+
+	CCamera							m_Camera;
+	CBrick*							m_pBrick			{ nullptr };
+
+	CPlayer*						m_pPlayer			{ nullptr };
 };
 
