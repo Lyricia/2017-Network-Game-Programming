@@ -4,6 +4,7 @@ struct ConnectionInfo {
 	int				ID;
 	SOCKET			sock;
 	SOCKADDR_IN		addr;
+	HANDLE			RecvThreadHandle;
 };
 
 struct RoomInfo {

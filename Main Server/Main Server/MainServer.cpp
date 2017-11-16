@@ -47,11 +47,10 @@ DWORD WINAPI RecvMessage(LPVOID arg)
 		}
 		else if (retval == 0)
 			break;	
-	z
+	
 		// 받은 데이터 출력
 		buf[retval] = '\0';
-		printf("[TCP/%s:%d] %s\n", inet_ntoa(client->addr.sin_addr),
-			ntohs(client->addr.sin_port), buf);
+		cout << "ID : " << client->ID << " " << buf << endl;
 
 		retval = send(client->sock, "test", sizeof("test"), NULL);
 		if (retval == SOCKET_ERROR)
@@ -70,29 +69,31 @@ DWORD WINAPI RecvMessage(LPVOID arg)
 DWORD WINAPI RoomProcess(LPVOID arg) 
 {
 	RoomInfo* room = (RoomInfo*)arg;
-	HANDLE ClientMsgRecvThread[3];
 	int i = 0;
 	int retval;
 
 	for (auto c : room->clientlist)
 	{
-		ClientMsgRecvThread[c->ID] = CreateThread(NULL, 0, RecvMessage, (LPVOID)c, 0, NULL);
-		i++;
+		c->RecvThreadHandle = CreateThread(NULL, 0, RecvMessage, (LPVOID)c, 0, NULL);
 	}
-
+	
 	while (1) {
-		room->clientlist.remove_if([&](ConnectionInfo* client)->bool{
-			DWORD exitcode = 0;
-			GetExitCodeThread(ClientMsgRecvThread[client->ID], &exitcode);
-			if(exitcode != STILL_ACTIVE)
-				cout << "Client ID : " << client->ID << " Terminated" << endl;
-			return (exitcode != STILL_ACTIVE);
-		});
+		if (room) {
+			room->clientlist.remove_if([&](ConnectionInfo* client)->bool {
+				DWORD exitcode = 0;
+				GetExitCodeThread(client->RecvThreadHandle, &exitcode);
+				if (exitcode != STILL_ACTIVE) {
+					cout << "Client ID : " << client->ID << " Terminated" << endl;
+					return true;
+				}
+				return false;
+			});
 
-		if (room->clientlist.empty()) 
-		{
-			cout << "Terminate Room " << room->RoomID << endl;
-			ExitThread(NULL);
+			if (room->clientlist.empty())
+			{
+				cout << "Terminate Room " << room->RoomID << endl;
+				ExitThread(NULL);
+			}
 		}
 		//cout << "Room " << room->RoomID << " is running client : " << room->clientlist.size() << endl;
 	}
