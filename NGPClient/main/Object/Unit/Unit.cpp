@@ -62,8 +62,8 @@ void CUnit::RegisterImage(ComPtr<ID2D1Bitmap1>&& bmp) noexcept
 
 void CUnit::LookAt(const D2D1_POINT_2F& target_pos)
 {
-	if(Point2F() == target_pos) return;
-	m_ptDirection = Normalize(target_pos);
+	if(m_ptPos == target_pos) return;
+	m_ptDirection = Normalize(target_pos - m_ptPos);
 	float angle = -acosf(m_ptDirection*Point2F(1, 0)); 
 	if (m_ptDirection.y > 0)
 		angle = -angle;

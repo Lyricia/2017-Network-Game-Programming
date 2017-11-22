@@ -35,7 +35,7 @@ public:
 	virtual void SetLookAt(const D2D1_POINT_2F& d2dptLookAt) { }
 	D2D_MATRIX_3X2_F GetCameraMatrix(){ SetMatrix(); return m_d2dmtxWorld; }
 	D2D_MATRIX_3X2_F RegenerateViewMatrix();
-	D2D1_POINT_2F GetInterpolatedPosFromCamera(const D2D1_POINT_2F& pt);
+	float GetScaleFactor() const {return (1.f / m_fScale);}
 
 	void SetClientSize(D2D_POINT_2F ptClientSize);
 	bool CheckControlLock(){ return m_bControlLock; }

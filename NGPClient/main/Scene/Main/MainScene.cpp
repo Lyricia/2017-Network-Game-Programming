@@ -14,7 +14,9 @@ CMainScene::CMainScene()
 }
 CMainScene::~CMainScene()
 {
-	if(m_pBrick) delete m_pBrick;
+	if (!m_vecObjects.empty())
+		for (auto& p : m_vecObjects)
+			delete p;
 	if(m_pPlayer) delete m_pPlayer;
 }
 
@@ -25,13 +27,14 @@ bool CMainScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 	case WM_LBUTTONDOWN:
 	case WM_MBUTTONDOWN:
 	case WM_RBUTTONDOWN:
+		m_pPlayer->Shoot();
 		break;
 	case WM_MOUSEMOVE:
 	{
 		auto rcClient = m_pFramework->GetClientSize();
 		m_ptMouseCursor = Point2F(
 			  LOWORD(lParam)- rcClient.right / 2
-			, HIWORD(lParam)- rcClient.bottom / 2);
+			, HIWORD(lParam)- rcClient.bottom / 2) ;
 		break;
 	}
 	case WM_LBUTTONUP:		
@@ -122,9 +125,9 @@ bool CMainScene::OnCreate(wstring && tag, CFramework * pFramework)
 	LoadImageFromFile(
 		m_pIndRes->wicFactory()
 		, hwndrendertarget
-		//, path("../../Resource/Sprite/aim.png").c_str()
+		, path("../../Resource/Sprite/aim.png").c_str()
 		//, path("../../Resource/Sprite/aim_big.png").c_str()
-		, path("../../Resource/Sprite/aim_trans.png").c_str()
+		//, path("../../Resource/Sprite/aim_trans.png").c_str()
 		, &m_bmpCrossHair);
 
 	m_pPlayer = new CPlayer(Point2F());
@@ -141,12 +144,13 @@ bool CMainScene::OnCreate(wstring && tag, CFramework * pFramework)
 	m_Camera.SetPosition(m_pPlayer->GetPos());
 	m_Camera.SetAnchor(Point2F(0.0f, 0.0f));
 
-	m_pBrick = new CBrick(Point2F(100, 200));
-	m_pBrick->RegisterSpriteImage(
-		  m_pIndRes.get()
+	CBrick* brick = new CBrick(Point2F(100, 200));
+	brick->RegisterSpriteImage(
+		m_pIndRes.get()
 		, rendertarget.Get()
 		, "../../Resource/Sprite/brick-Sheet.png"
 		, Point2F(5, 1));
+	m_vecObjects.emplace_back(brick);
 
 	return true;
 }
@@ -155,8 +159,12 @@ void CMainScene::Update(float fTimeElapsed)
 {
 	m_Camera.SetPosition(m_pPlayer->GetPos());
 	m_pPlayer->Update(fTimeElapsed);
-	m_pPlayer->LookAt(m_ptMouseCursor);
-	m_pBrick->Update(fTimeElapsed);
+	m_pPlayer->LookAt(
+		(m_ptMouseCursor * m_Camera.GetScaleFactor()) + 
+		m_pPlayer->GetPos());
+	m_pPlayer->RayCastingToShoot(m_vecObjects);
+	for (auto& p : m_vecObjects)
+		p->Update(fTimeElapsed);
 }
 
 void CMainScene::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
@@ -179,11 +187,16 @@ void CMainScene::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
 					, m_pd2dsbrGrid2.Get());
 		}
 
-	m_pBrick->Draw(pd2dRenderTarget);
+	for (auto& p : m_vecObjects)
+		p->Draw(pd2dRenderTarget);
 	m_pPlayer->Draw(pd2dRenderTarget);
 
 	pd2dRenderTarget->DrawBitmap(
 		m_bmpCrossHair.Get()
 		, SizeToRect(m_bmpCrossHair->GetSize()) + 
-		m_Camera.GetInterpolatedPosFromCamera(m_ptMouseCursor));
+		m_ptMouseCursor * m_Camera.GetScaleFactor() +
+		m_pPlayer->GetPos());
+	auto pt = m_ptMouseCursor * m_Camera.GetScaleFactor() +
+		m_pPlayer->GetPos();
+	printf("\r %f, %f", pt.x, pt.y);
 }

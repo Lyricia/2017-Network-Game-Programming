@@ -68,17 +68,17 @@ public:
 	// Framework에 필요한 것들.
 private:
 	
-	HWND							m_hWnd				{ nullptr }	;
-	HINSTANCE						m_hInst				{ nullptr }	;
+	HWND							m_hWnd				{ nullptr };
+	HINSTANCE						m_hInst				{ nullptr };
+																   
+	shared_ptr<CIndRes>				m_pIndRes			{ nullptr };
+	shared_ptr<CTimer>				m_pTimer			{ nullptr };
+																   
+	ComPtr<ID2D1HwndRenderTarget>	m_pd2dRenderTarget	{ nullptr };
 
-	shared_ptr<CIndRes>				m_pIndRes			{ nullptr }	;
-	shared_ptr<CTimer>				m_pTimer			{ nullptr }	;
+	D2D_RECT_L						m_rcClient;
 
-	ComPtr<ID2D1HwndRenderTarget>	m_pd2dRenderTarget	{ nullptr }	;
-
-	D2D_RECT_L						m_rcClient						;
-
-	list<unique_ptr<CScene>>		m_lstScenes						;
-	CScene*							m_pCurrentScene		{ nullptr }	;
+	list<unique_ptr<CScene>>		m_lstScenes;
+	CScene*							m_pCurrentScene		{ nullptr };
 
 };

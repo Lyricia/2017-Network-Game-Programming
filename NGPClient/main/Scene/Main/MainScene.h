@@ -3,7 +3,7 @@
 #include "Scene/Scene.h"
 #include "Camera\Camera.h"
 
-class CBrick;
+class CObject;
 class CPlayer;
 class CMainScene :
 	public CScene
@@ -30,7 +30,7 @@ private:
 	D2D1_POINT_2F					m_ptMouseCursor;
 
 	CCamera							m_Camera;
-	CBrick*							m_pBrick			{ nullptr };
+	std::vector<CObject*>			m_vecObjects;
 
 	CPlayer*						m_pPlayer			{ nullptr };
 };
