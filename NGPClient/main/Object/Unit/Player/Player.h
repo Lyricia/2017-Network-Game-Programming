@@ -6,6 +6,7 @@
 #define SHOOT_TIME		0.3
 #define SHOOT_RANGE		1000.f
 #define SHOOT_DAMAGE	10.f
+#define SHOOT_STROKE	6.0f // 레이저 두께
 #define MUZZLE_OFFSET	64.f
 
 class CIndRes;

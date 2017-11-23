@@ -49,6 +49,9 @@
     <Filter Include="Object\Brick">
       <UniqueIdentifier>{198bedeb-3331-48d8-8203-d2e2c03fb19a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Framework\Client">
+      <UniqueIdentifier>{2690d2e6-0761-4779-8458-8ae9918d5c73}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -108,6 +111,9 @@
     <ClInclude Include="Object\Unit\Agent\Agent.h">
       <Filter>Object\Unit\Agent</Filter>
     </ClInclude>
+    <ClInclude Include="Framework\Client\Client.h">
+      <Filter>Framework\Client</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -148,6 +154,9 @@
     </ClCompile>
     <ClCompile Include="Object\Unit\Agent\Agent.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\Client\Client.cpp">
+      <Filter>Framework\Client</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -15,7 +15,6 @@ CPlayer::CPlayer(D2D_POINT_2F pt, D2D_RECT_F rc)
 	, m_bShoot(true)
 {
 }
-
 CPlayer::~CPlayer()
 {
 }
@@ -74,11 +73,12 @@ void CPlayer::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
 				ColorF{ ColorF::LightYellow }
 				, &m_pd2dLineBrush);
 
+		m_pd2dLineBrush->SetOpacity(1 - (m_fShootTimer /SHOOT_TIME));
 		pd2dRenderTarget->DrawLine(
 			m_ptMuzzleStartPos
 			, m_ptMuzzleEndPos
 			, m_pd2dLineBrush.Get()
-			, 6.0f);
+			, SHOOT_STROKE);
 	}
 }
 
@@ -128,7 +128,6 @@ void CPlayer::Move(const D2D_POINT_2F & pt)
 {
 	m_ptPos = m_ptPos + pt;
 }
-
 void CPlayer::Move(float x, float y)
 {
 	m_ptPos = m_ptPos + Point2F(x, y);

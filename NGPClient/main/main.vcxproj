@@ -153,6 +153,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Camera\Camera.h" />
+    <ClInclude Include="Framework\Client\Client.h" />
     <ClInclude Include="Framework\IndRes\IndRes.h" />
     <ClInclude Include="Framework\Timer\Timer.h" />
     <ClInclude Include="Framework\Framework.h" />
@@ -174,6 +175,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera\Camera.cpp" />
+    <ClCompile Include="Framework\Client\Client.cpp" />
     <ClCompile Include="Framework\IndRes\IndRes.cpp" />
     <ClCompile Include="Framework\Timer\Timer.cpp" />
     <ClCompile Include="Framework\Framework.cpp" />

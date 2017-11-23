@@ -17,6 +17,9 @@
 #include <memory.h>
 #include <tchar.h>
 
+#include <WinSock2.h>
+#pragma comment(lib, "ws2_32")
+
 // C++ 런타임 헤더 파일입니다.
 #include <iostream>
 #include <vector>
