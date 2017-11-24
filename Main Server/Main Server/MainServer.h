@@ -9,9 +9,17 @@ struct ConnectionInfo {
 
 struct RoomInfo {
 	int						RoomID;
-	list<ConnectionInfo*>	clientlist;
 	ConnectionInfo*			serverinfo;
+	list<ConnectionInfo*>	clientlist;
+	//list<ConnectionInfo*>	agentlist;
 	list<NGPMSG*>			MsgQueue;
+	//GameWorld				GameWorld;
+	//HANDLE				hGameWorld
+
+	//void UpdateWorld();
+	void SendMsgs(SOCKET sock, NGPMSG &msg, size_t msgsize){
+		send(sock, (char*)&msg, msgsize, 0);
+	}
 };
 
 class MainServer : public Server

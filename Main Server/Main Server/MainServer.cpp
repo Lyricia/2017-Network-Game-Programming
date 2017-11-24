@@ -95,6 +95,13 @@ DWORD WINAPI RoomProcess(LPVOID arg)
 				ExitThread(NULL);
 			}
 		}
+		
+		//CreateMSG(MSGTYPE::MSGUPDATE::ADJUSTPOS, )
+
+		for (auto c : room->clientlist)
+		{
+			//room->SendMsgs(c->sock, );
+		}
 		//cout << "Room " << room->RoomID << " is running client : " << room->clientlist.size() << endl;
 	}
 	return 0;
