@@ -21,6 +21,76 @@ int recvn(SOCKET s, char *buf, int len, int flags)
 	return (len - left);
 }
 
+DWORD WINAPI RunGameWorld(LPVOID arg)
+{
+	int msgtype = 0;
+	list<NGPMSG*> *MsgQueue = (list<NGPMSG*>*)arg;
+	
+	ActionInfo* Actionlist = new ActionInfo();
+	ObjInfo* Objlist = new ObjInfo();
+
+	while (1)
+	{
+		NGPMSG msg;
+		if (!MsgQueue->empty()) 
+		{
+			msgtype = DispatchMSG(MsgQueue->front(), *Actionlist, *Objlist);
+			MsgQueue->pop_front();
+		}
+		else continue;
+
+		switch (msgtype)
+		{
+		case MSGTYPE::MSGACTION::MOVE:
+			break;
+
+		case MSGTYPE::MSGACTION::SHOOT:
+
+			break;
+
+		case MSGTYPE::MSGACTION::BUILDTURRET:
+
+			break;
+
+		case MSGTYPE::MSGACTION::RELOAD:
+
+			break;
+
+
+		case MSGTYPE::MSGSTATE::AIAGENTINFO:
+			break;
+
+		case MSGTYPE::MSGSTATE::AICREATTIONREQUEST:
+			break;
+
+		case MSGTYPE::MSGSTATE::CLIENTGAMEOVER:
+			break;
+
+		case MSGTYPE::MSGSTATE::CLIENTREADY:
+			break;
+
+		case MSGTYPE::MSGSTATE::ROOMCREATION:
+			break;
+
+
+		case MSGTYPE::MSGUPDATE::ADJUSTPOS:
+			break;
+
+		case MSGTYPE::MSGUPDATE::CREATEOBJECT:
+			break;
+
+		case MSGTYPE::MSGUPDATE::DELETEOBJECT:
+			break;
+
+		case MSGTYPE::MSGUPDATE::UPDATEOBJECTSTATE:
+			break;
+
+		}
+	}
+	
+	return 0;
+}
+
 DWORD WINAPI RecvMessage(LPVOID arg) 
 {
 	ConnectionInfo* client = (ConnectionInfo*)arg;
@@ -69,6 +139,7 @@ DWORD WINAPI RecvMessage(LPVOID arg)
 DWORD WINAPI RoomProcess(LPVOID arg) 
 {
 	RoomInfo* room = (RoomInfo*)arg;
+	
 	int i = 0;
 	int retval;
 
@@ -77,7 +148,15 @@ DWORD WINAPI RoomProcess(LPVOID arg)
 		c->RecvThreadHandle = CreateThread(NULL, 0, RecvMessage, (LPVOID)c, 0, NULL);
 	}
 	
+	room->hGameWorld = CreateThread(NULL, 0, RunGameWorld, (LPVOID)&room->MsgQueue, 0, NULL);
+	if (room->hGameWorld == NULL) {
+		cout << "Thread Creation Failed" << endl;
+		return 0;
+	}
+	
+
 	while (1) {
+
 		if (room) {
 			room->clientlist.remove_if([&](ConnectionInfo* client)->bool {
 				DWORD exitcode = 0;
@@ -97,11 +176,11 @@ DWORD WINAPI RoomProcess(LPVOID arg)
 		}
 		
 		//CreateMSG(MSGTYPE::MSGUPDATE::ADJUSTPOS, )
-
 		for (auto c : room->clientlist)
 		{
-			//room->SendMsgs(c->sock, );
+			// send world update to clients
 		}
+		
 		//cout << "Room " << room->RoomID << " is running client : " << room->clientlist.size() << endl;
 	}
 	return 0;

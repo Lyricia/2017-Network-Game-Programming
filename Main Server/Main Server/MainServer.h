@@ -9,12 +9,12 @@ struct ConnectionInfo {
 
 struct RoomInfo {
 	int						RoomID;
-	ConnectionInfo*			serverinfo;
+	HANDLE					hGameWorld;
+	list<NGPMSG*>			*MsgQueue;
+	ConnectionInfo			*serverinfo;
 	list<ConnectionInfo*>	clientlist;
 	//list<ConnectionInfo*>	agentlist;
-	list<NGPMSG*>			MsgQueue;
 	//GameWorld				GameWorld;
-	//HANDLE				hGameWorld
 
 	//void UpdateWorld();
 	void SendMsgs(SOCKET sock, NGPMSG &msg, size_t msgsize){

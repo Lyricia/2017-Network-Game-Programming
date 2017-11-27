@@ -1,6 +1,8 @@
 #pragma once
 
-#define DETAILBUFSIZE 512
+#define ACTIONINFOBUFSIZE	128
+#define OBJINFOBUFSIZE		256
+
 
 //struct D2D_POINT_2F {};
 
@@ -70,82 +72,33 @@ struct MSGHEADER {
 
 struct NGPMSG {
 	MSGHEADER			header;
-	char				detailinfo[DETAILBUFSIZE];
+	char				objinfo[OBJINFOBUFSIZE];
+	char				actioninfo[ACTIONINFOBUFSIZE];
 };
 
-inline NGPMSG* CreateMSG(char type, short size, char roomno, char objectno, char nObjinfo, char nActioninfo, void* detail) 
+inline NGPMSG* CreateMSG(char type, short size, char roomno, char objectno, char nObjinfo, char nActioninfo, void* objinfo, void* actioninfo) 
 {
 	NGPMSG* msg = new NGPMSG();
-	msg->detailinfo = 1;
 
 	MSGHEADER msgHeader = { type, size, roomno, objectno, nObjinfo, nActioninfo };
 	
 	msg->header = msgHeader;
-	msg->detailinfo = detail;
+	memcpy(msg->actioninfo, actioninfo, MSGSIZE::SIZE_ACTIONINFO*nActioninfo);
+	memcpy(msg->objinfo, objinfo, MSGSIZE::SIZE_OBJINFO*nObjinfo);
 
 	return msg;
 }
 
-inline void DispatchMSG(NGPMSG* msg)
+inline int DispatchMSG(NGPMSG* msg, ActionInfo& actionlist, ObjInfo& objlist)
 {
-	switch (msg->header.MSGTYPE) 
-	{
-	case MSGTYPE::MSGACTION::MOVE:
-	{
-		int num_actioninfo = msg->header.NUM_ACTIONINFO;
-		ActionInfo* actionlist = new ActionInfo();
-		memcpy(actionlist, msg->detailinfo, sizeof())
+	int num_actioninfo = msg->header.NUM_ACTIONINFO;
+	int num_objinfo = msg->header.NUM_OBJINFO;
 
-
-		for (int i = 0; i < num_actioninfo; ++i)
-		{
-
-		}
-
-		delete[] actionlist;
-		break;
-	}
-
-	case MSGTYPE::MSGACTION::SHOOT:
-		
-		break;
+	if (num_actioninfo > 0)
+		memcpy(&actionlist, msg->actioninfo, MSGSIZE::SIZE_ACTIONINFO * num_actioninfo);
 	
-	case MSGTYPE::MSGACTION::BUILDTURRET:
-		
-		break;
+	if (num_objinfo > 0)
+		memcpy(&objlist, msg->objinfo, MSGSIZE::SIZE_OBJINFO * num_objinfo);
 
-	case MSGTYPE::MSGACTION::RELOAD:
-		
-		break;
-
-
-	case MSGTYPE::MSGSTATE::AIAGENTINFO:
-		break;
-
-	case MSGTYPE::MSGSTATE::AICREATTIONREQUEST:
-		break;
-
-	case MSGTYPE::MSGSTATE::CLIENTGAMEOVER:
-		break;
-
-	case MSGTYPE::MSGSTATE::CLIENTREADY:
-		break;
-
-	case MSGTYPE::MSGSTATE::ROOMCREATION:
-		break;
-
-
-	case MSGTYPE::MSGUPDATE::ADJUSTPOS:
-		break;
-
-	case MSGTYPE::MSGUPDATE::CREATEOBJECT:
-		break;
-
-	case MSGTYPE::MSGUPDATE::DELETEOBJECT:
-		break;
-
-	case MSGTYPE::MSGUPDATE::UPDATEOBJECTSTATE:
-		break;
-
-	}
+	return msg->header.MSGTYPE;	
 }
