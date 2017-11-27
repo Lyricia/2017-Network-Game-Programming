@@ -11,6 +11,7 @@ CBrick::CBrick(D2D_POINT_2F pt, D2D_RECT_F rc)
 	, m_fHP(BRICK_MAX_HP)
 	, m_fBlockStunTimer(0)
 {
+	m_Tag = CObject::Type::Brick;
 }
 
 CBrick::~CBrick()

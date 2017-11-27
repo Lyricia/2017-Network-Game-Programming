@@ -19,6 +19,7 @@ private:
 	//MsgQueue				m_MsgQueue;
 	ConnectedServerInfo 	m_MainServer;
 
+	// Test용 버퍼. Msg Queue로 바꿀것.
 	char					m_pBuffer[BUFFER_SIZE];
 	
 public:
@@ -29,4 +30,6 @@ public:
 	void Release();
 	void ConnectServer();
 	void SendMsgs();
+
+	void SetClientID(UINT id) { m_Local_id = id; }
 };

@@ -23,6 +23,7 @@ void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst, shared_ptr<CIndRes> indres
 	m_hWnd = hWnd;
 	m_hInst = hInst;
 	::GetClientRect(m_hWnd, &m_rcClient);
+	ShowCursor(FALSE);
 
 	// 클래스와 윈도우 프로시저 연결
 	::SetUserDataPtr(m_hWnd, this);
@@ -51,7 +52,6 @@ void CFramework::Draw()
 	if (m_pCurrentScene) m_pCurrentScene->Draw(m_pd2dRenderTarget.Get());
 
 	m_pd2dRenderTarget->EndDraw();
-
 }
 
 void CFramework::Update(float fTimeElapsed)

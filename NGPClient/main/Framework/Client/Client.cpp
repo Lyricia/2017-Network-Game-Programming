@@ -26,7 +26,11 @@ void err_display(char* msg)
 }
 
 CClient::CClient()
+	: m_Local_id(-1)
+	, m_Local_sock(NULL)
 {
+	ZeroMemory(&m_Local_addr, sizeof(m_Local_addr));
+	ZeroMemory(&m_MainServer, sizeof(m_MainServer));
 }
 CClient::~CClient()
 {
@@ -57,10 +61,8 @@ void CClient::Release()
 void CClient::ConnectServer()
 {
 	// connect()
-	SOCKADDR_IN serveraddr;
-	ZeroMemory(&m_Local_addr, sizeof(m_Local_addr));
 	m_Local_addr.sin_family = AF_INET;
-	m_Local_addr.sin_addr.s_addr = inet_addr(m_pBuffer);
+	m_Local_addr.sin_addr.s_addr = inet_addr("");
 	m_Local_addr.sin_port = htons(SERVERPORT);
 	int retval = connect(m_Local_sock, (SOCKADDR *)&m_Local_addr, sizeof(m_Local_addr));
 	if (retval == SOCKET_ERROR)
@@ -69,4 +71,6 @@ void CClient::ConnectServer()
 
 void CClient::SendMsgs()
 {
+	int retval = send(m_Local_sock, m_pBuffer, BUFFER_SIZE, 0);
+
 }
