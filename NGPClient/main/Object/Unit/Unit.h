@@ -1,7 +1,7 @@
 #pragma once
 #include "Object\Object.h"
 
-class CIndRes;
+class CResourceManager;
 class CUnit : public CObject
 {
 public:
@@ -11,12 +11,7 @@ public:
 	virtual void Update(float fTimeElapsed) override;
 	virtual void Draw(ID2D1HwndRenderTarget* pd2dRenderTarget) override;
 
-	virtual void RegisterImage(
-		  CIndRes*					pIndRes
-		, ID2D1HwndRenderTarget*	pd2dRenderTarget
-		, path						filename);
-	virtual void RegisterImage(const ComPtr<ID2D1Bitmap1>& bmp);
-	virtual void RegisterImage(ComPtr<ID2D1Bitmap1>&& bmp) noexcept;
+	virtual void RegisterResourceManager(shared_ptr<CResourceManager> resMng);
 
 	virtual void Collide(float atk) {}
 	void LookAt(const D2D1_POINT_2F& target_pos);
@@ -26,13 +21,16 @@ public:
 	bool IsDie() const { return m_fHP <= 0; }
 
 protected:
-	D2D1_POINT_2F				m_ptDirection;
-	D2D1_POINT_2F				m_ptTargetPos;
+	D2D1_POINT_2F					m_ptDirection;
+	D2D1_POINT_2F					m_ptTargetPos;
 
-	D2D1_MATRIX_3X2_F			m_mtxRotate;
-	ComPtr<ID2D1Bitmap1>		m_bmpImage;
+	D2D1_MATRIX_3X2_F				m_mtxRotate;
 
-	float						m_fHP;
-	float						m_fBlockStunTimer;
+	shared_ptr<CResourceManager>	m_pResMng;
+	D2D1_SIZE_U						m_szImg;
+	D2D1_POINT_2U					m_ptCurrImg;
+
+	float							m_fHP;
+	float							m_fBlockStunTimer;
 };
 

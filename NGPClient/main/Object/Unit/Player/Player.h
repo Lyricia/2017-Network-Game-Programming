@@ -15,34 +15,24 @@
 #define MAX_GRENADE				3
 #define MAX_TURRET				1
 
-#define MAX_VELOCITY			400.f
+#define PLAYER_MAX_VELOCITY		400.f
 #define PLAYER_VELOCITY			2000.f
 
 #define FRICTIONAL_DRAG			2.5f
 #define REFLACTION_FACTOR		0.8f
 
-class CIndRes;
+class CResourceManager;
 class CPlayer : public CUnit
 {
 public:
-	CPlayer(CIndRes* pIndRes
-		, ID2D1HwndRenderTarget* pd2dRenderTarget
-		, D2D_POINT_2F pt, D2D_RECT_F rc = RectF());
+	CPlayer(D2D_POINT_2F pt, D2D_RECT_F rc = RectF());
 	virtual ~CPlayer();
 
 	virtual void Update(float fTimeElapsed) override;
 	virtual void Draw(ID2D1HwndRenderTarget* pd2dRenderTarget) override;
-	virtual void DrawUI(ID2D1HwndRenderTarget* pd2dRenderTarget);
+	virtual void DrawUI(ID2D1HwndRenderTarget* pd2dRenderTarget, float fScaleFactor);
 
-	virtual void RegisterImage(
-		CIndRes*					pIndRes
-		, ID2D1HwndRenderTarget*	pd2dRenderTarget
-		, path						filename);
-	virtual void RegisterSpriteImage(
-		CIndRes*					pIndRes
-		, ID2D1HwndRenderTarget*	pd2dRenderTarget
-		, path						filename
-		, D2D_POINT_2F				ptLength);
+	virtual void RegisterResourceManager(shared_ptr<CResourceManager> resMng);
 
 	virtual void Collide(float atk) override;
 
@@ -54,17 +44,9 @@ public:
 
 private:
 	ComPtr<ID2D1Bitmap1>			m_bmpImage;
-	D2D_POINT_2F					m_ptCurrImg;
-	UINT							m_nSpriteImgWidth;
-	UINT							m_nSpriteImgHeight;
 
 	ComPtr<ID2D1Bitmap1>			m_bmpWeaponImage;
 	D2D_RECT_F						m_rcWeaponSize;
-
-	ComPtr<IDWriteTextFormat>		m_dwTextFormat;
-	ComPtr<ID2D1SolidColorBrush>	m_pd2dGaugeBrush;
-	ComPtr<ID2D1SolidColorBrush>	m_pd2dTextBrush;
-	ComPtr<ID2D1SolidColorBrush>	m_pd2dOutlineBrush;
 
 	float							m_fBlockStunTimer;
 	bool							m_bCollision;
@@ -73,7 +55,6 @@ private:
 
 	CObject*						m_pTarget;
 
-	ComPtr<ID2D1SolidColorBrush>	m_pd2dLineBrush;
 	D2D_POINT_2F					m_ptMuzzleDirection;
 	D2D_POINT_2F					m_ptMuzzleStartPos;
 	D2D_POINT_2F					m_ptMuzzleEndPos;

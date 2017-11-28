@@ -1,16 +1,11 @@
 #include "stdafx.h"
-#include "Framework\IndRes\IndRes.h"
+#include "Framework\ResourceManager\ResourceManager.h"
 #include "Player.h"
 #include "Object\Brick\Brick.h"
 
 
-CPlayer::CPlayer(
-	CIndRes* pIndRes
-	, ID2D1HwndRenderTarget* pd2dRenderTarget
-	, D2D_POINT_2F pt, D2D_RECT_F rc)
+CPlayer::CPlayer(D2D_POINT_2F pt, D2D_RECT_F rc)
 	: CUnit(pt, rc)
-	, m_bmpImage(nullptr)
-	, m_bmpWeaponImage(nullptr)
 	, m_pTarget(nullptr)
 	, m_rcWeaponSize(RectF())
 	, m_fBlockStunTimer(0)
@@ -25,33 +20,6 @@ CPlayer::CPlayer(
 {
 	m_Tag = CObject::Type::Player;
 	m_fHP = PLAYER_MAX_HP;
-
-	pd2dRenderTarget->CreateSolidColorBrush(
-		ColorF{ ColorF::White }
-		, &m_pd2dOutlineBrush);
-
-	pd2dRenderTarget->CreateSolidColorBrush(
-		ColorF{ ColorF::LightYellow }
-		, &m_pd2dLineBrush);
-
-	pd2dRenderTarget->CreateSolidColorBrush(
-		ColorF{ ColorF::DarkGray }
-		, &m_pd2dTextBrush);
-
-	pd2dRenderTarget->CreateSolidColorBrush(
-		ColorF{ ColorF::Red }
-		, &m_pd2dGaugeBrush);
-	m_pd2dGaugeBrush->SetOpacity(0.8f);
-
-	pIndRes->dwFactory()->CreateTextFormat(
-		L"Arial"
-		, nullptr
-		, DWRITE_FONT_WEIGHT_BOLD
-		, DWRITE_FONT_STYLE_NORMAL
-		, DWRITE_FONT_STRETCH_NORMAL
-		, 40.f
-		, L"ko-kr"
-		, &m_dwTextFormat);
 }
 CPlayer::~CPlayer()
 {
@@ -103,8 +71,8 @@ void CPlayer::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
 	pd2dRenderTarget->SetTransform(m_mtxRotate*transform);
 
 	auto bmpSize = m_bmpImage->GetSize();
-	float aniWidthFactor = bmpSize.width / (float)m_nSpriteImgWidth;
-	float aniHeightFactor = bmpSize.height / (float)m_nSpriteImgHeight;
+	float aniWidthFactor = bmpSize.width / (float)m_szImg.width;
+	float aniHeightFactor = bmpSize.height / (float)m_szImg.height;
 	pd2dRenderTarget->DrawBitmap(
 		m_bmpImage.Get()
 		, m_rcSize + m_ptPos
@@ -124,66 +92,72 @@ void CPlayer::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
 
 	if (m_bReload)
 	{
-		m_pd2dGaugeBrush->SetColor(ColorF{ ColorF::Blue });
 		pd2dRenderTarget->FillRectangle(
 			RectF(m_rcSize.left
 				, m_rcSize.top - (m_rcSize.bottom - m_rcSize.top) * 0.2f
 				, m_rcSize.left + (m_rcSize.right - m_rcSize.left) * (m_fShootTimer / RELOAD_TIME)
 				, m_rcSize.top - (m_rcSize.bottom - m_rcSize.top) * 0.1f)
 			+ m_ptPos
-			, m_pd2dGaugeBrush.Get());
-		m_pd2dGaugeBrush->SetColor(ColorF{ ColorF::Red });
+			, m_pResMng->brBlue.Get());
 	}
 	else if (m_bShoot)
 	{
-		m_pd2dLineBrush->SetOpacity(1 - (m_fShootTimer /SHOOT_TIME));
+		m_pResMng->brLightYellow->SetOpacity(1 - (m_fShootTimer /SHOOT_TIME));
 		pd2dRenderTarget->DrawLine(
 			m_ptMuzzleStartPos
 			, m_ptMuzzleEndPos
-			, m_pd2dLineBrush.Get()
+			, m_pResMng->brLightYellow.Get()
 			, SHOOT_STROKE);
+		m_pResMng->brLightYellow->SetOpacity(1.f);
 	}
-
+	// 체력바
+	m_pResMng->brRed->SetOpacity(0.8f);
 	pd2dRenderTarget->FillRectangle(
 		RectF(m_rcSize.left
 			, m_rcSize.top - (m_rcSize.bottom - m_rcSize.top) * 0.1f
 			, m_rcSize.left + (m_rcSize.right - m_rcSize.left) * (m_fHP / PLAYER_MAX_HP)
 			, m_rcSize.top)
 		+ m_ptPos
-		, m_pd2dGaugeBrush.Get());
+		, m_pResMng->brRed.Get());
+	m_pResMng->brRed->SetOpacity(1.0f);
 
+	// 체력바 테두리
 	pd2dRenderTarget->DrawRectangle(
 		RectF(m_rcSize.left
 			, m_rcSize.top - (m_rcSize.bottom - m_rcSize.top) * 0.1f
 			, m_rcSize.left + (m_rcSize.right - m_rcSize.left) 
 			, m_rcSize.top)
 		+ m_ptPos
-		, m_pd2dOutlineBrush.Get());
+		, m_pResMng->brWhite.Get());
 }
 
-void CPlayer::DrawUI(ID2D1HwndRenderTarget * pd2dRenderTarget)
+void CPlayer::DrawUI(ID2D1HwndRenderTarget * pd2dRenderTarget, float fScaleFactor)
 {
-	D2D_POINT_2F pt = Point2F(-CLIENT_WIDTH / 2 + 30, -CLIENT_HEIGHT / 2 + 30);
+	D2D_POINT_2F pt = Point2F(
+		  -fScaleFactor*(CLIENT_WIDTH / 2) + 30
+		, -fScaleFactor*(CLIENT_HEIGHT / 2) + 30);
 	std::wstring str = L"HP";
 	pd2dRenderTarget->DrawText(
 		str.c_str()
 		, static_cast<UINT>(str.length())
-		, m_dwTextFormat.Get()
+		, m_pResMng->dwUITextFormat.Get()
 		, RectF(pt.x + 1, pt.y, pt.x + 70, pt.y + 50)
 		+ m_ptPos
-		, m_pd2dGaugeBrush.Get());
+		, m_pResMng->brRed.Get());
 	
+	// 체력바
 	pd2dRenderTarget->FillRectangle(
 		RectF(pt.x + 70 , pt.y + 10
 			, pt.x + 70 + 300 * (m_fHP / PLAYER_MAX_HP) , pt.y + 35)
 		+ m_ptPos
-		, m_pd2dGaugeBrush.Get());
+		, m_pResMng->brRed.Get());
 
+	// 체력바 테두리
 	pd2dRenderTarget->DrawRectangle(
 		RectF(pt.x + 70, pt.y + 10
 			, pt.x + 70 + 300 * (m_fHP / PLAYER_MAX_HP), pt.y + 35)
 		+ m_ptPos
-		, m_pd2dOutlineBrush.Get());
+		, m_pResMng->brWhite.Get());
 
 	pt.y += 50;
 	str = L"Ammo: ";
@@ -192,10 +166,10 @@ void CPlayer::DrawUI(ID2D1HwndRenderTarget * pd2dRenderTarget)
 	pd2dRenderTarget->DrawText(
 		str.c_str()
 		, static_cast<UINT>(str.length())
-		, m_dwTextFormat.Get()
+		, m_pResMng->dwUITextFormat.Get()
 		, RectF(pt.x, pt.y, pt.x + 1000, pt.y + 50)
 		+ m_ptPos
-		, m_pd2dTextBrush.Get());
+		, m_pResMng->brDarkGray.Get());
 
 	pt.y += 45;
 	str = L"Grenade: ";
@@ -203,54 +177,40 @@ void CPlayer::DrawUI(ID2D1HwndRenderTarget * pd2dRenderTarget)
 	pd2dRenderTarget->DrawText(
 		str.c_str()
 		, static_cast<UINT>(str.length())
-		, m_dwTextFormat.Get()
+		, m_pResMng->dwUITextFormat.Get()
 		, RectF(pt.x, pt.y, pt.x + 300, pt.y + 50)
 		+ m_ptPos
-		, m_pd2dTextBrush.Get());
-
+		, m_pResMng->brDarkGray.Get());
+	
 	pt.y += 45;
 	str = L"Kit: ";
 	str += std::to_wstring(m_iTurretKit);
 	pd2dRenderTarget->DrawText(
 		str.c_str()
 		, static_cast<UINT>(str.length())
-		, m_dwTextFormat.Get()
+		, m_pResMng->dwUITextFormat.Get()
 		, RectF(pt.x, pt.y, pt.x + 300, pt.y + 50)
 		+ m_ptPos
-		, m_pd2dTextBrush.Get());
+		, m_pResMng->brDarkGray.Get());
 }
 
-void CPlayer::RegisterImage(CIndRes * pIndRes, ID2D1HwndRenderTarget * pd2dRenderTarget, path filename)
+void CPlayer::RegisterResourceManager(shared_ptr<CResourceManager> resMng)
 {
-	LoadImageFromFile(
-		  pIndRes->wicFactory()
-		, pd2dRenderTarget
-		, filename.c_str()
-		, &m_bmpWeaponImage
-	);
+	m_pResMng = resMng;
+	m_bmpImage = m_pResMng->GetImage(ResImgName::character_sheet);
+	m_szImg = m_pResMng->GetImgLength(ResImgName::character_sheet);
 
-	if (IsRectInvalid(m_rcWeaponSize))
-		m_rcWeaponSize = SizeToRect(m_bmpWeaponImage->GetSize());
-}
-
-void CPlayer::RegisterSpriteImage(CIndRes * pIndRes, ID2D1HwndRenderTarget * pd2dRenderTarget, path filename, D2D_POINT_2F ptLength)
-{
-	m_nSpriteImgWidth = ptLength.x;
-	m_nSpriteImgHeight = ptLength.y;
-
-	LoadImageFromFile(
-		pIndRes->wicFactory()
-		, pd2dRenderTarget
-		, filename.c_str()
-		, &m_bmpImage
-	);
 	if (IsRectInvalid(m_rcSize))
 	{
 		auto sz = m_bmpImage->GetSize();
-		sz.width /= ptLength.x;
-		sz.height /= ptLength.y;
+		sz.width /= m_szImg.width;
+		sz.height /= m_szImg.height;
 		m_rcSize = SizeToRect(sz);
 	}
+	
+	m_bmpWeaponImage = m_pResMng->GetImage(ResImgName::gun);
+	if (IsRectInvalid(m_rcWeaponSize))
+		m_rcWeaponSize = SizeToRect(m_bmpWeaponImage->GetSize());
 }
 
 void CPlayer::Collide(float atk)
@@ -266,8 +226,8 @@ void CPlayer::Move(const D2D_POINT_2F& ptVelocity)
 {
 	m_ptVelocity += ptVelocity;
 	float len = Length(m_ptVelocity);
-	if (len > MAX_VELOCITY)
-		m_ptVelocity -= Normalize(m_ptVelocity) * (len - MAX_VELOCITY);
+	if (len > PLAYER_MAX_VELOCITY)
+		m_ptVelocity -= Normalize(m_ptVelocity) * (len - PLAYER_MAX_VELOCITY);
 }
 
 void CPlayer::Reflection(const D2D_POINT_2F& ptReflect)

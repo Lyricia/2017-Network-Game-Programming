@@ -32,8 +32,7 @@ public:
 	void ProcessInput(float fTimeElapsed);
 
 private:
-	ComPtr<ID2D1SolidColorBrush>	m_pd2dsbrGrid1		{ nullptr };
-	ComPtr<ID2D1SolidColorBrush>	m_pd2dsbrGrid2		{ nullptr }	;
+	shared_ptr<CResourceManager>	m_pResMng			{ nullptr };
 
 	ComPtr<ID2D1Bitmap1>			m_bmpCrossHair;
 	D2D1_POINT_2F					m_ptMouseCursor;

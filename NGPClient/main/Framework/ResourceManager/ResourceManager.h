@@ -1,21 +1,51 @@
 #pragma once
 
+template <class ENUM>
+constexpr UINT GetIdxFromEnum(ENUM e) { return static_cast<UINT>(e); }
+
+class CIndRes;
 class CResourceManager
 {
 public:
-	CResourceManager();
+	enum class ImgName {
+		  aim = 0
+		, aim_big
+		, aim_trans
+		, brick_Sheet
+		, character_sheet
+		, Explosion256
+		, grenade
+		, gun
+		, MagicBlast
+		, turret_barrel
+		, turret_base_sheet
+		, Count
+	};
+
+public:
+	CResourceManager(
+		  CIndRes*					pIndRes
+		, ID2D1HwndRenderTarget*	pd2dRenderTarget);
 	~CResourceManager();
 
+	ImgName						GetImgNameFromIdx(UINT idx);
+	ID2D1Bitmap1*				GetImage(ImgName name);
+	const ComPtr<ID2D1Bitmap1>&	GetImageRef(ImgName name);
+	std::string					GetImgNameString(ImgName name);
+	D2D_SIZE_U					GetImgLength(ImgName name);
+
 private:
-	ComPtr<ID2D1Bitmap1>		m_imgAim;
-	ComPtr<ID2D1Bitmap1>		m_imgAim_big;
-	ComPtr<ID2D1Bitmap1>		m_imgAim_trans;
-	ComPtr<ID2D1Bitmap1>		m_imgBrick_Sheet;
-	ComPtr<ID2D1Bitmap1>		m_imgCharacter_sheet;
-	ComPtr<ID2D1Bitmap1>		m_imgExplosion256;
-	ComPtr<ID2D1Bitmap1>		m_imgGrenade;
-	ComPtr<ID2D1Bitmap1>		m_imgGun;
-	ComPtr<ID2D1Bitmap1>		m_imgMagicBlast;
-	ComPtr<ID2D1Bitmap1>		m_imgTurret_barrel;
-	ComPtr<ID2D1Bitmap1>		m_imgTurret_base_sheet;
+	ComPtr<ID2D1Bitmap1>			m_bmpImage[GetIdxFromEnum(ImgName::Count)];
+
+public:
+	ComPtr<IDWriteTextFormat>		dwUITextFormat;
+	ComPtr<ID2D1SolidColorBrush>	brWhite;
+	ComPtr<ID2D1SolidColorBrush>	brRed;
+	ComPtr<ID2D1SolidColorBrush>	brBlue;
+	ComPtr<ID2D1SolidColorBrush>	brDarkGray;
+	ComPtr<ID2D1SolidColorBrush>	brLightYellow;
+	ComPtr<ID2D1SolidColorBrush>	brGreen;
+	ComPtr<ID2D1SolidColorBrush>	brGreenYellow;
 };
+
+using ResImgName = CResourceManager::ImgName;

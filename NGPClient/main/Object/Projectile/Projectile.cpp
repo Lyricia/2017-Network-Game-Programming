@@ -1,13 +1,12 @@
 #include "stdafx.h"
-#include "Framework\IndRes\IndRes.h"
+#include "Framework\ResourceManager\ResourceManager.h"
 #include "Projectile.h"
 
 CProjectile::CProjectile(D2D_POINT_2F pt, D2D_RECT_F rc)
 	: CObject(pt, rc)
-	, m_bmpImage(nullptr)
-	, m_ptCurrImg(Point2F())
-	, m_nSpriteImgWidth(0)
-	, m_nSpriteImgHeight(0)
+	, m_ptCurrImg(Point2U())
+	, m_szImg(SizeU())
+	, m_pResMng(nullptr)
 {
 	m_Tag = CObject::Type::Projectile;
 }
@@ -24,6 +23,7 @@ void CProjectile::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
 {
 }
 
-void CProjectile::RegisterSpriteImage(CIndRes * pIndRes, ID2D1HwndRenderTarget * pd2dRenderTarget, path filename, D2D_POINT_2F ptLength)
+void CProjectile::RegisterResourceManager(shared_ptr<CResourceManager> resMng)
 {
+	m_pResMng = resMng;
 }

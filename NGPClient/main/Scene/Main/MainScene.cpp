@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "Framework/Framework.h"
+#include "Framework/ResourceManager/ResourceManager.h"
 #include "Framework/IndRes/IndRes.h"
 
 #include "Object\Brick\Brick.h"
@@ -105,55 +106,26 @@ bool CMainScene::OnCreate(wstring && tag, CFramework * pFramework)
 	if (!Base::OnCreate(std::move(tag), pFramework)) return false;
 
 	m_hWnd = pFramework->GethWnd();
+	m_pResMng = pFramework->GetResourceManager();
 
 	auto rcClient = pFramework->GetClientSize();
 	m_Camera.SetClientSize(Point2F(rcClient.right, rcClient.bottom));
 	auto rendertarget = pFramework->GetRenderTarget();
 
-	rendertarget->CreateSolidColorBrush(ColorF{ ColorF::Green }, &m_pd2dsbrGrid1);
-	rendertarget->CreateSolidColorBrush(ColorF{ ColorF::GreenYellow }, &m_pd2dsbrGrid2);
+	m_bmpCrossHair = m_pResMng->GetImageRef(ResImgName::aim);
 
-	LoadImageFromFile(
-		m_pIndRes->wicFactory()
-		, rendertarget.Get()
-		, path("../../Resource/Sprite/aim.png").c_str()
-		//, path("../../Resource/Sprite/aim_big.png").c_str()
-		//, path("../../Resource/Sprite/aim_trans.png").c_str()
-		, &m_bmpCrossHair);
-
-	m_pPlayer = new CPlayer(m_pIndRes.get(), rendertarget.Get(), Point2F());
-	m_pPlayer->RegisterSpriteImage(
-		m_pIndRes.get()
-		, rendertarget.Get()
-		, "../../Resource/Sprite/character-sheet.png"
-		, Point2F(20, 1));
-	m_pPlayer->RegisterImage(
-		m_pIndRes.get()
-		, rendertarget.Get()
-		, "../../Resource/Sprite/gun.png");
+	m_pPlayer = new CPlayer(Point2F());
+	m_pPlayer->RegisterResourceManager(m_pResMng);
 
 	m_Camera.SetPosition(m_pPlayer->GetPos());
 	m_Camera.SetAnchor(Point2F(0.0f, 0.0f));
 
-	CPlayer* other_player = new CPlayer(
-		m_pIndRes.get(), rendertarget.Get(), Point2F(-100, 10));
-	other_player->RegisterSpriteImage(
-		m_pIndRes.get()
-		, rendertarget.Get()
-		, "../../Resource/Sprite/character-sheet.png"
-		, Point2F(20, 1));
-	other_player->RegisterImage(
-		m_pIndRes.get()
-		, rendertarget.Get()
-		, "../../Resource/Sprite/gun.png");
+	CPlayer* other_player = new CPlayer(Point2F(-100, 10));
+	other_player->RegisterResourceManager(m_pResMng);
 	m_vecObjects.push_back(other_player);
 
 	CBrick* brick = new CBrick(Point2F(100, 200));
-	brick->RegisterSpriteImage(
-		m_pIndRes.get()
-		, rendertarget.Get()
-		, "../../Resource/Sprite/brick-Sheet.png"
-		, Point2F(5, 1));
+	brick->RegisterResourceManager(m_pResMng);
 	m_vecObjects.push_back(brick);
 
 	return true;
@@ -259,19 +231,19 @@ void CMainScene::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
 				pd2dRenderTarget->FillRectangle(
 					RectF(-32, -32, 32, 32) + 
 					Point2F(64.f*j, 64.f*i)
-					, m_pd2dsbrGrid1.Get());
+					, m_pResMng->brGreen.Get());
 			else
 				pd2dRenderTarget->FillRectangle(
 					RectF(-32, -32, 32, 32) +
 					Point2F(64.f *j, 64.f *i)
-					, m_pd2dsbrGrid2.Get());
+					, m_pResMng->brGreenYellow.Get());
 		}
 
 	for (auto& p : m_vecObjects)
 		p->Draw(pd2dRenderTarget);
 
 	m_pPlayer->Draw(pd2dRenderTarget);
-	m_pPlayer->DrawUI(pd2dRenderTarget);
+	m_pPlayer->DrawUI(pd2dRenderTarget, m_Camera.GetScaleFactor());
 
 	pd2dRenderTarget->DrawBitmap(
 		m_bmpCrossHair.Get()

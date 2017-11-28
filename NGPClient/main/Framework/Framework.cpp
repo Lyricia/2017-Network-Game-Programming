@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "IndRes/IndRes.h"
+#include "ResourceManager/ResourceManager.h"
 #include "Timer/Timer.h"
 #include "Scene/Scene.h"
 #include "Scene/Main/MainScene.h"
@@ -29,7 +30,8 @@ void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst, shared_ptr<CIndRes> indres
 	::SetUserDataPtr(m_hWnd, this);
 
 	m_pIndRes->CreateHwndRenderTarget(hWnd, &m_pd2dRenderTarget);
-
+	m_pResourceManager = make_shared<CResourceManager>(
+		m_pIndRes.get(), m_pd2dRenderTarget.Get());
 	BuildScene<CMainScene>(L"Main"s);
 }
 

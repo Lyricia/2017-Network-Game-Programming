@@ -1,5 +1,8 @@
 #pragma once
 
+#define CAMERA_MIN_SCALE 0.5f
+#define CAMERA_MAX_SCALE 2.0f
+
 class CCamera
 {
 protected:
@@ -29,7 +32,7 @@ public:
 	virtual void SetAnchor(const D2D1_POINT_2F& ptAnchor) { m_d2dptAnchor = ptAnchor; }
 
 	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f) { }
-	virtual void Scale(float Scale){ if(Scale > 0) m_fScale = Scale; }
+	virtual void Scale(float Scale){ if(Scale >= CAMERA_MIN_SCALE && Scale <= CAMERA_MAX_SCALE) m_fScale = Scale; }
 	float GetScale(){ return m_fScale; }
 	void AgjustScale(float Scale){ if (m_fScale+Scale > 0) m_fScale += Scale; }
 	virtual void SetLookAt(const D2D1_POINT_2F& d2dptLookAt) { }
