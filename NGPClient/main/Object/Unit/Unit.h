@@ -28,7 +28,7 @@ protected:
 
 	shared_ptr<CResourceManager>	m_pResMng;
 	D2D1_SIZE_U						m_szImg;
-	D2D1_POINT_2U					m_ptCurrImg;
+	D2D1_POINT_2F					m_ptCurrImg;
 
 	float							m_fHP;
 	float							m_fBlockStunTimer;

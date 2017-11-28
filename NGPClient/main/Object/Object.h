@@ -3,7 +3,7 @@
 class CObject
 {
 public:
-	enum class Type { Player, Agent, Brick, Projectile };
+	enum class Type { Player, Agent, Brick, Grenade, Effect };
 
 public:
 	CObject(D2D_POINT_2F pt = Point2F(), D2D_RECT_F rc = RectF());
@@ -11,8 +11,6 @@ public:
 
 	virtual void Update(float fTimeElapsed) {}
 	virtual void Draw(ID2D1HwndRenderTarget * pd2dRenderTarget) = 0;
-
-	void Move(D2D_POINT_2F pt) { m_ptPos = m_ptPos + pt; }
 
 	void SetPos(D2D_POINT_2F pt) { m_ptPos = pt; }
 	void SetSize(D2D_RECT_F rc) { m_rcSize = rc; }

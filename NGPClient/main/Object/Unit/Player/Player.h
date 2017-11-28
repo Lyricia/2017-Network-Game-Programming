@@ -9,6 +9,7 @@
 #define SHOOT_DAMAGE			10.f
 #define SHOOT_STROKE			6.0f // 레이저 두께
 #define RELOAD_TIME				3.0f
+#define GRENADE_DELAY			1.0f
 #define MUZZLE_OFFSET			64.f
 
 #define MAX_AMMO				30
@@ -21,6 +22,7 @@
 #define FRICTIONAL_DRAG			2.5f
 #define REFLACTION_FACTOR		0.8f
 
+class CEffect;
 class CResourceManager;
 class CPlayer : public CUnit
 {
@@ -37,10 +39,12 @@ public:
 	virtual void Collide(float atk) override;
 
 	void Move(const D2D_POINT_2F& ptVelocity);
-	void Reflection(const D2D_POINT_2F& ptReflect = Point2F());
+	void Reflection(const D2D_POINT_2F& ptDirReflect = Point2F());
 	void Stop();
-	void Shoot();
+	CEffect* Shoot();
 	void RayCastingToShoot(std::vector<CObject*>& pvecObjects);
+
+	CObject* GrenadeOut();
 
 private:
 	ComPtr<ID2D1Bitmap1>			m_bmpImage;
@@ -62,6 +66,9 @@ private:
 	float							m_fShootTimer;
 	bool							m_bShoot;
 	bool							m_bReload;
+
+	float							m_fGrenadeTimer;
+	bool							m_bGrenade;
 
 	UINT							m_iAmmo;
 	UINT							m_iGrenade;

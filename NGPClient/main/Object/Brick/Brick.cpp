@@ -50,7 +50,7 @@ void CBrick::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
 void CBrick::RegisterResourceManager(shared_ptr<CResourceManager> resMng)
 {
 	m_pResMng = resMng;
-	m_bmpImage = m_pResMng->GetImage(ResImgName::brick_Sheet);
+	m_bmpImage = m_pResMng->GetImageRef(ResImgName::brick_Sheet);
 	m_szImg = m_pResMng->GetImgLength(ResImgName::brick_Sheet);
 
 	if (IsRectInvalid(m_rcSize))

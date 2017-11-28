@@ -9,6 +9,7 @@ CUnit::CUnit(D2D_POINT_2F pt, D2D_RECT_F rc)
 	, m_mtxRotate(Matrix3x2F::Identity())
 	, m_pResMng(nullptr)
 	, m_szImg(SizeU())
+	, m_ptCurrImg(Point2F())
 	, m_fHP(0)
 	, m_fBlockStunTimer(0)
 {

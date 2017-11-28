@@ -59,17 +59,18 @@ std::string CResourceManager::GetImgNameString(ImgName name)
 {
 	switch (name)
 	{
-	case ImgName::aim:				 return std::string("aim");
-	case ImgName::aim_big:			 return std::string("aim_big");
-	case ImgName::aim_trans:		 return std::string("aim_trans");
-	case ImgName::brick_Sheet:		 return std::string("brick_Sheet");
-	case ImgName::character_sheet:	 return std::string("character_sheet");
-	case ImgName::Explosion256:		 return std::string("Explosion256");
-	case ImgName::grenade:			 return std::string("grenade");
-	case ImgName::gun:				 return std::string("gun");
-	case ImgName::MagicBlast:		 return std::string("MagicBlast");
-	case ImgName::turret_barrel:	 return std::string("turret_barrel");
-	case ImgName::turret_base_sheet: return std::string("turret_base_sheet");
+	case ImgName::aim:					return std::string("aim");
+	case ImgName::aim_big:				return std::string("aim_big");
+	case ImgName::aim_trans:			return std::string("aim_trans");
+	case ImgName::brick_Sheet:			return std::string("brick_Sheet");
+	case ImgName::character_sheet:		return std::string("character_sheet");
+	case ImgName::Explosion256:			return std::string("Explosion256");
+	case ImgName::grenade:				return std::string("grenade");
+	case ImgName::gun:					return std::string("gun");
+	case ImgName::MagicBlast:			return std::string("MagicBlast");
+	case ImgName::turret_barrel:		return std::string("turret_barrel");
+	case ImgName::turret_base_sheet:	return std::string("turret_base_sheet");
+	case ImgName::map_image:			return std::string("map_image");
 	default:
 		return std::string();
 	}
@@ -78,20 +79,20 @@ std::string CResourceManager::GetImgNameString(ImgName name)
 
 D2D_SIZE_U CResourceManager::GetImgLength(ImgName name)
 {
-	
 	switch (name)
 	{
-	case ImgName::aim:				 return SizeU(1, 1);
-	case ImgName::aim_big:			 return SizeU(1, 1);
-	case ImgName::aim_trans:		 return SizeU(1, 1);
-	case ImgName::brick_Sheet:		 return SizeU(5, 1);
-	case ImgName::character_sheet:	 return SizeU(20, 1);
-	case ImgName::Explosion256:		 return SizeU(8, 3);
-	case ImgName::grenade:			 return SizeU(26, 1);
-	case ImgName::gun:				 return SizeU(1, 1);
-	case ImgName::MagicBlast:		 return SizeU(16, 1);
-	case ImgName::turret_barrel:	 return SizeU(1, 1);
-	case ImgName::turret_base_sheet: return SizeU(20, 1);
+	case ImgName::aim:					return SizeU(1, 1);
+	case ImgName::aim_big:				return SizeU(1, 1);
+	case ImgName::aim_trans:			return SizeU(1, 1);
+	case ImgName::brick_Sheet:			return SizeU(5, 1);
+	case ImgName::character_sheet:		return SizeU(20, 1);
+	case ImgName::Explosion256:			return SizeU(8, 3);
+	case ImgName::grenade:				return SizeU(26, 1);
+	case ImgName::gun:					return SizeU(1, 1);
+	case ImgName::MagicBlast:			return SizeU(16, 1);
+	case ImgName::turret_barrel:		return SizeU(1, 1);
+	case ImgName::turret_base_sheet:	return SizeU(20, 1);
+	case ImgName::map_image:			return SizeU(1, 1);
 	default:
 		return D2D_SIZE_U();
 	}

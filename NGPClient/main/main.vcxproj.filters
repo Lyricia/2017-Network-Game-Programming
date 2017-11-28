@@ -37,9 +37,6 @@
     <Filter Include="Object\Unit">
       <UniqueIdentifier>{712bb1ec-0362-4984-a2b3-bd5d96b53d4f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Object\Unit\Agent">
-      <UniqueIdentifier>{6d1edc05-6f0c-47ce-9719-ea8e059f2324}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Object\Unit\Player">
       <UniqueIdentifier>{1cb662fb-d9bc-4f2f-ac1f-a42ed3ef57f0}</UniqueIdentifier>
     </Filter>
@@ -57,6 +54,12 @@
     </Filter>
     <Filter Include="Framework\ResourceManager">
       <UniqueIdentifier>{47ab9589-4869-4003-9240-9562e2fd5582}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Projectile\Grenade">
+      <UniqueIdentifier>{4fa88d74-d233-4a8e-89b3-48966016c70a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Effect">
+      <UniqueIdentifier>{c535efd7-f836-4297-ad90-79dac10f8307}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -114,9 +117,6 @@
     <ClInclude Include="Object\Brick\Brick.h">
       <Filter>Object\Brick</Filter>
     </ClInclude>
-    <ClInclude Include="Object\Unit\Agent\Agent.h">
-      <Filter>Object\Unit\Agent</Filter>
-    </ClInclude>
     <ClInclude Include="Framework\Client\Client.h">
       <Filter>Framework\Client</Filter>
     </ClInclude>
@@ -125,6 +125,12 @@
     </ClInclude>
     <ClInclude Include="Framework\ResourceManager\ResourceManager.h">
       <Filter>Framework\ResourceManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Projectile\Grenade\Grenade.h">
+      <Filter>Object\Projectile\Grenade</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Effect\Effect.h">
+      <Filter>Object\Effect</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -167,14 +173,17 @@
     <ClCompile Include="Framework\Client\Client.cpp">
       <Filter>Framework\Client</Filter>
     </ClCompile>
-    <ClCompile Include="Object\Unit\Agent\Agent.cpp">
-      <Filter>Object\Unit\Agent</Filter>
-    </ClCompile>
     <ClCompile Include="Object\Projectile\Projectile.cpp">
       <Filter>Object\Projectile</Filter>
     </ClCompile>
     <ClCompile Include="Framework\ResourceManager\ResourceManager.cpp">
       <Filter>Framework\ResourceManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Projectile\Grenade\Grenade.cpp">
+      <Filter>Object\Projectile\Grenade</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Effect\Effect.cpp">
+      <Filter>Object\Effect</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

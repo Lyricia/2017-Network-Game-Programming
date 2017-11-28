@@ -2,6 +2,8 @@
 #include "Framework\ResourceManager\ResourceManager.h"
 #include "Player.h"
 #include "Object\Brick\Brick.h"
+#include "Object\Projectile\Grenade\Grenade.h"
+#include "Object\Effect\Effect.h"
 
 
 CPlayer::CPlayer(D2D_POINT_2F pt, D2D_RECT_F rc)
@@ -9,10 +11,12 @@ CPlayer::CPlayer(D2D_POINT_2F pt, D2D_RECT_F rc)
 	, m_pTarget(nullptr)
 	, m_rcWeaponSize(RectF())
 	, m_fBlockStunTimer(0)
-	, m_bCollision(false)
 	, m_fShootTimer(0)
+	, m_fGrenadeTimer(0)
+	, m_bCollision(false)
 	, m_bShoot(true)
 	, m_bReload(false)
+	, m_bGrenade(false)
 	, m_ptVelocity(Point2F())
 	, m_iAmmo(MAX_AMMO)
 	, m_iGrenade(MAX_GRENADE)
@@ -53,6 +57,17 @@ void CPlayer::Update(float fTimeElapsed)
 			m_fShootTimer = 0.f;
 		}
 	}
+
+	if (m_bGrenade)
+	{
+		m_fGrenadeTimer += fTimeElapsed;
+		if (m_fGrenadeTimer > GRENADE_DELAY)
+		{
+			m_bGrenade = false;
+			m_fGrenadeTimer = 0.f;
+		}
+	}
+
 	if (m_bCollision)
 	{
 		m_fBlockStunTimer += fTimeElapsed;
@@ -197,7 +212,7 @@ void CPlayer::DrawUI(ID2D1HwndRenderTarget * pd2dRenderTarget, float fScaleFacto
 void CPlayer::RegisterResourceManager(shared_ptr<CResourceManager> resMng)
 {
 	m_pResMng = resMng;
-	m_bmpImage = m_pResMng->GetImage(ResImgName::character_sheet);
+	m_bmpImage = m_pResMng->GetImageRef(ResImgName::character_sheet);
 	m_szImg = m_pResMng->GetImgLength(ResImgName::character_sheet);
 
 	if (IsRectInvalid(m_rcSize))
@@ -230,12 +245,12 @@ void CPlayer::Move(const D2D_POINT_2F& ptVelocity)
 		m_ptVelocity -= Normalize(m_ptVelocity) * (len - PLAYER_MAX_VELOCITY);
 }
 
-void CPlayer::Reflection(const D2D_POINT_2F& ptReflect)
+void CPlayer::Reflection(const D2D_POINT_2F& ptDirReflect)
 {
-	if(ptReflect == Point2F())
+	if(ptDirReflect == Point2F())
 		m_ptVelocity = m_ptVelocity * -REFLACTION_FACTOR;
 	else
-		m_ptVelocity = ptReflect * Length(m_ptVelocity * REFLACTION_FACTOR);
+		m_ptVelocity = ptDirReflect * Length(m_ptVelocity * REFLACTION_FACTOR);
 }
 
 void CPlayer::Stop()
@@ -243,10 +258,10 @@ void CPlayer::Stop()
 	m_ptVelocity = Point2F();
 }
 
-void CPlayer::Shoot()
+CEffect* CPlayer::Shoot()
 {
-	if (m_bShoot) return;
-	if (m_bReload) return;
+	if (m_bShoot) return nullptr;
+	if (m_bReload) return nullptr;
 
 	if (m_iAmmo == 0) m_bReload = true;
 	else --m_iAmmo;
@@ -273,7 +288,14 @@ void CPlayer::Shoot()
 			break;
 		}
 		}
+		auto& rc = SizeToRect(SizeF(m_rcSize.right, m_rcSize.bottom));
+		CEffect* effect = new CEffect(m_ptMuzzleEndPos, rc);
+		auto& img = m_pResMng->GetImageRef(ResImgName::MagicBlast);
+		auto& sz = m_pResMng->GetImgLength(ResImgName::MagicBlast);
+		effect->RegisterEffectSprite(img, sz);
+		return effect;
 	}
+	return nullptr;
 }
 
 void CPlayer::RayCastingToShoot(std::vector<CObject*>& pvecObjects)
@@ -312,4 +334,20 @@ void CPlayer::RayCastingToShoot(std::vector<CObject*>& pvecObjects)
 	}
 	m_pTarget = nullptr;
 	m_ptMuzzleEndPos = m_ptPos + (m_ptDirection * SHOOT_RANGE);
+}
+
+CObject * CPlayer::GrenadeOut()
+{
+	if (m_bGrenade) return nullptr;
+	if (m_iGrenade == 0) return nullptr;
+	--m_iGrenade;
+	m_bGrenade = true;
+
+	CGrenade* grenade = new CGrenade(m_ptPos);
+	grenade->RegisterResourceManager(m_pResMng);
+	grenade->SetParent(this);
+	grenade->SetVelocity(m_ptDirection 
+		* Length(m_ptTargetPos - m_ptPos) 
+		* PROJECTILE_FRICTIONAL_DRAG);
+	return grenade;
 }

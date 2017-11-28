@@ -10,6 +10,7 @@
 
 class CObject;
 class CPlayer;
+class CEffect;
 class CMainScene :
 	public CScene
 {
@@ -34,11 +35,13 @@ public:
 private:
 	shared_ptr<CResourceManager>	m_pResMng			{ nullptr };
 
+	ComPtr<ID2D1Bitmap1>			m_bmpBackGround;
 	ComPtr<ID2D1Bitmap1>			m_bmpCrossHair;
 	D2D1_POINT_2F					m_ptMouseCursor;
 
 	CCamera							m_Camera;
 	std::vector<CObject*>			m_vecObjects;
+	std::list<CEffect*>				m_lstEffects;
 
 	CPlayer*						m_pPlayer			{ nullptr };
 };
