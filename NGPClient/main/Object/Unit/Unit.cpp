@@ -69,4 +69,5 @@ void CUnit::LookAt(const D2D1_POINT_2F& target_pos)
 		angle = -angle;
 	m_mtxRotate = Matrix3x2F::Rotation(
 		RADIAN_TO_DEGREE(angle), m_ptPos);
+	m_ptTargetPos = target_pos;
 }

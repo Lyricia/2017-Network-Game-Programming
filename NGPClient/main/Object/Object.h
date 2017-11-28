@@ -3,7 +3,8 @@
 class CObject
 {
 public:
-	enum class Type { Player, Brick };
+	enum class Type { Player, Agent, Brick, Projectile };
+
 public:
 	CObject(D2D_POINT_2F pt = Point2F(), D2D_RECT_F rc = RectF());
 	virtual ~CObject();

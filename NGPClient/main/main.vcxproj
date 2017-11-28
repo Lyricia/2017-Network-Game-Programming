@@ -155,11 +155,13 @@
     <ClInclude Include="Camera\Camera.h" />
     <ClInclude Include="Framework\Client\Client.h" />
     <ClInclude Include="Framework\IndRes\IndRes.h" />
+    <ClInclude Include="Framework\ResourceManager\ResourceManager.h" />
     <ClInclude Include="Framework\Timer\Timer.h" />
     <ClInclude Include="Framework\Framework.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="Object\Brick\Brick.h" />
     <ClInclude Include="Object\Object.h" />
+    <ClInclude Include="Object\Projectile\Projectile.h" />
     <ClInclude Include="Object\Unit\Agent\Agent.h" />
     <ClInclude Include="Object\Unit\Player\Player.h" />
     <ClInclude Include="Object\Unit\Unit.h" />
@@ -177,11 +179,13 @@
     <ClCompile Include="Camera\Camera.cpp" />
     <ClCompile Include="Framework\Client\Client.cpp" />
     <ClCompile Include="Framework\IndRes\IndRes.cpp" />
+    <ClCompile Include="Framework\ResourceManager\ResourceManager.cpp" />
     <ClCompile Include="Framework\Timer\Timer.cpp" />
     <ClCompile Include="Framework\Framework.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Object\Brick\Brick.cpp" />
     <ClCompile Include="Object\Object.cpp" />
+    <ClCompile Include="Object\Projectile\Projectile.cpp" />
     <ClCompile Include="Object\Unit\Agent\Agent.cpp" />
     <ClCompile Include="Object\Unit\Player\Player.cpp" />
     <ClCompile Include="Object\Unit\Unit.cpp" />

@@ -27,6 +27,8 @@ public:
 
 protected:
 	D2D1_POINT_2F				m_ptDirection;
+	D2D1_POINT_2F				m_ptTargetPos;
+
 	D2D1_MATRIX_3X2_F			m_mtxRotate;
 	ComPtr<ID2D1Bitmap1>		m_bmpImage;
 

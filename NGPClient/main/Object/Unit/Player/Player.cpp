@@ -303,6 +303,7 @@ void CPlayer::Shoot()
 		{
 			CPlayer* player = static_cast<CPlayer*>(m_pTarget);
 			player->Collide(SHOOT_DAMAGE);
+			player->Move(m_ptMuzzleDirection * PLAYER_VELOCITY);
 			break;
 		}
 		case CObject::Type::Brick:

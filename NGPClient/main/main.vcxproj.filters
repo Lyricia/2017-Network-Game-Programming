@@ -52,6 +52,12 @@
     <Filter Include="Framework\Client">
       <UniqueIdentifier>{2690d2e6-0761-4779-8458-8ae9918d5c73}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object\Projectile">
+      <UniqueIdentifier>{2f811c51-7d1f-4ef2-b0c1-825b8a9981ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\ResourceManager">
+      <UniqueIdentifier>{47ab9589-4869-4003-9240-9562e2fd5582}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -114,6 +120,12 @@
     <ClInclude Include="Framework\Client\Client.h">
       <Filter>Framework\Client</Filter>
     </ClInclude>
+    <ClInclude Include="Object\Projectile\Projectile.h">
+      <Filter>Object\Projectile</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\ResourceManager\ResourceManager.h">
+      <Filter>Framework\ResourceManager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -152,11 +164,17 @@
     <ClCompile Include="Object\Brick\Brick.cpp">
       <Filter>Object\Brick</Filter>
     </ClCompile>
-    <ClCompile Include="Object\Unit\Agent\Agent.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Framework\Client\Client.cpp">
       <Filter>Framework\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Unit\Agent\Agent.cpp">
+      <Filter>Object\Unit\Agent</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Projectile\Projectile.cpp">
+      <Filter>Object\Projectile</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\ResourceManager\ResourceManager.cpp">
+      <Filter>Framework\ResourceManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
