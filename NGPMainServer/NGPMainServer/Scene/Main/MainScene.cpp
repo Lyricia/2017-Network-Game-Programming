@@ -3,7 +3,6 @@
 #include "Object\Brick\Brick.h"
 #include "Object\Unit\Player\Player.h"
 #include "Object\Projectile\Grenade\Grenade.h"
-#include "Object\Effect\Effect.h"
 
 #include "Server\Main\MainServer.h"
 
@@ -20,101 +19,9 @@ CMainScene::~CMainScene()
 	m_vecObjects.clear();
 }
 
-bool CMainScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
-{
-	switch (nMessageID)
-	{
-	case WM_LBUTTONDOWN:
-	case WM_MBUTTONDOWN:
-	case WM_RBUTTONDOWN:
-		break;
-	case WM_MOUSEMOVE:
-	{
-		
-		break;
-	}
-	case WM_LBUTTONUP:		
-	case WM_MBUTTONUP:		
-	case WM_RBUTTONUP:		
-	case WM_MOUSEWHEEL:		
-		break;
-	default:
-		return false;
-	}
-
-	return(true);
-}
-
-bool CMainScene::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
-{
-	switch (nMessageID)
-	{
-	case WM_SIZE:
-	{
-		auto rcClient = m_pGameWorld->GetClientSize();
-		m_Camera.SetClientSize(Point2F(rcClient.right, rcClient.bottom));
-		break;
-	}
-	case WM_LBUTTONDOWN:
-	case WM_MBUTTONDOWN:
-	case WM_RBUTTONDOWN:
-	case WM_MOUSEMOVE:
-	case WM_LBUTTONUP:
-	case WM_MBUTTONUP:
-	case WM_RBUTTONUP:
-	case WM_MOUSEWHEEL:
-		return OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
-
-	case WM_KEYDOWN:
-	case WM_KEYUP:
-	case WM_CHAR:
-		return OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
-
-	default:
-		return false;
-	}
-
-	return true;
-}
-
-bool CMainScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
-{
-	switch (nMessageID)
-	{
-	case WM_KEYDOWN:
-		switch (wParam)
-		{
-		case 'Z': m_Camera.Scale(m_Camera.GetScale() * 2.f);
-			break;
-		case 'X': m_Camera.Scale(m_Camera.GetScale() * 0.5f);
-			break;
-		default:
-			return false;
-		}
-		break;
-	default:
-		return false;
-	}
-	return(true);
-}
-
 bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 {
 	if (!Base::OnCreate(std::move(tag), pGameWorld)) return false;
-
-	//m_hWnd = pGameWorld->GethWnd();
-	//m_pResMng = pGameWorld->GetResourceManager();
-
-	//auto rcClient = pGameWorld->GetClientSize();
-	//m_Camera.SetClientSize(Point2F(rcClient.right, rcClient.bottom));
-	//auto rendertarget = pGameWorld->GetRenderTarget();
-	//
-	//m_bmpBackGround = m_pResMng->GetImageRef(ResImgName::map_image);
-	//m_bmpCrossHair = m_pResMng->GetImageRef(ResImgName::aim);
-
-	//m_ptCamera = Point2F();
-	//m_Camera.SetPosition(m_ptCamera);
-	//m_Camera.SetAnchor(Point2F(0.0f, 0.0f));
 
 	int map_size_half = g_iMapSize / 2;
 	for (int i = 0; i < g_iMapSize; ++i)
@@ -191,10 +98,7 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 
 void CMainScene::Update(float fTimeElapsed)
 {
-	ProcessInput(fTimeElapsed);
 	PreprocessingUpdate(fTimeElapsed);
-
-	m_Camera.SetPosition(m_ptCamera);
 
 	for (auto& p : m_vecObjects)
 		p->Update(fTimeElapsed);
@@ -265,65 +169,6 @@ void CMainScene::PhysicsUpdate(float fTimeElapsed)
 		}
 		}
 		
-	}
-}
-
-//void CMainScene::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
-//{
-//	auto cameramtx = m_Camera.RegenerateViewMatrix();
-//	pd2dRenderTarget->SetTransform(cameramtx);
-//
-//	auto& szImg = m_bmpBackGround->GetSize();
-//	auto& rcBK = SizeToRect(SizeF(szImg.width * 4, szImg.height * 4));
-//
-//	pd2dRenderTarget->DrawBitmap(m_bmpBackGround.Get(), rcBK);
-//
-//	for (auto& p : m_vecObjects)
-//		p->Draw(pd2dRenderTarget);
-//
-//	for (auto& p : m_lstEffects)
-//		p->Draw(pd2dRenderTarget);
-//
-//	pd2dRenderTarget->DrawBitmap(
-//		m_bmpCrossHair.Get()
-//		, SizeToRect(m_bmpCrossHair->GetSize()) + 
-//		m_ptMouseCursor * m_Camera.GetScaleFactor() +
-//		m_ptCamera);
-//
-//	auto pt = m_ptMouseCursor * m_Camera.GetScaleFactor() +
-//		m_ptCamera;
-//	printf("\r %f, %f", pt.x, pt.y);
-//}
-
-void CMainScene::ProcessInput(float fTimeElapsed)
-{
-	static UCHAR pKeyBuffer[256];
-	DWORD dwDirection = 0;
-
-	if (::GetKeyboardState(pKeyBuffer))
-	{
-		if (pKeyBuffer['W'] & 0xF0) dwDirection |= DIR_UP;
-		if (pKeyBuffer['S'] & 0xF0) dwDirection |= DIR_DOWN;
-		if (pKeyBuffer['A'] & 0xF0) dwDirection |= DIR_LEFT;
-		if (pKeyBuffer['D'] & 0xF0) dwDirection |= DIR_RIGHT;
-		if (pKeyBuffer['G'] & 0xF0);
-
-		D2D_POINT_2F ptDir = Point2F();
-		if (dwDirection & DIR_UP) ptDir.y += -1;
-		if (dwDirection & DIR_DOWN) ptDir.y += 1;
-		if (dwDirection & DIR_LEFT) ptDir.x += -1;
-		if (dwDirection & DIR_RIGHT) ptDir.x += 1;
-		if (dwDirection && Length(ptDir))
-		{
-			m_ptCamera += Normalize(ptDir) * 100 * fTimeElapsed;
-		}
-
-		if (pKeyBuffer[VK_LBUTTON] & 0xF0)
-		{
-			//CEffect* effect = m_pPlayer->Shoot();
-			//if (effect)
-			//	m_lstEffects.push_back(effect);
-		}
 	}
 }
 

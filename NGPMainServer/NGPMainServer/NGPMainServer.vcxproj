@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Camera\Camera.cpp" />
     <ClCompile Include="GameWorld\GameWorld.cpp" />
     <ClCompile Include="GameWorld\Timer\Timer.cpp" />
     <ClCompile Include="NGPMainServer.cpp" />
@@ -41,7 +40,6 @@
     <ClCompile Include="Server\Server.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Camera\Camera.h" />
     <ClInclude Include="GameWorld\GameWorld.h" />
     <ClInclude Include="GameWorld\Timer\Timer.h" />
     <ClInclude Include="Object\Brick\Brick.h" />

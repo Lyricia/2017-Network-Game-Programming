@@ -109,6 +109,7 @@ bool CMainScene::OnCreate(wstring && tag, CFramework * pFramework)
 	if (!Base::OnCreate(std::move(tag), pFramework)) return false;
 
 	m_hWnd = pFramework->GethWnd();
+	m_pClient = pFramework->GetClient();
 	m_pResMng = pFramework->GetResourceManager();
 
 	auto rcClient = pFramework->GetClientSize();

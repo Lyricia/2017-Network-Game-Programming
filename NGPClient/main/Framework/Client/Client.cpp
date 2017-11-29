@@ -72,6 +72,10 @@ void CClient::Release()
 	closesocket(m_MainServer.sock);
 	// 윈속 종료
 	WSACleanup();
+
+	for (auto& p : m_MsgQueue)
+		delete p;
+	m_MsgQueue.clear();
 }
 
 void CClient::ConnectServer()
@@ -84,13 +88,18 @@ void CClient::ConnectServer()
 	if (retval == SOCKET_ERROR)
 		err_quit("connect()");
 
+	retval = recvn(m_MainServer.sock, (char*)&m_Local_id, sizeof(m_Local_id), 0);
+	if (retval == SOCKET_ERROR) {
+		return;
+	}
+
+	m_MainServer.pMsgQueue = &m_MsgQueue;
 	m_MainServer.hReceiver = CreateThread(NULL, 0, RecvMessage, (LPVOID)&m_MainServer, 0, NULL);
 }
 
-void CClient::SendMsgs()
+void CClient::SendMsgs(char* buf, UINT buf_size)
 {
-	int retval = send(m_MainServer.sock, m_pBuffer, BUFFER_SIZE, 0);
-
+	int retval = send(m_MainServer.sock, buf, buf_size, 0);
 }
 
 DWORD RecvMessage(LPVOID arg)

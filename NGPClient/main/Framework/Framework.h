@@ -1,5 +1,7 @@
 #pragma once
 
+class CClient;
+
 class CIndRes;
 class CResourceManager;
 class CTimer;
@@ -55,16 +57,18 @@ public:
 
 	// Getter
 public:
-	HWND GethWnd()										const { return m_hWnd; }
-	shared_ptr<CIndRes> GetIndRes()						const { return m_pIndRes; }
-	shared_ptr<CResourceManager> GetResourceManager()	const { return m_pResourceManager; }
-	ComPtr<ID2D1HwndRenderTarget> GetRenderTarget()		const { return m_pd2dRenderTarget; }
-	D2D_RECT_L GetClientSize()							const { return m_rcClient; }
+	HWND							GethWnd()				const { return m_hWnd; }
+	shared_ptr<CClient>				GetClient()				const { return m_pClient; }
+	shared_ptr<CIndRes>				GetIndRes()				const { return m_pIndRes; }
+	shared_ptr<CResourceManager>	GetResourceManager()	const { return m_pResourceManager; }
+	ComPtr<ID2D1HwndRenderTarget>	GetRenderTarget()		const { return m_pd2dRenderTarget; }
+	D2D_RECT_L						GetClientSize()			const { return m_rcClient; }
 
 	// Framework에 필요한 것들.
 private:
 	HWND							m_hWnd				{ nullptr };
 	HINSTANCE						m_hInst				{ nullptr };
+	shared_ptr<CClient>				m_pClient			{ nullptr };
 																   
 	shared_ptr<CIndRes>				m_pIndRes			{ nullptr };
 	shared_ptr<CResourceManager>	m_pResourceManager	{ nullptr };

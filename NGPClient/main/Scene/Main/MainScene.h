@@ -8,6 +8,8 @@
 #define DIR_UP				0x04
 #define DIR_DOWN			0x08
 
+class CClient;
+
 class CObject;
 class CPlayer;
 class CEffect;
@@ -33,6 +35,8 @@ public:
 	void ProcessInput(float fTimeElapsed);
 
 private:
+	shared_ptr<CClient>				m_pClient			{ nullptr };
+
 	shared_ptr<CResourceManager>	m_pResMng			{ nullptr };
 
 	ComPtr<ID2D1Bitmap1>			m_bmpBackGround;

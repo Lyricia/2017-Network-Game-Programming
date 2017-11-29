@@ -1,7 +1,6 @@
 #pragma once
 
 class CGameWorld;
-class CIndRes;
 
 class CScene
 {
@@ -11,12 +10,7 @@ public:
 
 	virtual bool OnCreate(wstring&& tag, CGameWorld* pGameWorld);
 
-	virtual bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
-	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
-	virtual bool OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
-
 	virtual void Update(float fTimeElapsed) = 0;
-	//virtual void Draw(ID2D1HwndRenderTarget * pd2dRenderTarget) = 0;
 
 	bool FindByTag(const wstring& Tag) const { return Tag == m_strTag; }
 
@@ -25,9 +19,6 @@ public:
 protected:
 
 	CGameWorld*				m_pGameWorld	{ nullptr }	;
-//	HWND					m_hWnd			{ NULL }	;
-//	shared_ptr<CIndRes>		m_pIndRes		{ nullptr }	;
 
 	wstring					m_strTag					;
-
 };

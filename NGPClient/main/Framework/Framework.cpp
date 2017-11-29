@@ -6,6 +6,7 @@
 #include "Scene/Scene.h"
 #include "Scene/Main/MainScene.h"
 
+#include "Client\Client.h"
 #include "Framework.h"
 
 CFramework::CFramework() 
@@ -28,6 +29,10 @@ void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst, shared_ptr<CIndRes> indres
 
 	// 클래스와 윈도우 프로시저 연결
 	::SetUserDataPtr(m_hWnd, this);
+
+	m_pClient = make_shared<CClient>();
+	m_pClient->Initialize();
+	m_pClient->ConnectServer();
 
 	m_pIndRes->CreateHwndRenderTarget(hWnd, &m_pd2dRenderTarget);
 	m_pResourceManager = make_shared<CResourceManager>(

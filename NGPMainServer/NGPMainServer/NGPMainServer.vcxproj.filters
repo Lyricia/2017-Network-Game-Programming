@@ -25,9 +25,6 @@
     <Filter Include="Object">
       <UniqueIdentifier>{0e34f1ca-ad9e-48fb-870c-b1d196176067}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Camera">
-      <UniqueIdentifier>{5f6bd56e-12cd-4d6c-a41a-c2efdd9dd468}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Scene">
       <UniqueIdentifier>{bc9c5f25-a0e0-48e4-9f19-4daf91b7e944}</UniqueIdentifier>
     </Filter>
@@ -59,9 +56,6 @@
   <ItemGroup>
     <ClCompile Include="Object\Object.cpp">
       <Filter>Object</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera\Camera.cpp">
-      <Filter>Camera</Filter>
     </ClCompile>
     <ClCompile Include="GameWorld\GameWorld.cpp">
       <Filter>GameWorld</Filter>
@@ -106,9 +100,6 @@
   <ItemGroup>
     <ClInclude Include="Object\Object.h">
       <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera\Camera.h">
-      <Filter>Camera</Filter>
     </ClInclude>
     <ClInclude Include="GameWorld\GameWorld.h">
       <Filter>GameWorld</Filter>
