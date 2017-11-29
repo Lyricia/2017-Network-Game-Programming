@@ -82,13 +82,14 @@ void CClient::ConnectServer()
 {
 	// connect()
 	m_MainServer.addr.sin_family = AF_INET;
-	m_MainServer.addr.sin_addr.s_addr = inet_addr("");
+	m_MainServer.addr.sin_addr.s_addr = inet_addr("127.0.0.1");
 	m_MainServer.addr.sin_port = htons(SERVERPORT);
 	int retval = connect(m_MainServer.sock, (SOCKADDR *)&m_MainServer.addr, sizeof(m_MainServer.addr));
 	if (retval == SOCKET_ERROR)
 		err_quit("connect()");
 
-	retval = recvn(m_MainServer.sock, (char*)&m_Local_id, sizeof(m_Local_id), 0);
+	NGPMSG msg;
+	retval = recvn(m_MainServer.sock, (char*)&msg, sizeof(NGPMSG), 0);
 	if (retval == SOCKET_ERROR) {
 		return;
 	}

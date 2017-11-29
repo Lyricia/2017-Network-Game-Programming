@@ -39,7 +39,12 @@ bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 		CPlayer* player = new CPlayer(Point2F(-100, 10));
 		p->ID = player->GetID();
 		m_vecObjects.push_back(player);
-		//send(p->sock, &p->ID, sizeof(int), 0);
+		char type = MSGTYPE::MSGSTATE::ROOMCREATION;
+		char roomNo = m_pRoomInfo->RoomID;
+		char objNo = p->ID;
+
+		NGPMSG* msg = CreateMSG(type, NULL, roomNo, objNo, 0, 0, NULL, NULL);
+		send(p->sock, (char*)msg, sizeof(NGPMSG), 0);
 	}
 
 	return true;
