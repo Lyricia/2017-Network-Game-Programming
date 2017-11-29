@@ -149,10 +149,12 @@
   <ItemGroup>
     <ClInclude Include="D2D_Operator.h" />
     <ClInclude Include="NGPmsg.h" />
+    <ClInclude Include="Object\Object.h" />
     <ClInclude Include="Object\Unit\Agent\Agent.h" />
     <ClInclude Include="Object\Unit\Agent\AgentFSM.h" />
     <ClInclude Include="Object\Unit\Agent\State.h" />
     <ClInclude Include="Object\Unit\Agent\StateMachine.h" />
+    <ClInclude Include="Object\Unit\Unit.h" />
     <ClInclude Include="Server\AgentServer.h" />
     <ClInclude Include="Server\NGPmsg.h" />
     <ClInclude Include="Server\Server.h" />
@@ -162,8 +164,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="NGPAgentServer.cpp" />
+    <ClCompile Include="Object\Object.cpp" />
     <ClCompile Include="Object\Unit\Agent\Agent.cpp" />
     <ClCompile Include="Object\Unit\Agent\AgentFSM.cpp" />
+    <ClCompile Include="Object\Unit\Unit.cpp" />
     <ClCompile Include="Server\AgentServer.cpp" />
     <ClCompile Include="Server\Server.cpp" />
     <ClCompile Include="stdafx.cpp">

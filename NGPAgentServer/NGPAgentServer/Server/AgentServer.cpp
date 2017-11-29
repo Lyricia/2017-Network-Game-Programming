@@ -123,7 +123,7 @@ DWORD WINAPI RecvMessage(LPVOID arg)
 		buf[retval] = '\0';
 		std::cout << "ID : " << Main_Server->ID << " " << buf << std::endl;
 
-		//retval = send(Main_Server->sock, "test", sizeof("test"), NULL);
+		retval = send(Main_Server->sock, "test", sizeof("test"), NULL);
 		
 		if (retval == SOCKET_ERROR)
 		{
@@ -146,8 +146,16 @@ DWORD WINAPI RoomProcess(LPVOID arg)
 	int i = 0;
 	int retval;
 	
+	//////////////////////
 
 
+
+
+	//////////////////////
+
+
+
+	return 0;
 
 }
 
@@ -176,12 +184,12 @@ void AgentServer::AcceptMainServer()
 	
 	//~~~~~~~~~~~~~~~~~<서버 연결을 위한 정보를 입력한다>~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-	std::string SERVERIP;
+	//std::string SERVERIP;
 	int SERVERPORT;
 	
 
-	std::cout << "Insert MainServer IP :: ";
-	std::cin >> SERVERIP;
+	//std::cout << "Insert MainServer IP :: ";
+	//std::cin >> SERVERIP;
 
 	std::cout << "Insert MainServer PORT :: ";
 	std::cin >> SERVERPORT;
@@ -197,10 +205,11 @@ void AgentServer::AcceptMainServer()
 	// connect()
 	ZeroMemory(&m_MainServer.addr , sizeof(m_MainServer.addr));
 	m_MainServer.addr.sin_family = AF_INET;
-	m_MainServer.addr.sin_addr.s_addr = inet_addr(SERVERIP.data());
+	m_MainServer.addr.sin_addr.s_addr = inet_addr(SERVERIP);
 	m_MainServer.addr.sin_port = htons(SERVERPORT);
 
 	retval = connect(m_MainServer.sock, (SOCKADDR *)&m_MainServer.addr, sizeof(m_MainServer.addr));
+	std::cout << "Connect" << std::endl;
 
 	if (retval == SOCKET_ERROR)
 	{

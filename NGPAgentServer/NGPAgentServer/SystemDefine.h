@@ -36,3 +36,6 @@
 #define DEBUG_CLIENT_HEIGHT	600
 
 #define UNIT_SIZE			64.f
+
+#define BUFSIZE				64
+#define SERVERIP			"127.0.0.1"

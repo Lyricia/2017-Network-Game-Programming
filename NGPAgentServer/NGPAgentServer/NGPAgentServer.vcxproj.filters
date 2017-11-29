@@ -16,11 +16,17 @@
     <Filter Include="소스 파일\Server">
       <UniqueIdentifier>{8be52957-64c1-42c5-9c24-7c09fbf7e0c2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\Agent">
-      <UniqueIdentifier>{c9c11656-b925-44e4-8f76-fe16e6e5fe0a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="소스 파일\pch">
       <UniqueIdentifier>{ee39cb78-bf61-4a7f-a6d0-65ce530b3b9a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Object">
+      <UniqueIdentifier>{b62e177c-bc0e-4d8c-98dd-fe0d1d7254cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Object\Unit">
+      <UniqueIdentifier>{77473cce-1518-4868-961a-90c05f6fd98b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Object\Unit\Agent">
+      <UniqueIdentifier>{c9c11656-b925-44e4-8f76-fe16e6e5fe0a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -40,16 +46,16 @@
       <Filter>소스 파일\Server</Filter>
     </ClInclude>
     <ClInclude Include="Object\Unit\Agent\Agent.h">
-      <Filter>소스 파일\Agent</Filter>
+      <Filter>소스 파일\Object\Unit\Agent</Filter>
     </ClInclude>
     <ClInclude Include="Object\Unit\Agent\AgentFSM.h">
-      <Filter>소스 파일\Agent</Filter>
+      <Filter>소스 파일\Object\Unit\Agent</Filter>
     </ClInclude>
     <ClInclude Include="Object\Unit\Agent\State.h">
-      <Filter>소스 파일\Agent</Filter>
+      <Filter>소스 파일\Object\Unit\Agent</Filter>
     </ClInclude>
     <ClInclude Include="Object\Unit\Agent\StateMachine.h">
-      <Filter>소스 파일\Agent</Filter>
+      <Filter>소스 파일\Object\Unit\Agent</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>소스 파일\pch</Filter>
@@ -59,6 +65,12 @@
     </ClInclude>
     <ClInclude Include="SystemDefine.h">
       <Filter>소스 파일\pch</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Object.h">
+      <Filter>소스 파일\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Unit\Unit.h">
+      <Filter>소스 파일\Object\Unit</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -72,13 +84,19 @@
       <Filter>소스 파일\Server</Filter>
     </ClCompile>
     <ClCompile Include="Object\Unit\Agent\Agent.cpp">
-      <Filter>소스 파일\Agent</Filter>
+      <Filter>소스 파일\Object\Unit\Agent</Filter>
     </ClCompile>
     <ClCompile Include="Object\Unit\Agent\AgentFSM.cpp">
-      <Filter>소스 파일\Agent</Filter>
+      <Filter>소스 파일\Object\Unit\Agent</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>소스 파일\pch</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Object.cpp">
+      <Filter>소스 파일\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Unit\Unit.cpp">
+      <Filter>소스 파일\Object\Unit</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
