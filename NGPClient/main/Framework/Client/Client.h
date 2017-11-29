@@ -4,19 +4,17 @@
 
 struct ConnectedServerInfo
 {
-	SOCKET 	   		sock;
-	SOCKADDR_IN  	addr;
-	HANDLE 	    	hReceiver;
-	//MsgQueue      	*pMsgQueue;
+	SOCKET 	   			sock;
+	SOCKADDR_IN  		addr;
+	HANDLE 	    		hReceiver;
+	list<NGPMSG*>*		pMsgQueue;
 };
 
 class CClient
 {
 private:
 	UINT 	         		m_Local_id;
-	SOCKET 	     			m_Local_sock;
-	SOCKADDR_IN       		m_Local_addr;
-	//MsgQueue				m_MsgQueue;
+	list<NGPMSG*>			m_MsgQueue;
 	ConnectedServerInfo 	m_MainServer;
 
 	// Test용 버퍼. Msg Queue로 바꿀것.
@@ -33,3 +31,5 @@ public:
 
 	void SetClientID(UINT id) { m_Local_id = id; }
 };
+
+static DWORD WINAPI RecvMessage(LPVOID arg);

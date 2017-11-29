@@ -1,12 +1,21 @@
 #pragma once
 #include "Server\Server.h"
+#include "GameWorld\GameWorld.h"
 
 struct ConnectionInfo {
 	int				ID;
 	SOCKET			sock;
 	SOCKADDR_IN		addr;
 	HANDLE			RecvThreadHandle;
-	list<NGPMSG*>*	*pMsgQueue;
+	list<NGPMSG*>*	pMsgQueue;
+
+	ConnectionInfo() 
+		: RecvThreadHandle(NULL)
+		, pMsgQueue(nullptr) {}
+	~ConnectionInfo() {
+		if (RecvThreadHandle)
+			TerminateThread(RecvThreadHandle, 0);
+	}
 };
 
 struct RoomInfo {
@@ -17,12 +26,16 @@ struct RoomInfo {
 	CGameWorld				GameWorld;
 	list<NGPMSG*>			MsgQueue;
 	HANDLE					hGameWorld;
-		
-	void UpdateWorld();
-	void SendMsgs();
-	//void SendMsgs(SOCKET sock, NGPMSG &msg, size_t msgsize){
-	//	send(sock, (char*)&msg, msgsize, 0);
-	//}
+	
+	RoomInfo() : hGameWorld(NULL) {}
+	~RoomInfo() {
+		for (auto& p : MsgQueue) delete p;
+		for (auto& p : clientlist) delete p;
+		MsgQueue.clear();
+		clientlist.clear();
+		if(hGameWorld)
+			TerminateThread(hGameWorld, 0);
+	}
 };
 
 class MainServer : public Server
@@ -34,6 +47,7 @@ class MainServer : public Server
 	list<ConnectionInfo*>		m_WaitingClientList;
 	list<NGPMSG*>				m_MsgQueue;
 
+	int							m_iRoomCunter;
 	shared_ptr<CIndRes>			m_IndRes;
 
 public:
@@ -48,4 +62,7 @@ public:
 	void DeleteRoom();
 };
 
+static int recvn(SOCKET s, char *buf, int len, int flags);
+static DWORD WINAPI RunGameWorld(LPVOID arg);
+static DWORD WINAPI RecvMessage(LPVOID arg);
 

@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "GameWorld\IndRes\IndRes.h"
-#include "GameWorld\GameWorld.h"
 #include "GameWorld\Timer\Timer.h"
 #include "GameWorld\ResourceManager\ResourceManager.h"
+#include "GameWorld\GameWorld.h"
 
 #include "MainServer.h"
 
@@ -32,43 +32,15 @@ DWORD WINAPI RunGameWorld(LPVOID arg)
 	int i = 0;
 	int retval;
 
-	for (auto& c : room->clientlist)
+	for (auto& client : room->clientlist)
 	{
-		c->pMsgQueue = &room->MsgQueue;
-		c->RecvThreadHandle = CreateThread(NULL, 0, RecvMessage, (LPVOID)c, 0, NULL);
+		client->pMsgQueue = &room->MsgQueue;
+		client->RecvThreadHandle = CreateThread(NULL, 0, RecvMessage, (LPVOID)client, 0, NULL);
 	}
 
-	room->GameWorld.Initailize(m_IndRes);
+	room->GameWorld.RegisterRoomInfo(room);
 	room->GameWorld.Run();
 
-	while (1) {
-
-		if (room) {
-			room->clientlist.remove_if([&](ConnectionInfo* client)->bool {
-				DWORD exitcode = 0;
-				GetExitCodeThread(client->RecvThreadHandle, &exitcode);
-				if (exitcode != STILL_ACTIVE) {
-					cout << "Client ID : " << client->ID << " Terminated" << endl;
-					return true;
-				}
-				return false;
-			});
-
-			if (room->clientlist.empty())
-			{
-				cout << "Terminate Room " << room->RoomID << endl;
-				ExitThread(NULL);
-			}
-		}
-
-		//CreateMSG(MSGTYPE::MSGUPDATE::ADJUSTPOS, )
-		for (auto c : room->clientlist)
-		{
-			// send world update to clients
-		}
-
-		//cout << "Room " << room->RoomID << " is running client : " << room->clientlist.size() << endl;
-	}
 	return 0;
 }
 
@@ -118,6 +90,7 @@ DWORD WINAPI RecvMessage(LPVOID arg)
 }
 
 MainServer::MainServer()
+	: m_iRoomCunter(0)
 {
 	m_IndRes = make_shared<CIndRes>();
 	if (!m_IndRes->Initialize())
@@ -143,7 +116,6 @@ void MainServer::Run()
 	SOCKADDR_IN clientaddr;
 	int addrlen;
 	int retval;
-	int roomcounter = 0;
 	int clientcounter = 0;
 
 	while (1)
@@ -180,14 +152,14 @@ void MainServer::RequestAddAgentServer()
 void MainServer::CreateRoom()
 {
 	RoomInfo* newroom = new RoomInfo();
-	newroom->RoomID = roomcounter++;
+	newroom->RoomID = m_iRoomCunter++;
 
 	for (int i = 0; i < 3; ++i)
 	{
 		newroom->clientlist.push_back(m_WaitingClientList.front());
 		m_WaitingClientList.pop_front();
 	}
-
+	newroom->GameWorld.Initailize(m_IndRes);
 	newroom->hGameWorld = CreateThread(NULL, 0, RunGameWorld, (LPVOID)newroom, 0, NULL);
 	if (newroom->hGameWorld == NULL)
 	{
@@ -204,76 +176,3 @@ void MainServer::DeleteRoom()
 {
 }
 
-void RoomInfo::UpdateWorld()
-{
-	int msgtype = 0;
-	list<NGPMSG*> *MsgQueue = (list<NGPMSG*>*)arg;
-
-	ActionInfo* Actionlist = new ActionInfo();
-	ObjInfo* Objlist = new ObjInfo();
-
-	while (1)
-	{
-		NGPMSG msg;
-		if (!MsgQueue->empty())
-		{
-			msgtype = DispatchMSG(MsgQueue->front(), *Actionlist, *Objlist);
-			MsgQueue->pop_front();
-		}
-		else continue;
-
-		switch (msgtype)
-		{
-		case MSGTYPE::MSGACTION::MOVE:
-			break;
-
-		case MSGTYPE::MSGACTION::SHOOT:
-
-			break;
-
-		case MSGTYPE::MSGACTION::BUILDTURRET:
-
-			break;
-
-		case MSGTYPE::MSGACTION::RELOAD:
-
-			break;
-
-
-		case MSGTYPE::MSGSTATE::AIAGENTINFO:
-			break;
-
-		case MSGTYPE::MSGSTATE::AICREATTIONREQUEST:
-			break;
-
-		case MSGTYPE::MSGSTATE::CLIENTGAMEOVER:
-			break;
-
-		case MSGTYPE::MSGSTATE::CLIENTREADY:
-			break;
-
-		case MSGTYPE::MSGSTATE::ROOMCREATION:
-			break;
-
-
-		case MSGTYPE::MSGUPDATE::ADJUSTPOS:
-			break;
-
-		case MSGTYPE::MSGUPDATE::CREATEOBJECT:
-			break;
-
-		case MSGTYPE::MSGUPDATE::DELETEOBJECT:
-			break;
-
-		case MSGTYPE::MSGUPDATE::UPDATEOBJECTSTATE:
-			break;
-
-		}
-	}
-
-	return 0;
-}
-
-void RoomInfo::SendMsgs()
-{
-}

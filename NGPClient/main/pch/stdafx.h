@@ -54,3 +54,5 @@ using namespace D2DBitmap;
 #include "SystemDefine.h"
 #include "inlineFuncs.h"
 #include "D2D_Operator.h"
+
+#include "NGPmsg.h"

@@ -4,8 +4,9 @@
 #include "Timer\Timer.h"
 #include "ResourceManager\ResourceManager.h"
 #include "Scene\Main\MainScene.h"
+#include "Server\Main\MainServer.h"
 #include "GameWorld.h"
-#define MAX_LOADSTRING 100
+
 
 void CGameWorld::Update(float fTimeElapsed)
 {
@@ -62,6 +63,7 @@ bool CGameWorld::Initailize(shared_ptr<CIndRes> indres)
 	m_pResMng = make_shared<CResourceManager>(m_pIndRes.get(), m_pd2dRenderTarget.Get());
 
 	m_pMainScene = make_unique<CMainScene>();
+	m_pMainScene->RegisterRoomInfo(m_pRoomInfo);
 	m_pMainScene->OnCreate(L"Main"s, this);
 	return true;
 }
@@ -73,6 +75,8 @@ void CGameWorld::Run()
 	// 기본 메시지 루프입니다.
 	while (true)
 	{
+		CheckClients();
+		ProcessMsgs();
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 		{
 			if (msg.message == WM_QUIT) break;
@@ -85,6 +89,39 @@ void CGameWorld::Run()
 		if (!m_pTimer->Update()) continue;
 		Update(m_pTimer->GetTimeElapsed());
 		Draw();
+		SendMsgs();
+	}
+}
+
+void CGameWorld::ProcessMsgs()
+{
+	m_pMainScene->ProcessMsgs();
+}
+
+void CGameWorld::SendMsgs()
+{
+	m_pMainScene->SendMsgs();
+}
+
+void CGameWorld::CheckClients()
+{
+	if (m_pRoomInfo) {
+		m_pRoomInfo->clientlist.remove_if([&](ConnectionInfo* client)->bool {
+			DWORD exitcode = 0;
+			GetExitCodeThread(client->RecvThreadHandle, &exitcode);
+			if (exitcode != STILL_ACTIVE) {
+				cout << "Client ID : " << client->ID << " Terminated" << endl;
+				return true;
+			}
+			return false;
+		});
+
+		if (m_pRoomInfo->clientlist.empty())
+		{
+			cout << "Terminate Room " << m_pRoomInfo->RoomID << endl;
+			PostQuitMessage(NULL);
+			//ExitThread(NULL);
+		}
 	}
 }
 

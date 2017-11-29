@@ -11,6 +11,9 @@
 class CObject;
 class CPlayer;
 class CEffect;
+
+struct RoomInfo;
+
 class CMainScene :
 	public CScene
 {
@@ -31,8 +34,14 @@ public:
 	void Draw(ID2D1HwndRenderTarget * pd2dRenderTarget) override;
 
 	void ProcessInput(float fTimeElapsed);
+	void ProcessMsgs();
+	void SendMsgs();
+
+	void RegisterRoomInfo(RoomInfo* room) { m_pRoomInfo = room; }
 
 private:
+	RoomInfo*						m_pRoomInfo;
+
 	shared_ptr<CResourceManager>	m_pResMng			{ nullptr };
 
 	ComPtr<ID2D1Bitmap1>			m_bmpBackGround;
@@ -43,6 +52,6 @@ private:
 	std::vector<CObject*>			m_vecObjects;
 	std::list<CEffect*>				m_lstEffects;
 
-	CPlayer*						m_pPlayer			{ nullptr };
+	D2D_POINT_2F					m_ptCamera;
 };
 

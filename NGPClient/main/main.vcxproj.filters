@@ -132,6 +132,9 @@
     <ClInclude Include="Object\Effect\Effect.h">
       <Filter>Object\Effect</Filter>
     </ClInclude>
+    <ClInclude Include="pch\NGPmsg.h">
+      <Filter>pch</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

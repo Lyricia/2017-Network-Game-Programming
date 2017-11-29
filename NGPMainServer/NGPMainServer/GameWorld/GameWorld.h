@@ -6,6 +6,8 @@ class CTimer;
 
 class CMainScene;
 
+struct RoomInfo;
+
 class CGameWorld
 {
 private:
@@ -20,22 +22,29 @@ public:
 
 	bool Initailize(shared_ptr<CIndRes> indres);
 	void Run();
+	void ProcessMsgs();
+	void SendMsgs();
+	void CheckClients();
 
-	int GetMarginWidth() { return m_iMarginWidth; }
-	int GetMarginHeight() { return m_iMarginHeight; }
+	void RegisterRoomInfo(RoomInfo* room) { m_pRoomInfo = room; }
 
-	HWND GethWnd()										const { return m_hWnd; }
-	shared_ptr<CIndRes> GetIndRes()						const { return m_pIndRes; }
-	shared_ptr<CResourceManager> GetResourceManager()	const { return m_pResMng; }
-	ComPtr<ID2D1HwndRenderTarget> GetRenderTarget()		const { return m_pd2dRenderTarget; }
-	D2D_RECT_L GetClientSize()							const { return m_rcClient; }
+	int								GetMarginWidth()		const { return m_iMarginWidth; }
+	int								GetMarginHeight()		const { return m_iMarginHeight; }
+	HWND							GethWnd()				const { return m_hWnd; }
+	shared_ptr<CIndRes>				GetIndRes()				const { return m_pIndRes; }
+	shared_ptr<CResourceManager>	GetResourceManager()	const { return m_pResMng; }
+	ComPtr<ID2D1HwndRenderTarget>	GetRenderTarget()		const { return m_pd2dRenderTarget; }
+	RoomInfo*						GetRoomInfo()			const { return m_pRoomInfo; }
+	D2D_RECT_L						GetClientSize()			const { return m_rcClient; }
 
 private:
+	RoomInfo*						m_pRoomInfo;
+
 	HINSTANCE						m_hInstance;
 	HWND							m_hWnd;
 
 	shared_ptr<CIndRes>				m_pIndRes;
-	shared_ptr<CResourceManager>				m_pResMng;
+	shared_ptr<CResourceManager>	m_pResMng;
 	unique_ptr<CTimer>				m_pTimer;
 
 	ComPtr<ID2D1HwndRenderTarget>	m_pd2dRenderTarget;

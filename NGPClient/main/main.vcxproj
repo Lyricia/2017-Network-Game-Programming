@@ -169,6 +169,7 @@
     <ClInclude Include="pch\D2DLoadBitmap.h" />
     <ClInclude Include="pch\D2D_Operator.h" />
     <ClInclude Include="pch\inlineFuncs.h" />
+    <ClInclude Include="pch\NGPmsg.h" />
     <ClInclude Include="pch\stdafx.h" />
     <ClInclude Include="pch\SystemDefine.h" />
     <ClInclude Include="resource.h" />

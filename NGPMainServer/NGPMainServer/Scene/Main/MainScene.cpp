@@ -1,6 +1,5 @@
 #include "stdafx.h"
 
-#include "GameWorld\GameWorld.h"
 #include "GameWorld/ResourceManager/ResourceManager.h"
 #include "GameWorld/IndRes/IndRes.h"
 
@@ -8,6 +7,8 @@
 #include "Object\Unit\Player\Player.h"
 #include "Object\Projectile\Grenade\Grenade.h"
 #include "Object\Effect\Effect.h"
+
+#include "Server\Main\MainServer.h"
 
 #include "MainScene.h"
 
@@ -23,7 +24,6 @@ CMainScene::~CMainScene()
 	for (auto& p : m_lstEffects)
 		delete p;
 	m_lstEffects.clear();
-	if(m_pPlayer) delete m_pPlayer;
 }
 
 bool CMainScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -118,18 +118,12 @@ bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 	m_bmpBackGround = m_pResMng->GetImageRef(ResImgName::map_image);
 	m_bmpCrossHair = m_pResMng->GetImageRef(ResImgName::aim);
 
-	m_pPlayer = new CPlayer(Point2F());
-	m_pPlayer->RegisterResourceManager(m_pResMng);
-
-	m_Camera.SetPosition(m_pPlayer->GetPos());
+	m_ptCamera = Point2F();
+	m_Camera.SetPosition(m_ptCamera);
 	m_Camera.SetAnchor(Point2F(0.0f, 0.0f));
 
-	CPlayer* other_player = new CPlayer(Point2F(-100, 10));
-	other_player->RegisterResourceManager(m_pResMng);
-	m_vecObjects.push_back(other_player);
-
 	int map_size_half = g_iMapSize / 2;
-	for(int i = 0; i < g_iMapSize; ++i)
+	for (int i = 0; i < g_iMapSize; ++i)
 		for (int j = 0; j < g_iMapSize; ++j)
 		{
 			if (g_iMap[j + i * g_iMapSize] == 1)
@@ -138,8 +132,16 @@ bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 				brick->RegisterResourceManager(m_pResMng);
 				m_vecObjects.push_back(brick);
 			}
-			
 		}
+
+	for(auto& p: m_pRoomInfo->clientlist)
+	{
+		CPlayer* player = new CPlayer(Point2F(-100, 10));
+		player->RegisterResourceManager(m_pResMng);
+		p->ID = player->GetID();
+		m_vecObjects.push_back(player);
+		send(p->sock, &p->ID, sizeof(int), 0);
+	}
 
 	return true;
 }
@@ -216,11 +218,7 @@ void CMainScene::Update(float fTimeElapsed)
 	ProcessInput(fTimeElapsed);
 	PreprocessingUpdate(fTimeElapsed);
 
-	m_Camera.SetPosition(m_pPlayer->GetPos());
-
-	m_pPlayer->Update(fTimeElapsed);
-	m_pPlayer->LookAt((m_ptMouseCursor * m_Camera.GetScaleFactor()) + m_pPlayer->GetPos());
-	m_pPlayer->RayCastingToShoot(m_vecObjects);
+	m_Camera.SetPosition(m_ptCamera);
 
 	for (auto& p : m_vecObjects)
 		p->Update(fTimeElapsed);
@@ -233,8 +231,6 @@ void CMainScene::Update(float fTimeElapsed)
 
 void CMainScene::PhysicsUpdate(float fTimeElapsed)
 {
-	D2D_POINT_2F ptPlayerPos =  m_pPlayer->GetPos();
-	float fPlayerRadius = m_pPlayer->GetSize().right;
 	D2D_POINT_2F dir = Point2F();
 
 	for (auto& p : m_vecObjects)
@@ -268,15 +264,6 @@ void CMainScene::PhysicsUpdate(float fTimeElapsed)
 		}
 		case CObject::Type::Brick:
 		{
-			dir = Normalize(p->GetPos() - ptPlayerPos);
-			if (PtInRect(
-					&(p->GetSize() + p->GetPos())
-					, ptPlayerPos + (dir * fPlayerRadius))
-				)
-			{
-				m_pPlayer->Reflection(-1.f * dir);
-				m_pPlayer->Move(- PLAYER_VELOCITY * dir * fTimeElapsed);
-			}
 			break;
 		}
 		case CObject::Type::Grenade:
@@ -321,21 +308,17 @@ void CMainScene::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
 	for (auto& p : m_vecObjects)
 		p->Draw(pd2dRenderTarget);
 
-	m_pPlayer->Draw(pd2dRenderTarget);
-
 	for (auto& p : m_lstEffects)
 		p->Draw(pd2dRenderTarget);
-
-	m_pPlayer->DrawUI(pd2dRenderTarget, m_Camera.GetScaleFactor());
 
 	pd2dRenderTarget->DrawBitmap(
 		m_bmpCrossHair.Get()
 		, SizeToRect(m_bmpCrossHair->GetSize()) + 
 		m_ptMouseCursor * m_Camera.GetScaleFactor() +
-		m_pPlayer->GetPos());
+		m_ptCamera);
 
 	auto pt = m_ptMouseCursor * m_Camera.GetScaleFactor() +
-		m_pPlayer->GetPos();
+		m_ptCamera;
 	printf("\r %f, %f", pt.x, pt.y);
 }
 
@@ -350,11 +333,7 @@ void CMainScene::ProcessInput(float fTimeElapsed)
 		if (pKeyBuffer['S'] & 0xF0) dwDirection |= DIR_DOWN;
 		if (pKeyBuffer['A'] & 0xF0) dwDirection |= DIR_LEFT;
 		if (pKeyBuffer['D'] & 0xF0) dwDirection |= DIR_RIGHT;
-		if (pKeyBuffer['G'] & 0xF0) {
-			CObject* grenade = m_pPlayer->GrenadeOut();
-			if(grenade) m_vecObjects.push_back(grenade);
-		}
-		if (pKeyBuffer[VK_SPACE] & 0xF0) m_pPlayer->Stop();
+		if (pKeyBuffer['G'] & 0xF0);
 
 		D2D_POINT_2F ptDir = Point2F();
 		if (dwDirection & DIR_UP) ptDir.y += -1;
@@ -363,14 +342,14 @@ void CMainScene::ProcessInput(float fTimeElapsed)
 		if (dwDirection & DIR_RIGHT) ptDir.x += 1;
 		if (dwDirection && Length(ptDir))
 		{
-			m_pPlayer->Move(Normalize(ptDir) * PLAYER_VELOCITY * fTimeElapsed);
+			m_ptCamera += Normalize(ptDir) * 100 * fTimeElapsed;
 		}
 
 		if (pKeyBuffer[VK_LBUTTON] & 0xF0)
 		{
-			CEffect* effect = m_pPlayer->Shoot();
-			if (effect)
-				m_lstEffects.push_back(effect);
+			//CEffect* effect = m_pPlayer->Shoot();
+			//if (effect)
+			//	m_lstEffects.push_back(effect);
 		}
 	}
 	static RECT rcWindow;
@@ -381,4 +360,61 @@ void CMainScene::ProcessInput(float fTimeElapsed)
 	m_ptMouseCursor = Point2F(
 		ptCursorPos.x - rcWindow.left - 5 - rcClient.right / 2
 		, ptCursorPos.y - rcWindow.top - 30 - rcClient.bottom / 2);
+}
+
+void CMainScene::ProcessMsgs()
+{
+	int msgtype = 0;
+
+	ActionInfo* Actionlist = new ActionInfo();
+	ObjInfo* Objlist = new ObjInfo();
+
+	NGPMSG msg;
+	::ZeroMemory(&msg, sizeof(msg));
+	if (!m_pRoomInfo->MsgQueue.empty())
+	{
+		msgtype = DispatchMSG(m_pRoomInfo->MsgQueue.front(), *Actionlist, *Objlist);
+		m_pRoomInfo->MsgQueue.pop_front();
+	}
+	else return;
+
+	switch (msgtype)
+	{
+	case MSGTYPE::MSGACTION::MOVE:
+		cout << "c ID: " << msg.header.OBJECTNO << " move!" << endl;
+		break;
+	case MSGTYPE::MSGACTION::SHOOT:
+		break;
+	case MSGTYPE::MSGACTION::BUILDTURRET:
+		break;
+	case MSGTYPE::MSGACTION::RELOAD:
+		break;
+	case MSGTYPE::MSGSTATE::AIAGENTINFO:
+		break;
+	case MSGTYPE::MSGSTATE::AICREATTIONREQUEST:
+		break;
+	case MSGTYPE::MSGSTATE::CLIENTGAMEOVER:
+		break;
+	case MSGTYPE::MSGSTATE::CLIENTREADY:
+		break;
+	case MSGTYPE::MSGSTATE::ROOMCREATION:
+		break;
+	case MSGTYPE::MSGUPDATE::ADJUSTPOS:
+		break;
+	case MSGTYPE::MSGUPDATE::CREATEOBJECT:
+		break;
+	case MSGTYPE::MSGUPDATE::DELETEOBJECT:
+		break;
+	case MSGTYPE::MSGUPDATE::UPDATEOBJECTSTATE:
+		break;
+	}
+}
+
+void CMainScene::SendMsgs()
+{
+	//CreateMSG(MSGTYPE::MSGUPDATE::ADJUSTPOS, )
+	for (auto client : m_pRoomInfo->clientlist)
+	{
+		// send world update to clients
+	}
 }

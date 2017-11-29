@@ -24,12 +24,28 @@ void err_display(char* msg)
 	printf("[%s] %s", msg, (char *)lpMsgBuf);
 	LocalFree(lpMsgBuf);
 }
+int recvn(SOCKET s, char * buf, int len, int flags)
+{
+	int received;
+	char *ptr = buf;
+	int left = len;
+
+	while (left > 0) {
+		received = recv(s, ptr, left, flags);
+		if (received == SOCKET_ERROR)
+			return SOCKET_ERROR;
+		else if (received == 0)
+			break;
+		left -= received;
+		ptr += received;
+	}
+
+	return (len - left);
+}
 
 CClient::CClient()
 	: m_Local_id(-1)
-	, m_Local_sock(NULL)
 {
-	ZeroMemory(&m_Local_addr, sizeof(m_Local_addr));
 	ZeroMemory(&m_MainServer, sizeof(m_MainServer));
 }
 CClient::~CClient()
@@ -45,15 +61,15 @@ void CClient::Initialize()
 		return;
 
 	// socket()
-	m_Local_sock = socket(AF_INET, SOCK_STREAM, 0);
-	if (m_Local_sock == INVALID_SOCKET) 
+	m_MainServer.sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (m_MainServer.sock == INVALID_SOCKET)
 		err_quit("socket()");
 }
 
 void CClient::Release()
 {
 	// closesocket()
-	closesocket(m_Local_sock);
+	closesocket(m_MainServer.sock);
 	// 윈속 종료
 	WSACleanup();
 }
@@ -61,16 +77,63 @@ void CClient::Release()
 void CClient::ConnectServer()
 {
 	// connect()
-	m_Local_addr.sin_family = AF_INET;
-	m_Local_addr.sin_addr.s_addr = inet_addr("");
-	m_Local_addr.sin_port = htons(SERVERPORT);
-	int retval = connect(m_Local_sock, (SOCKADDR *)&m_Local_addr, sizeof(m_Local_addr));
+	m_MainServer.addr.sin_family = AF_INET;
+	m_MainServer.addr.sin_addr.s_addr = inet_addr("");
+	m_MainServer.addr.sin_port = htons(SERVERPORT);
+	int retval = connect(m_MainServer.sock, (SOCKADDR *)&m_MainServer.addr, sizeof(m_MainServer.addr));
 	if (retval == SOCKET_ERROR)
 		err_quit("connect()");
+
+	m_MainServer.hReceiver = CreateThread(NULL, 0, RecvMessage, (LPVOID)&m_MainServer, 0, NULL);
 }
 
 void CClient::SendMsgs()
 {
-	int retval = send(m_Local_sock, m_pBuffer, BUFFER_SIZE, 0);
+	int retval = send(m_MainServer.sock, m_pBuffer, BUFFER_SIZE, 0);
 
+}
+
+DWORD RecvMessage(LPVOID arg)
+{
+	ConnectedServerInfo* main_server = (ConnectedServerInfo*)arg;
+	int retval;
+	char buf[64 + 1];
+	int len;
+
+	printf("\n[TCP 클라이언트] 서버접속: IP 주소=%s, 포트 번호=%d\n",
+		inet_ntoa(main_server->addr.sin_addr), ntohs(main_server->addr.sin_port));
+
+	while (1) {
+		// 데이터 받기(고정 길이)
+		retval = recvn(main_server->sock, (char *)&len, sizeof(int), 0);
+		if (retval == SOCKET_ERROR) {
+			break;
+		}
+		else if (retval == 0)
+			break;
+
+		// 데이터 받기(가변 길이)
+		retval = recvn(main_server->sock, buf, len, 0);
+		if (retval == SOCKET_ERROR) {
+			break;
+		}
+		else if (retval == 0)
+			break;
+
+		// 받은 데이터 출력
+		buf[retval] = '\0';
+		cout << "ID : " << " " << buf << endl;
+
+		retval = send(main_server->sock, "test", sizeof("test"), NULL);
+		if (retval == SOCKET_ERROR)
+		{
+			closesocket(main_server->sock);
+			return 0;
+		}
+	}
+
+	closesocket(main_server->sock);
+	printf("[TCP 클라이언트] 서버연결 종료: IP 주소=%s, 포트 번호=%d\n",
+		inet_ntoa(main_server->addr.sin_addr), ntohs(main_server->addr.sin_port));
+	return 0;
 }
