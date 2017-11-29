@@ -1,14 +1,15 @@
 #include "stdafx.h"
 
-#include "IndRes/IndRes.h"
-#include "Timer/Timer.h"
-
+#include "IndRes\IndRes.h"
+#include "Timer\Timer.h"
+#include "ResourceManager\ResourceManager.h"
+#include "Scene\Main\MainScene.h"
 #include "GameWorld.h"
 #define MAX_LOADSTRING 100
 
 void CGameWorld::Update(float fTimeElapsed)
 {
-
+	m_pMainScene->Update(fTimeElapsed);
 }
 
 void CGameWorld::Draw()
@@ -16,6 +17,7 @@ void CGameWorld::Draw()
 	m_pd2dRenderTarget->BeginDraw();
 	m_pd2dRenderTarget->Clear(ColorF{ ColorF::LightGray });
 
+	m_pMainScene->Draw(m_pd2dRenderTarget.Get());
 
 	m_pd2dRenderTarget->EndDraw();
 }
@@ -28,6 +30,7 @@ CGameWorld::CGameWorld()
 	, m_pd2dRenderTarget(nullptr)
 	, m_iMarginWidth(0)
 	, m_iMarginHeight(0)
+	, m_pMainScene(nullptr)
 {
 }
 
@@ -50,12 +53,16 @@ bool CGameWorld::Initailize(shared_ptr<CIndRes> indres)
 	}
 
 	::GetClientRect(m_hWnd, &m_rcClient);
+	::ShowCursor(FALSE);
 
 	// 클래스와 윈도우 프로시저 연결
 	::SetUserDataPtr(m_hWnd, this);
 
 	m_pIndRes->CreateHwndRenderTarget(m_hWnd, &m_pd2dRenderTarget);
+	m_pResMng = make_shared<CResourceManager>(m_pIndRes.get(), m_pd2dRenderTarget.Get());
 
+	m_pMainScene = make_unique<CMainScene>();
+	m_pMainScene->OnCreate(L"Main"s, this);
 	return true;
 }
 

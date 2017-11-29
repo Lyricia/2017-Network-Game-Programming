@@ -6,7 +6,6 @@ namespace D2DBitmap
 	template<typename Rect = D2D_RECT_U>
 	bool LoadImageFromFile(	  IWICImagingFactory		*pwicFactory
 							, ID2D1RenderTarget			*pd2dRenderTarget
-
 							, LPCTSTR					pszstrFileName
 							, ID2D1Bitmap1				**ppd2dBitmap
 							, Rect						*pd2drcImage  = nullptr

@@ -1,26 +1,28 @@
 #pragma once
-#include "Server.h"
+#include "Server\Server.h"
 
 struct ConnectionInfo {
 	int				ID;
 	SOCKET			sock;
 	SOCKADDR_IN		addr;
 	HANDLE			RecvThreadHandle;
+	list<NGPMSG*>*	*pMsgQueue;
 };
 
 struct RoomInfo {
 	int						RoomID;
-	HANDLE					hGameWorld;
-	list<NGPMSG*>			*MsgQueue;
 	ConnectionInfo			*serverinfo;
 	list<ConnectionInfo*>	clientlist;
 	//list<ConnectionInfo*>	agentlist;
-	//GameWorld				GameWorld;
-
-	//void UpdateWorld();
-	void SendMsgs(SOCKET sock, NGPMSG &msg, size_t msgsize){
-		send(sock, (char*)&msg, msgsize, 0);
-	}
+	CGameWorld				GameWorld;
+	list<NGPMSG*>			MsgQueue;
+	HANDLE					hGameWorld;
+		
+	void UpdateWorld();
+	void SendMsgs();
+	//void SendMsgs(SOCKET sock, NGPMSG &msg, size_t msgsize){
+	//	send(sock, (char*)&msg, msgsize, 0);
+	//}
 };
 
 class MainServer : public Server
@@ -32,10 +34,11 @@ class MainServer : public Server
 	list<ConnectionInfo*>		m_WaitingClientList;
 	list<NGPMSG*>				m_MsgQueue;
 
-public:
-	MainServer() {};
-	~MainServer() {};
+	shared_ptr<CIndRes>			m_IndRes;
 
+public:
+	MainServer();
+	~MainServer();
 
 	virtual void Run();
 

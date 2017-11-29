@@ -7,6 +7,7 @@
 
 #include "targetver.h"
 
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
 #define WIN32_LEAN_AND_MEAN             // 거의 사용되지 않는 내용은 Windows 헤더에서 제외합니다.
 // Windows 헤더 파일:
 #include <windows.h>
@@ -17,6 +18,9 @@
 #include <memory.h>
 #include <tchar.h>
 
+#include <WinSock2.h>
+#pragma comment(lib, "ws2_32")
+
 // C++ 런타임 헤더 파일입니다.
 #include <iostream>
 #include <vector>
@@ -25,7 +29,6 @@
 #include <random>
 #include <chrono>
 #include <memory>
-#include <functional>
 #include <string>
 using namespace std;
 
@@ -42,10 +45,6 @@ using namespace Microsoft::WRL;
 #include <wincodec.h>
 using namespace D2D1;
 
-#pragma comment(lib, "d2d1.lib")
-#pragma comment(lib, "dwrite.lib")
-#pragma comment(lib, "windowscodecs.lib")
-
 // Bitmap
 #include "D2DLoadBitmap.h"
 using namespace D2DBitmap;
@@ -54,3 +53,5 @@ using namespace D2DBitmap;
 #include "SystemDefine.h"
 #include "inlineFuncs.h"
 #include "D2D_Operator.h"
+
+#include "Server\NGPmsg.h"

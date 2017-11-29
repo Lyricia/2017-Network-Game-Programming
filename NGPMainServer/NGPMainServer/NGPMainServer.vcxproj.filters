@@ -25,51 +25,171 @@
     <Filter Include="GameWorld\Timer">
       <UniqueIdentifier>{7f1fc042-03b0-4d91-8a59-8d50fbe7c167}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object">
+      <UniqueIdentifier>{0e34f1ca-ad9e-48fb-870c-b1d196176067}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Camera">
+      <UniqueIdentifier>{5f6bd56e-12cd-4d6c-a41a-c2efdd9dd468}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameWorld\ResourceManager">
+      <UniqueIdentifier>{a2f49496-f1aa-4ab4-a198-adb4bf31d0c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{bc9c5f25-a0e0-48e4-9f19-4daf91b7e944}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene\Main">
+      <UniqueIdentifier>{0691e28f-b501-46a6-a459-565ebd4b8ff4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Brick">
+      <UniqueIdentifier>{7aeafc96-6ad3-4478-acd4-18868a39260a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Effect">
+      <UniqueIdentifier>{83a0d693-af4e-44b4-ab6a-99d64b8a673a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Unit">
+      <UniqueIdentifier>{4551fb92-4817-4c1f-ae87-84d74e7b24bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Projectile">
+      <UniqueIdentifier>{806f6465-93a6-4fae-b3ab-66b070d8428f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Projectile\Grenade">
+      <UniqueIdentifier>{5ea57ee8-dad7-43b6-ba04-8c7d902669ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Unit\Player">
+      <UniqueIdentifier>{22fdca6e-506a-4330-9a14-7ebe295a5c8f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server">
+      <UniqueIdentifier>{e7c517f3-7515-4508-abb6-473d4214a59b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server\Main">
+      <UniqueIdentifier>{ee62a339-cdcd-4f62-aaec-358f3263c223}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Object\Object.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="GameWorld\IndRes\IndRes.cpp">
+      <Filter>GameWorld\IndRes</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera\Camera.cpp">
+      <Filter>Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="GameWorld\GameWorld.cpp">
+      <Filter>GameWorld</Filter>
+    </ClCompile>
+    <ClCompile Include="GameWorld\ResourceManager\ResourceManager.cpp">
+      <Filter>GameWorld\ResourceManager</Filter>
+    </ClCompile>
+    <ClCompile Include="GameWorld\Timer\Timer.cpp">
+      <Filter>GameWorld\Timer</Filter>
+    </ClCompile>
+    <ClCompile Include="pch\stdafx.cpp">
+      <Filter>pch</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Scene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Main\MainScene.cpp">
+      <Filter>Scene\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="NGPMainServer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Brick\Brick.cpp">
+      <Filter>Object\Brick</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Effect\Effect.cpp">
+      <Filter>Object\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Unit\Unit.cpp">
+      <Filter>Object\Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Projectile\Projectile.cpp">
+      <Filter>Object\Projectile</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Projectile\Grenade\Grenade.cpp">
+      <Filter>Object\Projectile\Grenade</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Unit\Player\Player.cpp">
+      <Filter>Object\Unit\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Server\Server.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="Server\Main\MainServer.cpp">
+      <Filter>Server\Main</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Object\Object.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="GameWorld\IndRes\IndRes.h">
+      <Filter>GameWorld\IndRes</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera\Camera.h">
+      <Filter>Camera</Filter>
+    </ClInclude>
     <ClInclude Include="GameWorld\GameWorld.h">
       <Filter>GameWorld</Filter>
     </ClInclude>
-    <ClInclude Include="targetver.h">
-      <Filter>헤더 파일</Filter>
+    <ClInclude Include="pch\inlineFuncs.h">
+      <Filter>pch</Filter>
     </ClInclude>
     <ClInclude Include="pch\D2D_Operator.h">
       <Filter>pch</Filter>
     </ClInclude>
-    <ClInclude Include="pch\inlineFuncs.h">
+    <ClInclude Include="pch\D2DLoadBitmap.h">
+      <Filter>pch</Filter>
+    </ClInclude>
+    <ClInclude Include="GameWorld\ResourceManager\ResourceManager.h">
+      <Filter>GameWorld\ResourceManager</Filter>
+    </ClInclude>
+    <ClInclude Include="GameWorld\Timer\Timer.h">
+      <Filter>GameWorld\Timer</Filter>
+    </ClInclude>
+    <ClInclude Include="pch\SystemDefine.h">
       <Filter>pch</Filter>
     </ClInclude>
     <ClInclude Include="pch\stdafx.h">
       <Filter>pch</Filter>
     </ClInclude>
-    <ClInclude Include="pch\SystemDefine.h">
-      <Filter>pch</Filter>
+    <ClInclude Include="Scene\Scene.h">
+      <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="GameWorld\IndRes\IndRes.h">
-      <Filter>GameWorld\IndRes</Filter>
+    <ClInclude Include="Scene\Main\MainScene.h">
+      <Filter>Scene\Main</Filter>
     </ClInclude>
-    <ClInclude Include="GameWorld\Timer\Timer.h">
-      <Filter>GameWorld\Timer</Filter>
+    <ClInclude Include="targetver.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="pch\D2DLoadBitmap.h">
-      <Filter>pch</Filter>
+    <ClInclude Include="Object\Brick\Brick.h">
+      <Filter>Object\Brick</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="NGPMainServer.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="GameWorld\GameWorld.cpp">
-      <Filter>GameWorld</Filter>
-    </ClCompile>
-    <ClCompile Include="pch\stdafx.cpp">
-      <Filter>pch</Filter>
-    </ClCompile>
-    <ClCompile Include="GameWorld\IndRes\IndRes.cpp">
-      <Filter>GameWorld\IndRes</Filter>
-    </ClCompile>
-    <ClCompile Include="GameWorld\Timer\Timer.cpp">
-      <Filter>GameWorld\Timer</Filter>
-    </ClCompile>
+    <ClInclude Include="Object\Effect\Effect.h">
+      <Filter>Object\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Unit\Unit.h">
+      <Filter>Object\Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Projectile\Projectile.h">
+      <Filter>Object\Projectile</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Projectile\Grenade\Grenade.h">
+      <Filter>Object\Projectile\Grenade</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Unit\Player\Player.h">
+      <Filter>Object\Unit\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Server\Server.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Server\Main\MainServer.h">
+      <Filter>Server\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="Server\NGPmsg.h">
+      <Filter>Server</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,8 +1,8 @@
 #include "stdafx.h"
 
-#include "Framework/Framework.h"
-#include "Framework/ResourceManager/ResourceManager.h"
-#include "Framework/IndRes/IndRes.h"
+#include "GameWorld\GameWorld.h"
+#include "GameWorld/ResourceManager/ResourceManager.h"
+#include "GameWorld/IndRes/IndRes.h"
 
 #include "Object\Brick\Brick.h"
 #include "Object\Unit\Player\Player.h"
@@ -57,7 +57,7 @@ bool CMainScene::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 	{
 	case WM_SIZE:
 	{
-		auto rcClient = m_pFramework->GetClientSize();
+		auto rcClient = m_pGameWorld->GetClientSize();
 		m_Camera.SetClientSize(Point2F(rcClient.right, rcClient.bottom));
 		break;
 	}
@@ -104,16 +104,16 @@ bool CMainScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 	return(true);
 }
 
-bool CMainScene::OnCreate(wstring && tag, CFramework * pFramework)
+bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 {
-	if (!Base::OnCreate(std::move(tag), pFramework)) return false;
+	if (!Base::OnCreate(std::move(tag), pGameWorld)) return false;
 
-	m_hWnd = pFramework->GethWnd();
-	m_pResMng = pFramework->GetResourceManager();
+	m_hWnd = pGameWorld->GethWnd();
+	m_pResMng = pGameWorld->GetResourceManager();
 
-	auto rcClient = pFramework->GetClientSize();
+	auto rcClient = pGameWorld->GetClientSize();
 	m_Camera.SetClientSize(Point2F(rcClient.right, rcClient.bottom));
-	auto rendertarget = pFramework->GetRenderTarget();
+	auto rendertarget = pGameWorld->GetRenderTarget();
 
 	m_bmpBackGround = m_pResMng->GetImageRef(ResImgName::map_image);
 	m_bmpCrossHair = m_pResMng->GetImageRef(ResImgName::aim);
@@ -377,7 +377,7 @@ void CMainScene::ProcessInput(float fTimeElapsed)
 	static POINT ptCursorPos;
 	::GetWindowRect(m_hWnd, &rcWindow);
 	::GetCursorPos(&ptCursorPos);
-	auto rcClient = m_pFramework->GetClientSize();
+	auto rcClient = m_pGameWorld->GetClientSize();
 	m_ptMouseCursor = Point2F(
 		ptCursorPos.x - rcWindow.left - 5 - rcClient.right / 2
 		, ptCursorPos.y - rcWindow.top - 30 - rcClient.bottom / 2);
