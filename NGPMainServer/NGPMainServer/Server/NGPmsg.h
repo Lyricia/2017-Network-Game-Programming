@@ -60,14 +60,11 @@ struct ObjInfo {
 
 struct MSGHEADER {
 	unsigned char		MSGTYPE;
-	unsigned short		DETAILINFOSIZE;
 	unsigned char		ROOMNO;
-	unsigned char		OBJECTNO;
-	
 	unsigned char		NUM_OBJINFO;
 	unsigned char		NUM_ACTIONINFO;
 
-	char				packer;
+	unsigned int		OBJECTNO;
 };
 
 struct NGPMSG {
@@ -76,15 +73,18 @@ struct NGPMSG {
 	char				actioninfo[ACTIONINFOBUFSIZE];
 };
 
-inline NGPMSG* CreateMSG(char type, short size, char roomno, char objectno, char nObjinfo, char nActioninfo, void* objinfo, void* actioninfo) 
+inline NGPMSG* CreateMSG(UCHAR type, UCHAR roomno, UINT objectno, UCHAR nObjinfo, UCHAR nActioninfo, void* objinfo, void* actioninfo)
 {
 	NGPMSG* msg = new NGPMSG();
 
-	MSGHEADER msgHeader = { type, size, roomno, objectno, nObjinfo, nActioninfo };
+	MSGHEADER msgHeader = { type, roomno, nObjinfo, nActioninfo , objectno };
 	
 	msg->header = msgHeader;
-	memcpy(msg->actioninfo, actioninfo, MSGSIZE::SIZE_ACTIONINFO*nActioninfo);
-	memcpy(msg->objinfo, objinfo, MSGSIZE::SIZE_OBJINFO*nObjinfo);
+	if (nActioninfo != 0)
+		memcpy(msg->actioninfo, actioninfo, MSGSIZE::SIZE_ACTIONINFO*nActioninfo);
+
+	if (nObjinfo != 0)
+		memcpy(msg->objinfo, objinfo, MSGSIZE::SIZE_OBJINFO*nObjinfo);
 
 	return msg;
 }
