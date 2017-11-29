@@ -67,8 +67,6 @@ bool CScene::OnCreate(wstring&& tag, CGameWorld* pGameWorld)
 		_DEBUG_ERROR("framework is must be vaild!");
 		return false;
 	}
-	m_hWnd = pGameWorld->GethWnd();
-	m_pIndRes = pGameWorld->GetIndRes();
 
 	return true;
 }

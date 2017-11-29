@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "GameWorld\ResourceManager\ResourceManager.h"
 #include "Projectile.h"
 
 CProjectile::CProjectile(D2D_POINT_2F pt, D2D_RECT_F rc)
@@ -18,11 +17,3 @@ void CProjectile::Update(float fTimeElapsed)
 {
 }
 
-void CProjectile::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
-{
-}
-
-void CProjectile::RegisterResourceManager(shared_ptr<CResourceManager> resMng)
-{
-	m_pResMng = resMng;
-}

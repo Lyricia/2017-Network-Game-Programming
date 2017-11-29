@@ -33,22 +33,20 @@ struct RoomInfo {
 		for (auto& p : clientlist) delete p;
 		MsgQueue.clear();
 		clientlist.clear();
-		if(hGameWorld)
+		if (hGameWorld) {
 			TerminateThread(hGameWorld, 0);
+		}
 	}
 };
 
 class MainServer : public Server
 {
-	//list<RoomInfo*>			m_RoomList;
-	//list<ClientInfo*>			m_WaitingClientList;
 	//ConnectedServerInfo		m_AgentServer;
 	list<RoomInfo*>				m_RoomList;
 	list<ConnectionInfo*>		m_WaitingClientList;
 	list<NGPMSG*>				m_MsgQueue;
 
-	int							m_iRoomCunter;
-	shared_ptr<CIndRes>			m_IndRes;
+	int							m_iRoomCounter;
 
 public:
 	MainServer();

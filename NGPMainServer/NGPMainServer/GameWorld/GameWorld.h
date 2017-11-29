@@ -14,13 +14,12 @@ private:
 
 private:
 	void Update(float fTimeElapsed);
-	void Draw();
 
 public:
 	CGameWorld();
 	~CGameWorld();
 
-	bool Initailize(shared_ptr<CIndRes> indres);
+	bool Initailize();
 	void Run();
 	void ProcessMsgs();
 	void SendMsgs();

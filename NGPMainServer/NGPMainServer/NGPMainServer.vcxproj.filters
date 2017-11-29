@@ -19,9 +19,6 @@
     <Filter Include="pch">
       <UniqueIdentifier>{ddfeae1b-ab44-4308-9e68-a812b611c6f3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GameWorld\IndRes">
-      <UniqueIdentifier>{d489ca1d-0644-4906-9f8f-e74aca2ed65d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="GameWorld\Timer">
       <UniqueIdentifier>{7f1fc042-03b0-4d91-8a59-8d50fbe7c167}</UniqueIdentifier>
     </Filter>
@@ -31,9 +28,6 @@
     <Filter Include="Camera">
       <UniqueIdentifier>{5f6bd56e-12cd-4d6c-a41a-c2efdd9dd468}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GameWorld\ResourceManager">
-      <UniqueIdentifier>{a2f49496-f1aa-4ab4-a198-adb4bf31d0c4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Scene">
       <UniqueIdentifier>{bc9c5f25-a0e0-48e4-9f19-4daf91b7e944}</UniqueIdentifier>
     </Filter>
@@ -42,9 +36,6 @@
     </Filter>
     <Filter Include="Object\Brick">
       <UniqueIdentifier>{7aeafc96-6ad3-4478-acd4-18868a39260a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Object\Effect">
-      <UniqueIdentifier>{83a0d693-af4e-44b4-ab6a-99d64b8a673a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Object\Unit">
       <UniqueIdentifier>{4551fb92-4817-4c1f-ae87-84d74e7b24bc}</UniqueIdentifier>
@@ -69,17 +60,11 @@
     <ClCompile Include="Object\Object.cpp">
       <Filter>Object</Filter>
     </ClCompile>
-    <ClCompile Include="GameWorld\IndRes\IndRes.cpp">
-      <Filter>GameWorld\IndRes</Filter>
-    </ClCompile>
     <ClCompile Include="Camera\Camera.cpp">
       <Filter>Camera</Filter>
     </ClCompile>
     <ClCompile Include="GameWorld\GameWorld.cpp">
       <Filter>GameWorld</Filter>
-    </ClCompile>
-    <ClCompile Include="GameWorld\ResourceManager\ResourceManager.cpp">
-      <Filter>GameWorld\ResourceManager</Filter>
     </ClCompile>
     <ClCompile Include="GameWorld\Timer\Timer.cpp">
       <Filter>GameWorld\Timer</Filter>
@@ -98,9 +83,6 @@
     </ClCompile>
     <ClCompile Include="Object\Brick\Brick.cpp">
       <Filter>Object\Brick</Filter>
-    </ClCompile>
-    <ClCompile Include="Object\Effect\Effect.cpp">
-      <Filter>Object\Effect</Filter>
     </ClCompile>
     <ClCompile Include="Object\Unit\Unit.cpp">
       <Filter>Object\Unit</Filter>
@@ -125,9 +107,6 @@
     <ClInclude Include="Object\Object.h">
       <Filter>Object</Filter>
     </ClInclude>
-    <ClInclude Include="GameWorld\IndRes\IndRes.h">
-      <Filter>GameWorld\IndRes</Filter>
-    </ClInclude>
     <ClInclude Include="Camera\Camera.h">
       <Filter>Camera</Filter>
     </ClInclude>
@@ -142,9 +121,6 @@
     </ClInclude>
     <ClInclude Include="pch\D2DLoadBitmap.h">
       <Filter>pch</Filter>
-    </ClInclude>
-    <ClInclude Include="GameWorld\ResourceManager\ResourceManager.h">
-      <Filter>GameWorld\ResourceManager</Filter>
     </ClInclude>
     <ClInclude Include="GameWorld\Timer\Timer.h">
       <Filter>GameWorld\Timer</Filter>
@@ -166,9 +142,6 @@
     </ClInclude>
     <ClInclude Include="Object\Brick\Brick.h">
       <Filter>Object\Brick</Filter>
-    </ClInclude>
-    <ClInclude Include="Object\Effect\Effect.h">
-      <Filter>Object\Effect</Filter>
     </ClInclude>
     <ClInclude Include="Object\Unit\Unit.h">
       <Filter>Object\Unit</Filter>

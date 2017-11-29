@@ -1,8 +1,6 @@
 #include "stdafx.h"
 
-#include "IndRes\IndRes.h"
 #include "Timer\Timer.h"
-#include "ResourceManager\ResourceManager.h"
 #include "Scene\Main\MainScene.h"
 #include "Server\Main\MainServer.h"
 #include "GameWorld.h"
@@ -11,16 +9,6 @@
 void CGameWorld::Update(float fTimeElapsed)
 {
 	m_pMainScene->Update(fTimeElapsed);
-}
-
-void CGameWorld::Draw()
-{
-	m_pd2dRenderTarget->BeginDraw();
-	m_pd2dRenderTarget->Clear(ColorF{ ColorF::LightGray });
-
-	m_pMainScene->Draw(m_pd2dRenderTarget.Get());
-
-	m_pd2dRenderTarget->EndDraw();
 }
 
 CGameWorld::CGameWorld()
@@ -39,28 +27,9 @@ CGameWorld::~CGameWorld()
 {
 }
 
-bool CGameWorld::Initailize(shared_ptr<CIndRes> indres)
+bool CGameWorld::Initailize()
 {
-	m_hInstance = GetModuleHandle(NULL);
 	m_pTimer = make_unique<CTimer>();
-	m_pIndRes = indres;
-
-	RegisterWndClass();
-
-	// 응용 프로그램 초기화를 수행합니다.
-	if (!InitInstance())
-	{
-		return false;
-	}
-
-	::GetClientRect(m_hWnd, &m_rcClient);
-	::ShowCursor(FALSE);
-
-	// 클래스와 윈도우 프로시저 연결
-	::SetUserDataPtr(m_hWnd, this);
-
-	m_pIndRes->CreateHwndRenderTarget(m_hWnd, &m_pd2dRenderTarget);
-	m_pResMng = make_shared<CResourceManager>(m_pIndRes.get(), m_pd2dRenderTarget.Get());
 
 	m_pMainScene = make_unique<CMainScene>();
 	m_pMainScene->RegisterRoomInfo(m_pRoomInfo);
@@ -84,11 +53,9 @@ void CGameWorld::Run()
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		static int i = 0;
-		printf("\rmessage loop test %d", i++);
 		if (!m_pTimer->Update()) continue;
 		Update(m_pTimer->GetTimeElapsed());
-		Draw();
+		//Draw();
 		SendMsgs();
 	}
 }
@@ -253,7 +220,7 @@ LRESULT CGameWorld::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM
 
 		m_pd2dRenderTarget->Resize(SizeU(nWndClientWidth, nWndClientHeight));
 
-		Draw();
+		//Draw();
 
 		return DefWindowProc(hWnd, nMessageID, wParam, lParam);
 	}
@@ -289,7 +256,8 @@ LRESULT CGameWorld::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM
 LRESULT CGameWorld::WndProc(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	auto self = ::GetUserDataPtr<CGameWorld*>(hWnd);
-	if (!self) return ::DefWindowProc(hWnd, nMessageID, wParam, lParam);
+	if (!self) 
+		return ::DefWindowProc(hWnd, nMessageID, wParam, lParam);
 
 	static auto DestroyWindow = [&]()
 	{

@@ -21,12 +21,9 @@
   <ItemGroup>
     <ClCompile Include="Camera\Camera.cpp" />
     <ClCompile Include="GameWorld\GameWorld.cpp" />
-    <ClCompile Include="GameWorld\IndRes\IndRes.cpp" />
-    <ClCompile Include="GameWorld\ResourceManager\ResourceManager.cpp" />
     <ClCompile Include="GameWorld\Timer\Timer.cpp" />
     <ClCompile Include="NGPMainServer.cpp" />
     <ClCompile Include="Object\Brick\Brick.cpp" />
-    <ClCompile Include="Object\Effect\Effect.cpp" />
     <ClCompile Include="Object\Object.cpp" />
     <ClCompile Include="Object\Projectile\Grenade\Grenade.cpp" />
     <ClCompile Include="Object\Projectile\Projectile.cpp" />
@@ -46,11 +43,8 @@
   <ItemGroup>
     <ClInclude Include="Camera\Camera.h" />
     <ClInclude Include="GameWorld\GameWorld.h" />
-    <ClInclude Include="GameWorld\IndRes\IndRes.h" />
-    <ClInclude Include="GameWorld\ResourceManager\ResourceManager.h" />
     <ClInclude Include="GameWorld\Timer\Timer.h" />
     <ClInclude Include="Object\Brick\Brick.h" />
-    <ClInclude Include="Object\Effect\Effect.h" />
     <ClInclude Include="Object\Object.h" />
     <ClInclude Include="Object\Projectile\Grenade\Grenade.h" />
     <ClInclude Include="Object\Projectile\Projectile.h" />

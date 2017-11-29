@@ -1,7 +1,5 @@
 #include "stdafx.h"
-#include "GameWorld\IndRes\IndRes.h"
 #include "GameWorld\Timer\Timer.h"
-#include "GameWorld\ResourceManager\ResourceManager.h"
 #include "GameWorld\GameWorld.h"
 
 #include "MainServer.h"
@@ -90,14 +88,9 @@ DWORD WINAPI RecvMessage(LPVOID arg)
 }
 
 MainServer::MainServer()
-	: m_iRoomCunter(0)
+	: m_iRoomCounter(0)
 {
-	m_IndRes = make_shared<CIndRes>();
-	if (!m_IndRes->Initialize())
-	{
-		cout << "IndRes Init Failed." << endl;
-		return;
-	}
+
 }
 MainServer::~MainServer()
 {
@@ -152,14 +145,15 @@ void MainServer::RequestAddAgentServer()
 void MainServer::CreateRoom()
 {
 	RoomInfo* newroom = new RoomInfo();
-	newroom->RoomID = m_iRoomCunter++;
+	newroom->RoomID = m_iRoomCounter++;
 
 	for (int i = 0; i < 3; ++i)
 	{
 		newroom->clientlist.push_back(m_WaitingClientList.front());
 		m_WaitingClientList.pop_front();
 	}
-	newroom->GameWorld.Initailize(m_IndRes);
+	newroom->GameWorld.RegisterRoomInfo(newroom);
+	newroom->GameWorld.Initailize();
 	newroom->hGameWorld = CreateThread(NULL, 0, RunGameWorld, (LPVOID)newroom, 0, NULL);
 	if (newroom->hGameWorld == NULL)
 	{

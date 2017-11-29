@@ -10,7 +10,7 @@ public:
 	virtual ~CEffect();
 
 	virtual void Update(float fTimeElapsed) override;
-	virtual void Draw(ID2D1HwndRenderTarget* pd2dRenderTarget) override;
+	//virtual void Draw(ID2D1HwndRenderTarget* pd2dRenderTarget) override;
 	virtual void RegisterEffectSprite(
 		ComPtr<ID2D1Bitmap1> bmpImg, const D2D1_SIZE_U& sz);
 

@@ -1,8 +1,5 @@
 #include "stdafx.h"
 
-#include "GameWorld/ResourceManager/ResourceManager.h"
-#include "GameWorld/IndRes/IndRes.h"
-
 #include "Object\Brick\Brick.h"
 #include "Object\Unit\Player\Player.h"
 #include "Object\Projectile\Grenade\Grenade.h"
@@ -21,9 +18,6 @@ CMainScene::~CMainScene()
 	for (auto& p : m_vecObjects)
 		delete p;
 	m_vecObjects.clear();
-	for (auto& p : m_lstEffects)
-		delete p;
-	m_lstEffects.clear();
 }
 
 bool CMainScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -108,19 +102,19 @@ bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 {
 	if (!Base::OnCreate(std::move(tag), pGameWorld)) return false;
 
-	m_hWnd = pGameWorld->GethWnd();
-	m_pResMng = pGameWorld->GetResourceManager();
+	//m_hWnd = pGameWorld->GethWnd();
+	//m_pResMng = pGameWorld->GetResourceManager();
 
-	auto rcClient = pGameWorld->GetClientSize();
-	m_Camera.SetClientSize(Point2F(rcClient.right, rcClient.bottom));
-	auto rendertarget = pGameWorld->GetRenderTarget();
+	//auto rcClient = pGameWorld->GetClientSize();
+	//m_Camera.SetClientSize(Point2F(rcClient.right, rcClient.bottom));
+	//auto rendertarget = pGameWorld->GetRenderTarget();
+	//
+	//m_bmpBackGround = m_pResMng->GetImageRef(ResImgName::map_image);
+	//m_bmpCrossHair = m_pResMng->GetImageRef(ResImgName::aim);
 
-	m_bmpBackGround = m_pResMng->GetImageRef(ResImgName::map_image);
-	m_bmpCrossHair = m_pResMng->GetImageRef(ResImgName::aim);
-
-	m_ptCamera = Point2F();
-	m_Camera.SetPosition(m_ptCamera);
-	m_Camera.SetAnchor(Point2F(0.0f, 0.0f));
+	//m_ptCamera = Point2F();
+	//m_Camera.SetPosition(m_ptCamera);
+	//m_Camera.SetAnchor(Point2F(0.0f, 0.0f));
 
 	int map_size_half = g_iMapSize / 2;
 	for (int i = 0; i < g_iMapSize; ++i)
@@ -129,7 +123,6 @@ bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 			if (g_iMap[j + i * g_iMapSize] == 1)
 			{
 				CBrick* brick = new CBrick(Point2F((j - map_size_half)*g_iMapSize, (i - map_size_half)*g_iMapSize));
-				brick->RegisterResourceManager(m_pResMng);
 				m_vecObjects.push_back(brick);
 			}
 		}
@@ -137,10 +130,9 @@ bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 	for(auto& p: m_pRoomInfo->clientlist)
 	{
 		CPlayer* player = new CPlayer(Point2F(-100, 10));
-		player->RegisterResourceManager(m_pResMng);
 		p->ID = player->GetID();
 		m_vecObjects.push_back(player);
-		send(p->sock, &p->ID, sizeof(int), 0);
+		//send(p->sock, &p->ID, sizeof(int), 0);
 	}
 
 	return true;
@@ -148,15 +140,6 @@ bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 
 void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 {
-	m_lstEffects.remove_if([](CEffect* pEffect)->bool {
-		if (pEffect->IsFinished()) 
-		{
-			delete pEffect;
-			return true;
-		}
-		return false;
-	});
-
 	for (auto& iter = m_vecObjects.begin(); iter != m_vecObjects.end();)
 	{
 		switch ((*iter)->GetTag())
@@ -192,13 +175,6 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 			{
 				grenade->Explosion(m_vecObjects);
 
-				auto rc = SizeToRect(SizeF(GRENADE_EXPLOSION_RANGE, GRENADE_EXPLOSION_RANGE));
-				CEffect* effect = new CEffect(grenade->GetPos(), rc);
-				auto& img = m_pResMng->GetImageRef(ResImgName::Explosion256);
-				auto& sz = m_pResMng->GetImgLength(ResImgName::Explosion256);
-				effect->RegisterEffectSprite(img, sz);
-				m_lstEffects.push_back(effect);
-
 				delete (*iter);
 				iter = m_vecObjects.erase(iter);
 			}
@@ -221,9 +197,6 @@ void CMainScene::Update(float fTimeElapsed)
 	m_Camera.SetPosition(m_ptCamera);
 
 	for (auto& p : m_vecObjects)
-		p->Update(fTimeElapsed);
-
-	for (auto& p : m_lstEffects)
 		p->Update(fTimeElapsed);
 
 	PhysicsUpdate(fTimeElapsed);
@@ -295,32 +268,32 @@ void CMainScene::PhysicsUpdate(float fTimeElapsed)
 	}
 }
 
-void CMainScene::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
-{
-	auto cameramtx = m_Camera.RegenerateViewMatrix();
-	pd2dRenderTarget->SetTransform(cameramtx);
-
-	auto& szImg = m_bmpBackGround->GetSize();
-	auto& rcBK = SizeToRect(SizeF(szImg.width * 4, szImg.height * 4));
-
-	pd2dRenderTarget->DrawBitmap(m_bmpBackGround.Get(), rcBK);
-
-	for (auto& p : m_vecObjects)
-		p->Draw(pd2dRenderTarget);
-
-	for (auto& p : m_lstEffects)
-		p->Draw(pd2dRenderTarget);
-
-	pd2dRenderTarget->DrawBitmap(
-		m_bmpCrossHair.Get()
-		, SizeToRect(m_bmpCrossHair->GetSize()) + 
-		m_ptMouseCursor * m_Camera.GetScaleFactor() +
-		m_ptCamera);
-
-	auto pt = m_ptMouseCursor * m_Camera.GetScaleFactor() +
-		m_ptCamera;
-	printf("\r %f, %f", pt.x, pt.y);
-}
+//void CMainScene::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
+//{
+//	auto cameramtx = m_Camera.RegenerateViewMatrix();
+//	pd2dRenderTarget->SetTransform(cameramtx);
+//
+//	auto& szImg = m_bmpBackGround->GetSize();
+//	auto& rcBK = SizeToRect(SizeF(szImg.width * 4, szImg.height * 4));
+//
+//	pd2dRenderTarget->DrawBitmap(m_bmpBackGround.Get(), rcBK);
+//
+//	for (auto& p : m_vecObjects)
+//		p->Draw(pd2dRenderTarget);
+//
+//	for (auto& p : m_lstEffects)
+//		p->Draw(pd2dRenderTarget);
+//
+//	pd2dRenderTarget->DrawBitmap(
+//		m_bmpCrossHair.Get()
+//		, SizeToRect(m_bmpCrossHair->GetSize()) + 
+//		m_ptMouseCursor * m_Camera.GetScaleFactor() +
+//		m_ptCamera);
+//
+//	auto pt = m_ptMouseCursor * m_Camera.GetScaleFactor() +
+//		m_ptCamera;
+//	printf("\r %f, %f", pt.x, pt.y);
+//}
 
 void CMainScene::ProcessInput(float fTimeElapsed)
 {
@@ -352,62 +325,55 @@ void CMainScene::ProcessInput(float fTimeElapsed)
 			//	m_lstEffects.push_back(effect);
 		}
 	}
-	static RECT rcWindow;
-	static POINT ptCursorPos;
-	::GetWindowRect(m_hWnd, &rcWindow);
-	::GetCursorPos(&ptCursorPos);
-	auto rcClient = m_pGameWorld->GetClientSize();
-	m_ptMouseCursor = Point2F(
-		ptCursorPos.x - rcWindow.left - 5 - rcClient.right / 2
-		, ptCursorPos.y - rcWindow.top - 30 - rcClient.bottom / 2);
 }
 
 void CMainScene::ProcessMsgs()
 {
 	int msgtype = 0;
 
-	ActionInfo* Actionlist = new ActionInfo();
-	ObjInfo* Objlist = new ObjInfo();
+	//ActionInfo* Actionlist = new ActionInfo();
+	//ObjInfo* Objlist = new ObjInfo();
 
-	NGPMSG msg;
-	::ZeroMemory(&msg, sizeof(msg));
-	if (!m_pRoomInfo->MsgQueue.empty())
-	{
-		msgtype = DispatchMSG(m_pRoomInfo->MsgQueue.front(), *Actionlist, *Objlist);
-		m_pRoomInfo->MsgQueue.pop_front();
-	}
-	else return;
+	//NGPMSG msg;
+	//::ZeroMemory(&msg, sizeof(msg));
+	//if (!m_pRoomInfo->MsgQueue.empty())
+	//{
+	//	msgtype = DispatchMSG(m_pRoomInfo->MsgQueue.front(), *Actionlist, *Objlist);
+	//	m_pRoomInfo->MsgQueue.pop_front();
+	//}
+	//else return;
+	//
+	//switch (msgtype)
+	//{
+	//case MSGTYPE::MSGACTION::MOVE:
+	//	cout << "c ID: " << msg.header.OBJECTNO << " move!" << endl;
+	//	break;
+	//case MSGTYPE::MSGACTION::SHOOT:
+	//	break;
+	//case MSGTYPE::MSGACTION::BUILDTURRET:
+	//	break;
+	//case MSGTYPE::MSGACTION::RELOAD:
+	//	break;
+	//case MSGTYPE::MSGSTATE::AIAGENTINFO:
+	//	break;
+	//case MSGTYPE::MSGSTATE::AICREATTIONREQUEST:
+	//	break;
+	//case MSGTYPE::MSGSTATE::CLIENTGAMEOVER:
+	//	break;
+	//case MSGTYPE::MSGSTATE::CLIENTREADY:
+	//	break;
+	//case MSGTYPE::MSGSTATE::ROOMCREATION:
+	//	break;
+	//case MSGTYPE::MSGUPDATE::ADJUSTPOS:
+	//	break;
+	//case MSGTYPE::MSGUPDATE::CREATEOBJECT:
+	//	break;
+	//case MSGTYPE::MSGUPDATE::DELETEOBJECT:
+	//	break;
+	//case MSGTYPE::MSGUPDATE::UPDATEOBJECTSTATE:
+	//	break;
+	//}
 
-	switch (msgtype)
-	{
-	case MSGTYPE::MSGACTION::MOVE:
-		cout << "c ID: " << msg.header.OBJECTNO << " move!" << endl;
-		break;
-	case MSGTYPE::MSGACTION::SHOOT:
-		break;
-	case MSGTYPE::MSGACTION::BUILDTURRET:
-		break;
-	case MSGTYPE::MSGACTION::RELOAD:
-		break;
-	case MSGTYPE::MSGSTATE::AIAGENTINFO:
-		break;
-	case MSGTYPE::MSGSTATE::AICREATTIONREQUEST:
-		break;
-	case MSGTYPE::MSGSTATE::CLIENTGAMEOVER:
-		break;
-	case MSGTYPE::MSGSTATE::CLIENTREADY:
-		break;
-	case MSGTYPE::MSGSTATE::ROOMCREATION:
-		break;
-	case MSGTYPE::MSGUPDATE::ADJUSTPOS:
-		break;
-	case MSGTYPE::MSGUPDATE::CREATEOBJECT:
-		break;
-	case MSGTYPE::MSGUPDATE::DELETEOBJECT:
-		break;
-	case MSGTYPE::MSGUPDATE::UPDATEOBJECTSTATE:
-		break;
-	}
 }
 
 void CMainScene::SendMsgs()
