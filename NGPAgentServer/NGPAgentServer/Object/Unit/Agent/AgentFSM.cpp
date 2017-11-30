@@ -23,6 +23,7 @@ void AgentGlobalState::Execute(CAgent * agent, float fTimeElapsed)
 	// 현재 방향을 바꿀 수 있다면 방향을 바꾸는 상태로 전환한다.
 	// 지금은 자체적으로 변경
 	if (agent->IsDirectionChangable())
+
 		agent->GetFSM()->ChangeState(ChangeDirection::Instance());
 }
 

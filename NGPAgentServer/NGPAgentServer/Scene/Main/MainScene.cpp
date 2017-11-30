@@ -33,20 +33,6 @@ bool CMainScene::OnCreate(std::wstring && tag, CGameWorld* pGameWorld)
 				m_vecObjects.push_back(brick);
 			}
 		}
-
-	for (auto& p : m_pRoomInfo->clientlist)
-	{
-		CPlayer* player = new CPlayer(Point2F(-100, 10));
-		p->ID = player->GetID();
-		m_vecObjects.push_back(player);
-		UCHAR type = MSGTYPE::MSGSTATE::ROOMCREATION;
-		UCHAR roomNo = m_pRoomInfo->RoomID;
-		UINT objNo = p->ID;
-
-		NGPMSG* msg = CreateMSG(type, roomNo, objNo, 0, 0, NULL, NULL);
-		send(p->sock, (char*)msg, sizeof(NGPMSG), 0);
-	}
-
 	return true;
 }
 
@@ -177,6 +163,8 @@ void CMainScene::PhysicsUpdate(float fTimeElapsed)
 	}
 }
 
+
+// 여기서 메세지 받은 것을 DisPatch 해서 Agent 에 뿌려주는 부분
 void CMainScene::ProcessMsgs()
 {
 	int msgtype = 0;
@@ -228,9 +216,5 @@ void CMainScene::ProcessMsgs()
 
 void CMainScene::SendMsgs()
 {
-	//CreateMSG(MSGTYPE::MSGUPDATE::ADJUSTPOS, )
-	for (auto client : m_pRoomInfo->clientlist)
-	{
-		// send world update to clients
-	}
+
 }

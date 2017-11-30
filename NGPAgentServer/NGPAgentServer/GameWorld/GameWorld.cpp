@@ -48,7 +48,11 @@ void CGameWorld::Run()
 			DispatchMessage(&msg);
 		}
 		if (!m_pTimer->Update()) continue;
+
+		// 1초에 30번
 		Update(m_pTimer->GetTimeElapsed());
+
+		// 내가 작업한 결과를 서버에게 Send한다.
 		SendMsgs();
 	}
 }
@@ -64,21 +68,21 @@ void CGameWorld::SendMsgs()
 
 void CGameWorld::CheckClients()
 {
-	if (m_pRoomInfo) {
-		m_pRoomInfo->clientlist.remove_if([&](ConnectionInfo* client)->bool {
-			DWORD exitcode = 0;
-			GetExitCodeThread(client->RecvThreadHandle, &exitcode);
-			if (exitcode != STILL_ACTIVE) {
-				std::cout << "Client ID : " << client->ID << " Terminated" << std::endl;
-				return true;
-			}
-			return false;
-		});
-
-		if (m_pRoomInfo->clientlist.empty())
-		{
-			std::cout << "Terminate Room " << m_pRoomInfo->RoomID << std::endl;
-			ExitThread(NULL);
-		}
-	}
+	//if (m_pRoomInfo) {
+	//	m_pRoomInfo->clientlist.remove_if([&](ConnectionInfo* client)->bool {
+	//		DWORD exitcode = 0;
+	//		GetExitCodeThread(client->RecvThreadHandle, &exitcode);
+	//		if (exitcode != STILL_ACTIVE) {
+	//			std::cout << "Client ID : " << client->ID << " Terminated" << std::endl;
+	//			return true;
+	//		}
+	//		return false;
+	//	});
+	//
+	//	if (m_pRoomInfo->clientlist.empty())
+	//	{
+	//		std::cout << "Terminate Room " << m_pRoomInfo->RoomID << std::endl;
+	//		ExitThread(NULL);
+	//	}
+	//}
 }

@@ -22,120 +22,59 @@ int recvn(SOCKET s, char *buf, int len, int flags)
 }
 
 
-DWORD WINAPI RunGameWorld(LPVOID arg)
+// Update World
+DWORD WINAPI UpdateWorld(LPVOID arg)
 {
 	int msgtype = 0;
-	std::list<NGPMSG*> *MsgQueue = (std::list<NGPMSG*>*)arg;
+	
 
 	ActionInfo* Actionlist = new ActionInfo();
 	ObjInfo* Objlist = new ObjInfo();
 
 	while (1)
 	{
-		NGPMSG msg;
-		if (!MsgQueue->empty())
-		{
-			msgtype = DispatchMSG(MsgQueue->front(), *Actionlist, *Objlist);
-			MsgQueue->pop_front();
-		}
-		else continue;
 
-		switch (msgtype)
-		{
-		case MSGTYPE::MSGACTION::MOVE:
-			break;
-
-		case MSGTYPE::MSGACTION::SHOOT:
-
-			break;
-
-		case MSGTYPE::MSGACTION::BUILDTURRET:
-
-			break;
-
-		case MSGTYPE::MSGACTION::RELOAD:
-
-			break;
-
-
-		case MSGTYPE::MSGSTATE::AIAGENTINFO:
-			break;
-
-		case MSGTYPE::MSGSTATE::AICREATTIONREQUEST:
-			break;
-
-		case MSGTYPE::MSGSTATE::CLIENTGAMEOVER:
-			break;
-
-		case MSGTYPE::MSGSTATE::CLIENTREADY:
-			break;
-
-		case MSGTYPE::MSGSTATE::ROOMCREATION:
-			break;
-
-
-		case MSGTYPE::MSGUPDATE::ADJUSTPOS:
-			break;
-
-		case MSGTYPE::MSGUPDATE::CREATEOBJECT:
-			break;
-
-		case MSGTYPE::MSGUPDATE::DELETEOBJECT:
-			break;
-
-		case MSGTYPE::MSGUPDATE::UPDATEOBJECTSTATE:
-			break;
-
-		}
 	}
 
 	return 0;
 }
 
-DWORD WINAPI RecvMessage(LPVOID arg)
+DWORD WINAPI MessageDispatcher(LPVOID arg)
 {
-	ConnectionInfo* Main_Server = (ConnectionInfo*)arg;
+	AgentServer* Server = (AgentServer*)arg;
 	int retval;
-	char buf[BUFSIZE + 1];
 	int len;
 
-	printf("\n[TCP 서버] 클라이언트 접속: IP 주소=%s, 포트 번호=%d\n",
-		inet_ntoa(Main_Server->addr.sin_addr), ntohs(Main_Server->addr.sin_port));
 
 	while (1) {
-		// 데이터 받기(고정 길이)
-		retval = recvn(Main_Server->sock, (char *)&len, sizeof(int), 0);
-		if (retval == SOCKET_ERROR) {
-			break;
-		}
-		else if (retval == 0)
-			break;
-
-		// 데이터 받기(가변 길이)
-		retval = recvn(Main_Server->sock, buf, len, 0);
-		if (retval == SOCKET_ERROR) {
-			break;
-		}
-		else if (retval == 0)
-			break;
-
-		// 받은 데이터 출력
-		buf[retval] = '\0';
-		std::cout << "ID : " << Main_Server->ID << " " << buf << std::endl;
-
-		retval = send(Main_Server->sock, "test", sizeof("test"), NULL);
 		
+
+
+		if (!Server->m_MsgQueue.empty())
+		{
+
+			NGPMSG msg =  Server->m_MsgQueue.front();
+			Server->m_MsgQueue.front();
+
+
+
+
+
+
+		}
+		
+
+
 		if (retval == SOCKET_ERROR)
 		{
-			closesocket(Main_Server->sock);
 			return 0;
 		}
 	}
 
-	closesocket(Main_Server->sock);
 
-	printf("[TCP 서버] 클라이언트 종료: IP 주소=%s, 포트 번호=%d\n",
-		inet_ntoa(Main_Server->addr.sin_addr), ntohs(Main_Server->addr.sin_port));
+
+
+
 	return 0;
 }
 
@@ -154,6 +93,17 @@ AgentServer::~AgentServer()
 	m_MsgQueue.clear();
 }
 
+// 룸 정보를 받아와서 지속적인 갱신을 한다.
+DWORD WINAPI RunGameWorld(LPVOID arg)
+{
+	RoomInfo* room = (RoomInfo*)arg;
+	int retval;
+
+	room->GameWorld.Run();
+
+	return 0;
+}
+
 void AgentServer::Run()
 {
 	AcceptMainServer();
@@ -161,26 +111,27 @@ void AgentServer::Run()
 	int retval;
 	char buf[BUFSIZE + 1];
 	int len;
+	////////////////////////////////////////////////////////////////////////////////////////
+	
+	HANDLE Dispatcher = CreateThread(NULL, 0, MessageDispatcher, this , 0, NULL);
+
 
 
 	while (1) {
+		NGPMSG* msg = new NGPMSG();
+
 		// 데이터 받기(고정 길이)
-		retval = recvn(m_MainServer.sock, (char *)&len, sizeof(int), 0);
+		// 메세지의 헤더만큼 읽는다.
+		retval = recvn(m_MainServer.sock, (char *)&msg, sizeof(NGPMSG), 0);
 		if (retval == SOCKET_ERROR) {
 			break;
 		}
 		else if (retval == 0)
 			break;
 
-		// 데이터 받기(가변 길이)
-		retval = recvn(m_MainServer.sock, buf, len, 0);
-		if (retval == SOCKET_ERROR) {
-			break;
-		}
-		else if (retval == 0)
-			break;
+		
 
-		//retval = send(Main_Server->sock, "test", sizeof("test"), NULL);
+		m_MsgQueue.push_back(msg);
 
 		if (retval == SOCKET_ERROR)
 		{
@@ -188,6 +139,8 @@ void AgentServer::Run()
 			return;
 		}
 	}
+
+	///////////////////////////////////////////////////////////////////////////////////////
 
 }
 
@@ -198,7 +151,6 @@ void AgentServer::AcceptMainServer()
 	// 오류 시 결과 값을 저장한다.
 	int retval;
 	
-
 	addrlen = sizeof(m_MainServer.addr);
 	m_MainServer.sock = accept(m_ListenSock, (SOCKADDR *)&m_MainServer.addr, &addrlen);
 	if (m_MainServer.sock == INVALID_SOCKET)
@@ -217,8 +169,8 @@ void AgentServer::CreateAgentsToRoom()
 
 	newroom->GameWorld.RegisterRoomInfo(newroom);
 	newroom->GameWorld.Initailize();
-	newroom->hGameWorld = CreateThread(NULL, 0, RunGameWorld, (LPVOID)newroom, 0, NULL);
-
+	
+	//HANDLE hThread = CreateThread(NULL, 0, RoomProcess, (LPVOID)newroom, 0, NULL);
 	if (newroom->hGameWorld == NULL)
 	{
 		std::cout << "Thread Creation failed" << std::endl;
@@ -236,6 +188,6 @@ void AgentServer::DeleteAgentsFromRoom()
 {
 
 
-
+	std::cout << "Delete Room "  << std::endl;
 
 }

@@ -25,16 +25,16 @@ struct RoomInfo {
 		HANDLE						hGameWorld;
 		std::list<NGPMSG*>			MsgQueue;
 		ConnectionInfo				*serverinfo;
-		std::list<ConnectionInfo*>	clientlist;
+		//std::list<ConnectionInfo*>	clientlist;
 		//std::list<ConnectionInfo*>	agentlist;
 		CGameWorld					GameWorld;
 
 		RoomInfo() : hGameWorld(NULL) {}
 		~RoomInfo() {
 			for (auto& p : MsgQueue) delete p;
-			for (auto& p : clientlist) delete p;
+			//for (auto& p : clientlist) delete p;
 			MsgQueue.clear();
-			clientlist.clear();
+			//clientlist.clear();
 			if (hGameWorld) {
 				TerminateThread(hGameWorld, 0);
 			}
@@ -44,14 +44,15 @@ struct RoomInfo {
 
 class AgentServer : public Server
 {
-private:
+public:
 	ConnectedServerInfo			m_MainServer;
 	std::list<RoomInfo*>		m_RoomList;
-
-	//
-	std::list<NGPMSG*>				m_MsgQueue;
-
+	std::list<NGPMSG*>			m_MsgQueue;
 	int							m_iRoomCounter;
+
+	CRITICAL_SECTION			m_AgentServer_CS;
+
+
 
 public:
 	AgentServer();
@@ -68,9 +69,16 @@ public:
 	// 게임이 종료된 룸이 있으면 호출되는 함수. 
 	// 게임 종료를 알리는 메시지를 받아 게임이 종료된 룸에 사용되던 시스템 자원을 회수하고 룸을 삭제한다.
 	void DeleteAgentsFromRoom();
+
+	//std::list<NGPMSG*>&	GetMsgQueue() { return m_MsgQueue; }
 };
 
 
 static int recvn(SOCKET s, char *buf, int len, int flags);
+
+// 단일 룸의 게임 월드 최신화
+static DWORD WINAPI UpdateWorld(LPVOID arg);
+
 static DWORD WINAPI RunGameWorld(LPVOID arg);
-static DWORD WINAPI RecvMessage(LPVOID arg);
+
+static DWORD WINAPI MessageDispatcher(LPVOID arg);
