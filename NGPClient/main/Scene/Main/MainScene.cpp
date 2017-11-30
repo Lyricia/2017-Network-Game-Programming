@@ -374,6 +374,7 @@ void CMainScene::ProcessInput(float fTimeElapsed)
 			action_info.MoveVelocity = Normalize(ptDir) * PLAYER_VELOCITY * fTimeElapsed;
 			NGPMSG* msg = CreateMSG(type, roomNo, objNo, 0, 1, NULL, &action_info);
 			m_pClient->SendMsgs((char*)msg, sizeof(msg));
+			delete msg;
 		}
 
 		if (pKeyBuffer[VK_LBUTTON] & 0xF0)

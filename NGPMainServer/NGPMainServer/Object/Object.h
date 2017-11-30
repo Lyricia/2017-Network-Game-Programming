@@ -10,7 +10,7 @@ public:
 	virtual ~CObject();
 
 	virtual void Update(float fTimeElapsed) {}
-	virtual LPVOID GetObjectInfo() {};
+	virtual LPVOID GetObjectInfo() { return nullptr; }
 	//virtual void Draw(ID2D1HwndRenderTarget * pd2dRenderTarget) = 0;
 
 	void SetPos(D2D_POINT_2F pt) { m_ptPos = pt; }

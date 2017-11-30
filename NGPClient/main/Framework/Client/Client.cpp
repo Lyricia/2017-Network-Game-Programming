@@ -13,6 +13,7 @@ void err_quit(char* msg)
 	LocalFree(lpMsgBuf);
 	exit(1);
 }
+
 void err_display(char* msg)
 {
 	LPVOID lpMsgBuf;
@@ -24,6 +25,7 @@ void err_display(char* msg)
 	printf("[%s] %s", msg, (char *)lpMsgBuf);
 	LocalFree(lpMsgBuf);
 }
+
 int recvn(SOCKET s, char * buf, int len, int flags)
 {
 	int received;
@@ -122,32 +124,32 @@ DWORD RecvMessage(LPVOID arg)
 
 
 	while (1) {
-		// 데이터 받기(고정 길이)
-		retval = recvn(main_server->sock, (char *)&len, sizeof(int), 0);
-		if (retval == SOCKET_ERROR) {
-			break;
-		}
-		else if (retval == 0)
-			break;
+		//// 데이터 받기(고정 길이)
+		//retval = recvn(main_server->sock, (char *)&len, sizeof(int), 0);
+		//if (retval == SOCKET_ERROR) {
+		//	break;
+		//}
+		//else if (retval == 0)
+		//	break;
 
-		// 데이터 받기(가변 길이)
-		retval = recvn(main_server->sock, buf, len, 0);
-		if (retval == SOCKET_ERROR) {
-			break;
-		}
-		else if (retval == 0)
-			break;
+		//// 데이터 받기(가변 길이)
+		//retval = recvn(main_server->sock, buf, len, 0);
+		//if (retval == SOCKET_ERROR) {
+		//	break;
+		//}
+		//else if (retval == 0)
+		//	break;
 
-		// 받은 데이터 출력
-		buf[retval] = '\0';
-		cout << "ID : " << " " << buf << endl;
+		//// 받은 데이터 출력
+		//buf[retval] = '\0';
+		//cout << "ID : " << " " << buf << endl;
 
-		retval = send(main_server->sock, "test", sizeof("test"), NULL);
-		if (retval == SOCKET_ERROR)
-		{
-			closesocket(main_server->sock);
-			return 0;
-		}
+		//retval = send(main_server->sock, "test", sizeof("test"), NULL);
+		//if (retval == SOCKET_ERROR)
+		//{
+		//	closesocket(main_server->sock);
+		//	return 0;
+		//}
 	}
 
 	closesocket(main_server->sock);

@@ -70,6 +70,7 @@ void CGameWorld::CheckClients()
 			GetExitCodeThread(client->RecvThreadHandle, &exitcode);
 			if (exitcode != STILL_ACTIVE) {
 				cout << "Client ID : " << client->ID << " Terminated" << endl;
+				delete client;
 				return true;
 			}
 			return false;

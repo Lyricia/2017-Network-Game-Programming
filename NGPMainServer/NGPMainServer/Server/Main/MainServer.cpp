@@ -53,9 +53,10 @@ DWORD WINAPI RecvMessage(LPVOID arg)
 	
 	while (1) {
 		retval = recvn(client->sock, (char *)msg, sizeof(NGPMSG), 0);
+		//retval = WSAGetLastError();
 		if (retval == SOCKET_ERROR)
 		{
-			// assert
+			break;
 		}
 		client->EnterCriticalSection();
 		client->pMsgQueue->push_back(msg);

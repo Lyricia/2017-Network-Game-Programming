@@ -46,6 +46,7 @@ bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 		UCHAR roomNo = m_pRoomInfo->RoomID;
 		UINT objNo = p->ID;
 
+		p->pUserdata =(LPVOID)player;
 		NGPMSG* msg = CreateMSG(type, roomNo, objNo, 0, 0, NULL, NULL);
 		send(p->sock, (char*)msg, sizeof(NGPMSG), 0);
 	}
@@ -239,7 +240,7 @@ void CMainScene::SendMsgs()
 	for (auto &client : m_pRoomInfo->clientlist)
 	{
 		CPlayer* p = (CPlayer*)client->pUserdata;
-		ObjInfo* tmp = p->GetObjectInfo();
+		ObjInfo* tmp = (ObjInfo*)p->GetObjectInfo();
 		objdata[idx++] = *tmp;
 		delete tmp;
 	}
@@ -249,7 +250,7 @@ void CMainScene::SendMsgs()
 	for (auto &obj : m_vecObjects)
 	{
 		if (obj->GetTag() == CObject::Type::Player) continue;
-		MapInfo* tmp = obj->GetObjectInfo();
+		MapInfo* tmp = (MapInfo*)obj->GetObjectInfo();
 		mapdata[idx++] = *(tmp);
 		delete tmp;
 	}
@@ -266,10 +267,11 @@ void CMainScene::SendMsgs()
 	
 	int nMapmsg = g_nBrick / MAPINFOBUFSIZE + 1;
 	NGPMSG** mapmsg = new NGPMSG*[nMapmsg];
-	int offset = MAPINFOBUFSIZE * sizeof(MapInfo);
+	int offset = MAPINFOBUFSIZE;
 
 	for (int i = 0; i < nMapmsg; ++i)
 	{
+		mapmsg[i] = new NGPMSG();
 		mapmsg[i] = CreateMSG(
 			MSGTYPE::MSGUPDATE::UPDATEMAPSTATE
 			, m_pRoomInfo->RoomID
@@ -298,6 +300,9 @@ void CMainScene::SendMsgs()
 	}
 
 	delete objmsg;
+	for (int i = 0; i < nMapmsg; ++i)
+		delete[] mapmsg[i];
+
 	delete[] mapmsg;
 	delete[] mapdata;
 	delete[] objdata;

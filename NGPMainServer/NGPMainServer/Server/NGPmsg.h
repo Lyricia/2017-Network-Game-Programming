@@ -130,7 +130,7 @@ inline NGPMSG* CreateMSG(UCHAR type, UCHAR roomno, UINT objectno, UCHAR nObjinfo
 	Header.NUM_ACTIONINFO = nActioninfo;
 	Header.NUM_OBJINFO = nObjinfo;
 	
-	msg->header = msgHeader;
+	msg->header = Header;
 	if (nActioninfo != 0)
 		memcpy(msg->actioninfo, actioninfo, MSGSIZE::SIZE_ACTIONINFO*nActioninfo);
 
@@ -151,7 +151,7 @@ inline NGPMSG* CreateMSG(UCHAR type, UCHAR roomno, UINT objectno, UCHAR nMapinfo
 	Header.NUM_OBJINFO = nMapinfo;
 	Header.ROOMNO = roomno;
 
-	msg->header = msgHeader;
+	msg->header = Header;
 	memcpy(msg->Mapdata, mapdata, sizeof(MapInfo)*nMapinfo);
 
 	return msg;

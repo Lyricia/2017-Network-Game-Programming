@@ -8,6 +8,7 @@ struct ConnectionInfo {
 	SOCKADDR_IN			addr;
 	HANDLE				RecvThreadHandle;
 	list<NGPMSG*>*		pMsgQueue;
+	LPVOID				pUserdata;
 	LPCRITICAL_SECTION	pCs;
 
 	ConnectionInfo() 
