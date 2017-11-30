@@ -33,7 +33,6 @@ DWORD WINAPI RunGameWorld(LPVOID arg)
 	for (auto& client : room->clientlist)
 	{
 		client->pMsgQueue = &room->MsgQueue;
-		client->pCs = &room->Cs;
 		client->RecvThreadHandle = CreateThread(NULL, 0, RecvMessage, (LPVOID)client, 0, NULL);
 	}
 	room->GameWorld.Run();
@@ -45,21 +44,39 @@ DWORD WINAPI RecvMessage(LPVOID arg)
 {
 	ConnectionInfo* client = (ConnectionInfo*)arg;
 	int retval;
-	NGPMSG* msg = new NGPMSG();
+	char buf[64 + 1];
+	int len;
 		
 	printf("\n[TCP 서버] 클라이언트 접속: IP 주소=%s, 포트 번호=%d\n",
 		inet_ntoa(client->addr.sin_addr), ntohs(client->addr.sin_port));
 	
 	while (1) {
-		retval = recvn(client->sock, (char *)msg, sizeof(NGPMSG), 0);
+		// 데이터 받기(고정 길이)
+		retval = recvn(client->sock, (char *)&len, sizeof(int), 0);
 		if (retval == SOCKET_ERROR) {
 			break;
 		}
-		
-		client->EnterCriticalSection();
-		client->pMsgQueue->push_back(msg);
-		client->LeaveCriticalSection();
-		cout << "ID : " << client->ID << "msg id:" << msg->header.OBJECTNO << endl;
+		else if (retval == 0)
+			break;
+	
+		// 데이터 받기(가변 길이)
+		retval = recvn(client->sock, buf, len, 0);
+		if (retval == SOCKET_ERROR) {
+			break;
+		}
+		else if (retval == 0)
+			break;	
+	
+		// 받은 데이터 출력
+		buf[retval] = '\0';
+		cout << "ID : " << client->ID << " " << buf << endl;
+
+		retval = send(client->sock, "test", sizeof("test"), NULL);
+		if (retval == SOCKET_ERROR)
+		{
+			closesocket(client->sock);
+			return 0;
+		}
 	}
 	
 	closesocket(client->sock);

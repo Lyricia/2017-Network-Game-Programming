@@ -8,6 +8,7 @@
 
 #include "MainScene.h"
 
+UINT g_nBrick = 0;
 
 CMainScene::CMainScene()
 {
@@ -33,6 +34,8 @@ bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 				m_vecObjects.push_back(brick);
 			}
 		}
+
+	g_nBrick = m_vecObjects.size();
 
 	for(auto& p: m_pRoomInfo->clientlist)
 	{
@@ -75,6 +78,7 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 			{
 				delete (*iter);
 				iter = m_vecObjects.erase(iter);
+				g_nBrick--;
 			}
 			else
 				++iter;
@@ -223,13 +227,78 @@ void CMainScene::ProcessMsgs()
 	//case MSGTYPE::MSGUPDATE::UPDATEOBJECTSTATE:
 	//	break;
 	//}
+
 }
 
 void CMainScene::SendMsgs()
 {
-	//CreateMSG(MSGTYPE::MSGUPDATE::ADJUSTPOS, )
-	for (auto client : m_pRoomInfo->clientlist)
+	int nPlayer = m_pRoomInfo->clientlist.size();
+	ObjInfo* objdata = new ObjInfo[nPlayer];
+	int idx = 0, retval;
+
+	for (auto &client : m_pRoomInfo->clientlist)
 	{
-		// send world update to clients
+		CPlayer* p = (CPlayer*)client->pUserdata;
+		ObjInfo* tmp = p->GetObjectInfo();
+		objdata[idx++] = *tmp;
+		delete tmp;
 	}
+
+	MapInfo* mapdata = new MapInfo[g_nBrick];
+	idx = 0;
+	for (auto &obj : m_vecObjects)
+	{
+		if (obj->GetTag() == CObject::Type::Player) continue;
+		MapInfo* tmp = obj->GetObjectInfo();
+		mapdata[idx++] = *(tmp);
+		delete tmp;
+	}
+
+	NGPMSG* objmsg = CreateMSG(
+		MSGTYPE::MSGUPDATE::UPDATEOBJECTSTATE
+		, m_pRoomInfo->RoomID
+		, 0
+		, nPlayer
+		, 0
+		, objdata
+		, nullptr
+	);
+	
+	int nMapmsg = g_nBrick / MAPINFOBUFSIZE + 1;
+	NGPMSG** mapmsg = new NGPMSG*[nMapmsg];
+	int offset = MAPINFOBUFSIZE * sizeof(MapInfo);
+
+	for (int i = 0; i < nMapmsg; ++i)
+	{
+		mapmsg[i] = CreateMSG(
+			MSGTYPE::MSGUPDATE::UPDATEMAPSTATE
+			, m_pRoomInfo->RoomID
+			, 0
+			, (i == nMapmsg - 1) ? g_nBrick % MAPINFOBUFSIZE : MAPINFOBUFSIZE
+			, mapdata + offset * i
+		);
+	}
+
+	for (auto & client : m_pRoomInfo->clientlist)
+	{
+		objmsg->header.OBJECTNO = client->ID;
+
+		retval = send(client->sock, (char*)objmsg, sizeof(NGPMSG), NULL);
+		if(retval == SOCKET_ERROR){
+			//assert
+		}
+
+		for (int i = 0; i < nMapmsg; ++i) {
+			mapmsg[i]->header.OBJECTNO = client->ID;
+			retval = send(client->sock, (char*)mapmsg[i], sizeof(NGPMSG), NULL);
+			if (retval == SOCKET_ERROR) {
+				//assert
+			}
+		}
+	}
+
+	delete objmsg;
+	delete[] mapmsg;
+	delete[] mapdata;
+	delete[] objdata;
 }

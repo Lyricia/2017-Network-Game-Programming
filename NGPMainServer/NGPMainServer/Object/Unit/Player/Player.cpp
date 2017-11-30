@@ -177,6 +177,21 @@ void CPlayer::RayCastingToShoot(std::vector<CObject*>& pvecObjects)
 	m_ptMuzzleEndPos = m_ptPos + (m_ptDirection * SHOOT_RANGE);
 }
 
+LPVOID CPlayer::GetObjectInfo()
+{
+	ObjInfo* objinfo = new ObjInfo();
+
+	objinfo->Ammo = { m_iGrenade, m_iAmmo, m_iTurretKit };
+	objinfo->Direction = m_ptDirection;
+	objinfo->Position = m_ptPos;
+	objinfo->HP = m_fHP;
+	objinfo->ObjectID = m_Id;
+	objinfo->ObjectType = OBJECTTYPE::Player;
+	objinfo->Collision = m_bCollision;
+
+	return objinfo;
+}
+
 CObject * CPlayer::GrenadeOut()
 {
 	if (m_bGrenade) return nullptr;

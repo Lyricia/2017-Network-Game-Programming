@@ -38,6 +38,9 @@ public:
 	CEffect* Shoot();
 	void RayCastingToShoot(std::vector<CObject*>& pvecObjects);
 
+	virtual LPVOID GetObjectInfo();
+
+
 	CObject* GrenadeOut();
 
 private:
@@ -59,7 +62,7 @@ private:
 	float							m_fGrenadeTimer;
 	bool							m_bGrenade;
 
-	UINT							m_iAmmo;
-	UINT							m_iGrenade;
-	UINT							m_iTurretKit;
+	UCHAR							m_iAmmo;
+	UCHAR							m_iGrenade;
+	UCHAR							m_iTurretKit;
 };
