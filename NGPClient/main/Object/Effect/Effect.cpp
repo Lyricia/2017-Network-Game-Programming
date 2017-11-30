@@ -10,6 +10,7 @@ CEffect::CEffect(D2D_POINT_2F pt, D2D_RECT_F rc)
 	, m_bFinished(false)
 {
 	m_Tag = CObject::Type::Effect;
+	RejectID();
 }
 CEffect::~CEffect()
 {

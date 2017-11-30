@@ -16,6 +16,8 @@ public:
 	void SetSize(D2D_RECT_F rc) { m_rcSize = rc; }
 	void SetID(UINT id) { m_Id = id; }
 
+	void RejectID();
+
 	Type					GetTag()	const { return m_Tag; }
 	UINT					GetID()		const { return m_Id; }
 	const D2D_POINT_2F&		GetPos()	const { return m_ptPos; }

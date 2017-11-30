@@ -13,7 +13,6 @@ CUnit::CUnit(D2D_POINT_2F pt, D2D_RECT_F rc)
 	, m_fHP(0)
 	, m_fBlockStunTimer(0)
 {
-	m_Id = g_ObjectID++;
 }
 CUnit::~CUnit()
 {

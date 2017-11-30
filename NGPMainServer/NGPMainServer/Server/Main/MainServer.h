@@ -3,11 +3,12 @@
 #include "GameWorld\GameWorld.h"
 
 struct ConnectionInfo {
-	int				ID;
-	SOCKET			sock;
-	SOCKADDR_IN		addr;
-	HANDLE			RecvThreadHandle;
-	list<NGPMSG*>*	pMsgQueue;
+	int					ID;
+	SOCKET				sock;
+	SOCKADDR_IN			addr;
+	HANDLE				RecvThreadHandle;
+	list<NGPMSG*>*		pMsgQueue;
+	LPCRITICAL_SECTION	pCs;
 
 	ConnectionInfo() 
 		: RecvThreadHandle(NULL)
@@ -16,6 +17,8 @@ struct ConnectionInfo {
 		if (RecvThreadHandle)
 			TerminateThread(RecvThreadHandle, 0);
 	}
+	void EnterCriticalSection() { ::EnterCriticalSection(pCs); }
+	void LeaveCriticalSection() { ::LeaveCriticalSection(pCs); }
 };
 
 struct RoomInfo {
@@ -26,9 +29,13 @@ struct RoomInfo {
 	CGameWorld				GameWorld;
 	list<NGPMSG*>			MsgQueue;
 	HANDLE					hGameWorld;
+	CRITICAL_SECTION		Cs;
 	
-	RoomInfo() : hGameWorld(NULL) {}
+	RoomInfo() 
+		: hGameWorld(NULL) 
+	{ ::InitializeCriticalSection(&Cs); }
 	~RoomInfo() {
+		::DeleteCriticalSection(&Cs);
 		for (auto& p : MsgQueue) delete p;
 		for (auto& p : clientlist) delete p;
 		MsgQueue.clear();
@@ -36,7 +43,10 @@ struct RoomInfo {
 		if (hGameWorld) {
 			TerminateThread(hGameWorld, 0);
 		}
+		
 	}
+	void EnterCriticalSection() { ::EnterCriticalSection(&Cs); }
+	void LeaveCriticalSection() { ::LeaveCriticalSection(&Cs); }
 };
 
 class MainServer : public Server

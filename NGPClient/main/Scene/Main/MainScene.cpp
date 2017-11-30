@@ -9,6 +9,7 @@
 #include "Object\Projectile\Grenade\Grenade.h"
 #include "Object\Effect\Effect.h"
 
+#include "Framework\Client\Client.h"
 #include "MainScene.h"
 
 
@@ -23,7 +24,6 @@ CMainScene::~CMainScene()
 	for (auto& p : m_lstEffects)
 		delete p;
 	m_lstEffects.clear();
-	if(m_pPlayer) delete m_pPlayer;
 }
 
 bool CMainScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -112,22 +112,8 @@ bool CMainScene::OnCreate(wstring && tag, CFramework * pFramework)
 	m_pClient = pFramework->GetClient();
 	m_pResMng = pFramework->GetResourceManager();
 
-	auto rcClient = pFramework->GetClientSize();
-	m_Camera.SetClientSize(Point2F(rcClient.right, rcClient.bottom));
-	auto rendertarget = pFramework->GetRenderTarget();
-
 	m_bmpBackGround = m_pResMng->GetImageRef(ResImgName::map_image);
 	m_bmpCrossHair = m_pResMng->GetImageRef(ResImgName::aim);
-
-	m_pPlayer = new CPlayer(Point2F());
-	m_pPlayer->RegisterResourceManager(m_pResMng);
-
-	m_Camera.SetPosition(m_pPlayer->GetPos());
-	m_Camera.SetAnchor(Point2F(0.0f, 0.0f));
-
-	CPlayer* other_player = new CPlayer(Point2F(-100, 10));
-	other_player->RegisterResourceManager(m_pResMng);
-	m_vecObjects.push_back(other_player);
 
 	int map_size_half = g_iMapSize / 2;
 	for(int i = 0; i < g_iMapSize; ++i)
@@ -141,6 +127,22 @@ bool CMainScene::OnCreate(wstring && tag, CFramework * pFramework)
 			}
 			
 		}
+
+	for (int i=0; i< 3; ++i)
+	{
+		CPlayer* player = new CPlayer(Point2F(-100, 10));
+		player->RegisterResourceManager(m_pResMng);
+		m_vecObjects.push_back(player);
+	}
+
+	for (auto& p : m_vecObjects)
+		if (p->GetID() == m_pClient->GetClientID())
+			m_pPlayer = static_cast<CPlayer*>(p);
+
+	auto rcClient = pFramework->GetClientSize();
+	m_Camera.SetClientSize(Point2F(rcClient.right, rcClient.bottom));
+	m_Camera.SetPosition(m_pPlayer->GetPos());
+	m_Camera.SetAnchor(Point2F(0.0f, 0.0f));
 
 	return true;
 }
@@ -365,6 +367,13 @@ void CMainScene::ProcessInput(float fTimeElapsed)
 		if (dwDirection && Length(ptDir))
 		{
 			m_pPlayer->Move(Normalize(ptDir) * PLAYER_VELOCITY * fTimeElapsed);
+			UCHAR type = MSGTYPE::MSGACTION::MOVE;
+			UCHAR roomNo = m_pClient->GetRoomID();
+			UCHAR objNo = m_pPlayer->GetID();
+			ActionInfo action_info;
+			action_info.MoveVelocity = Normalize(ptDir) * PLAYER_VELOCITY * fTimeElapsed;
+			NGPMSG* msg = CreateMSG(type, roomNo, objNo, 0, 1, NULL, &action_info);
+			m_pClient->SendMsgs((char*)msg, sizeof(msg));
 		}
 
 		if (pKeyBuffer[VK_LBUTTON] & 0xF0)

@@ -223,7 +223,6 @@ void CMainScene::ProcessMsgs()
 	//case MSGTYPE::MSGUPDATE::UPDATEOBJECTSTATE:
 	//	break;
 	//}
-
 }
 
 void CMainScene::SendMsgs()

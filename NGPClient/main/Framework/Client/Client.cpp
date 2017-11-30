@@ -45,7 +45,6 @@ int recvn(SOCKET s, char * buf, int len, int flags)
 
 CClient::CClient()
 	: m_Local_id(-1)
-	, m_CS(NULL)
 {
 	ZeroMemory(&m_MainServer, sizeof(m_MainServer));
 }
@@ -66,7 +65,7 @@ void CClient::Initialize()
 	if (m_MainServer.sock == INVALID_SOCKET)
 		err_quit("socket()");
 
-	::InitializeCriticalSection(m_CS);
+	::InitializeCriticalSection(&m_CS);
 }
 
 void CClient::Release()
@@ -80,7 +79,7 @@ void CClient::Release()
 		delete p;
 	m_MsgQueue.clear();
 
-	::DeleteCriticalSection(m_CS);
+	::DeleteCriticalSection(&m_CS);
 }
 
 void CClient::ConnectServer()
@@ -96,6 +95,7 @@ void CClient::ConnectServer()
 	retval = recvn(m_MainServer.sock, (char*)&msg, sizeof(NGPMSG), 0);
 	if (retval == SOCKET_ERROR) err_quit("Connect recvn()");
 	m_Local_id = msg.header.OBJECTNO;
+	m_Room_id = msg.header.ROOMNO;
 
 	m_MainServer.pMsgQueue = &m_MsgQueue;
 	m_MainServer.pCS = &m_CS;
@@ -117,8 +117,8 @@ DWORD RecvMessage(LPVOID arg)
 	printf("\n[TCP 클라이언트] Receiver Ready: Server IP Address=%s, Server Port=%d\n",
 		inet_ntoa(main_server->addr.sin_addr), ntohs(main_server->addr.sin_port));
 
-	::EnterCriticalSection((*main_server->pCS));
-	::LeaveCriticalSection((*main_server->pCS));
+	::EnterCriticalSection(main_server->pCS);
+	::LeaveCriticalSection(main_server->pCS);
 
 
 	while (1) {

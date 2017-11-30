@@ -57,4 +57,3 @@ using namespace D2DBitmap;
 
 #include "NGPmsg.h"
 
-UINT	g_ObjectID = 0;
