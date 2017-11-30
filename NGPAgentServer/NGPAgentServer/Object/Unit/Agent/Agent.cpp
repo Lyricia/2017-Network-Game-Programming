@@ -45,9 +45,10 @@ void CAgent::Update(float fTimeElapsed)
 	m_pStateMachine->Update(fTimeElapsed);
 }
 
+#ifdef WITH_RENDER_AGENT
 void CAgent::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
 {
-#ifdef WITH_RENDER_AGENT
+
 	D2D_MATRIX_3X2_F transform;
 	pd2dRenderTarget->GetTransform(&transform);
 	pd2dRenderTarget->SetTransform(m_mtxRotate*transform);
@@ -72,10 +73,8 @@ void CAgent::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
 
 	pd2dRenderTarget->SetTransform(transform);
 
-#endif
-
 }
-
+#endif
 
 void CAgent::RegisterResourceManager(std::shared_ptr<CResourceManager> resMng)
 {

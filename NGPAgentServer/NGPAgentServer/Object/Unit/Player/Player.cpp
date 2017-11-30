@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "GameWorld\ResourceManager\ResourceManager.h"
 #include "Player.h"
 #include "Object\Brick\Brick.h"
 #include "Object\Projectile\Grenade\Grenade.h"
@@ -79,155 +78,6 @@ void CPlayer::Update(float fTimeElapsed)
 	}
 }
 
-void CPlayer::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
-{
-	D2D_MATRIX_3X2_F transform;
-	pd2dRenderTarget->GetTransform(&transform);
-	pd2dRenderTarget->SetTransform(m_mtxRotate*transform);
-
-	auto bmpSize = m_bmpImage->GetSize();
-	float aniWidthFactor = bmpSize.width / (float)m_szImg.width;
-	float aniHeightFactor = bmpSize.height / (float)m_szImg.height;
-	pd2dRenderTarget->DrawBitmap(
-		m_bmpImage.Get()
-		, m_rcSize + m_ptPos
-		, 1.f
-		, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR
-		, RectF(
-			aniWidthFactor * (int)m_ptCurrImg.x
-			, aniHeightFactor * (int)m_ptCurrImg.y
-			, aniWidthFactor * ((int)m_ptCurrImg.x + 1)
-			, aniHeightFactor * ((int)m_ptCurrImg.y + 1)));
-
-	pd2dRenderTarget->DrawBitmap(
-		m_bmpWeaponImage.Get()
-		, m_rcWeaponSize + m_ptPos);
-
-	pd2dRenderTarget->SetTransform(transform);
-
-	if (m_bReload)
-	{
-		pd2dRenderTarget->FillRectangle(
-			RectF(m_rcSize.left
-				, m_rcSize.top - (m_rcSize.bottom - m_rcSize.top) * 0.2f
-				, m_rcSize.left + (m_rcSize.right - m_rcSize.left) * (m_fShootTimer / RELOAD_TIME)
-				, m_rcSize.top - (m_rcSize.bottom - m_rcSize.top) * 0.1f)
-			+ m_ptPos
-			, m_pResMng->brBlue.Get());
-	}
-	else if (m_bShoot)
-	{
-		m_pResMng->brLightYellow->SetOpacity(1 - (m_fShootTimer /SHOOT_TIME));
-		pd2dRenderTarget->DrawLine(
-			m_ptMuzzleStartPos
-			, m_ptMuzzleEndPos
-			, m_pResMng->brLightYellow.Get()
-			, SHOOT_STROKE);
-		m_pResMng->brLightYellow->SetOpacity(1.f);
-	}
-	// 체력바
-	m_pResMng->brRed->SetOpacity(0.8f);
-	pd2dRenderTarget->FillRectangle(
-		RectF(m_rcSize.left
-			, m_rcSize.top - (m_rcSize.bottom - m_rcSize.top) * 0.1f
-			, m_rcSize.left + (m_rcSize.right - m_rcSize.left) * (m_fHP / PLAYER_MAX_HP)
-			, m_rcSize.top)
-		+ m_ptPos
-		, m_pResMng->brRed.Get());
-	m_pResMng->brRed->SetOpacity(1.0f);
-
-	// 체력바 테두리
-	pd2dRenderTarget->DrawRectangle(
-		RectF(m_rcSize.left
-			, m_rcSize.top - (m_rcSize.bottom - m_rcSize.top) * 0.1f
-			, m_rcSize.left + (m_rcSize.right - m_rcSize.left) 
-			, m_rcSize.top)
-		+ m_ptPos
-		, m_pResMng->brWhite.Get());
-}
-
-void CPlayer::DrawUI(ID2D1HwndRenderTarget * pd2dRenderTarget, float fScaleFactor)
-{
-	D2D_POINT_2F pt = Point2F(
-		  -fScaleFactor*(CLIENT_WIDTH / 2) + 30
-		, -fScaleFactor*(CLIENT_HEIGHT / 2) + 30);
-	std::wstring str = L"HP";
-	pd2dRenderTarget->DrawText(
-		str.c_str()
-		, static_cast<UINT>(str.length())
-		, m_pResMng->dwUITextFormat.Get()
-		, RectF(pt.x + 1, pt.y, pt.x + 70, pt.y + 50)
-		+ m_ptPos
-		, m_pResMng->brRed.Get());
-	
-	// 체력바
-	pd2dRenderTarget->FillRectangle(
-		RectF(pt.x + 70 , pt.y + 10
-			, pt.x + 70 + 300 * (m_fHP / PLAYER_MAX_HP) , pt.y + 35)
-		+ m_ptPos
-		, m_pResMng->brRed.Get());
-
-	// 체력바 테두리
-	pd2dRenderTarget->DrawRectangle(
-		RectF(pt.x + 70, pt.y + 10
-			, pt.x + 70 + 300 * (m_fHP / PLAYER_MAX_HP), pt.y + 35)
-		+ m_ptPos
-		, m_pResMng->brWhite.Get());
-
-	pt.y += 50;
-	str = L"Ammo: ";
-	str += std::to_wstring(m_iAmmo);
-	str += L" / Inf";
-	pd2dRenderTarget->DrawText(
-		str.c_str()
-		, static_cast<UINT>(str.length())
-		, m_pResMng->dwUITextFormat.Get()
-		, RectF(pt.x, pt.y, pt.x + 1000, pt.y + 50)
-		+ m_ptPos
-		, m_pResMng->brDarkGray.Get());
-
-	pt.y += 45;
-	str = L"Grenade: ";
-	str += std::to_wstring(m_iGrenade);
-	pd2dRenderTarget->DrawText(
-		str.c_str()
-		, static_cast<UINT>(str.length())
-		, m_pResMng->dwUITextFormat.Get()
-		, RectF(pt.x, pt.y, pt.x + 300, pt.y + 50)
-		+ m_ptPos
-		, m_pResMng->brDarkGray.Get());
-	
-	pt.y += 45;
-	str = L"Kit: ";
-	str += std::to_wstring(m_iTurretKit);
-	pd2dRenderTarget->DrawText(
-		str.c_str()
-		, static_cast<UINT>(str.length())
-		, m_pResMng->dwUITextFormat.Get()
-		, RectF(pt.x, pt.y, pt.x + 300, pt.y + 50)
-		+ m_ptPos
-		, m_pResMng->brDarkGray.Get());
-}
-
-void CPlayer::RegisterResourceManager(shared_ptr<CResourceManager> resMng)
-{
-	m_pResMng = resMng;
-	m_bmpImage = m_pResMng->GetImageRef(ResImgName::character_sheet);
-	m_szImg = m_pResMng->GetImgLength(ResImgName::character_sheet);
-
-	if (IsRectInvalid(m_rcSize))
-	{
-		auto sz = m_bmpImage->GetSize();
-		sz.width /= m_szImg.width;
-		sz.height /= m_szImg.height;
-		m_rcSize = SizeToRect(sz);
-	}
-	
-	m_bmpWeaponImage = m_pResMng->GetImage(ResImgName::gun);
-	if (IsRectInvalid(m_rcWeaponSize))
-		m_rcWeaponSize = SizeToRect(m_bmpWeaponImage->GetSize());
-}
-
 void CPlayer::Collide(float atk)
 {
 	if (m_bCollision) return;
@@ -247,7 +97,7 @@ void CPlayer::Move(const D2D_POINT_2F& ptVelocity)
 
 void CPlayer::Reflection(const D2D_POINT_2F& ptDirReflect)
 {
-	if(ptDirReflect == Point2F())
+	if (ptDirReflect == Point2F())
 		m_ptVelocity = m_ptVelocity * -REFLACTION_FACTOR;
 	else
 		m_ptVelocity = ptDirReflect * Length(m_ptVelocity * REFLACTION_FACTOR);
@@ -265,7 +115,7 @@ CEffect* CPlayer::Shoot()
 
 	if (m_iAmmo == 0) m_bReload = true;
 	else --m_iAmmo;
-	
+
 	m_bShoot = true;
 	m_ptMuzzleDirection = m_ptDirection;
 	m_ptMuzzleStartPos = m_ptPos + m_ptMuzzleDirection * MUZZLE_OFFSET;
@@ -288,12 +138,6 @@ CEffect* CPlayer::Shoot()
 			break;
 		}
 		}
-		auto& rc = SizeToRect(SizeF(m_rcSize.right, m_rcSize.bottom));
-		CEffect* effect = new CEffect(m_ptMuzzleEndPos, rc);
-		auto& img = m_pResMng->GetImageRef(ResImgName::MagicBlast);
-		auto& sz = m_pResMng->GetImgLength(ResImgName::MagicBlast);
-		effect->RegisterEffectSprite(img, sz);
-		return effect;
 	}
 	return nullptr;
 }
@@ -344,10 +188,9 @@ CObject * CPlayer::GrenadeOut()
 	m_bGrenade = true;
 
 	CGrenade* grenade = new CGrenade(m_ptPos);
-	grenade->RegisterResourceManager(m_pResMng);
 	grenade->SetParent(this);
-	grenade->SetVelocity(m_ptDirection 
-		* Length(m_ptTargetPos - m_ptPos) 
+	grenade->SetVelocity(m_ptDirection
+		* Length(m_ptTargetPos - m_ptPos)
 		* PROJECTILE_FRICTIONAL_DRAG);
 	return grenade;
 }

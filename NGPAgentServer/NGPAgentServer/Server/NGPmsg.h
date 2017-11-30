@@ -60,36 +60,35 @@ namespace MSGTYPE {
 	};
 }
 
+
 struct ActionInfo {
 	D2D_POINT_2F		Direction;
 	unsigned int		ObjectID;
 };
 
 struct AMMUNITION {
-	unsigned char	Granade;
-	unsigned char	GunAmmo;
-	unsigned char	TurretKit;
+	unsigned char		Granade;
+	unsigned char		GunAmmo;
+	unsigned char		TurretKit;
+	unsigned char		packer;
 };
 
 struct ObjInfo {
-	unsigned char		ObjectID;
+	AMMUNITION			Ammo;
 	D2D_POINT_2F		Position;
 	D2D_POINT_2F		Direction;
+	unsigned char		ObjectID;
 	unsigned char		HP;
-	AMMUNITION			Ammo;
+	short				packer;
 };
-
 
 struct MSGHEADER {
 	unsigned char		MSGTYPE;
-	unsigned short		DETAILINFOSIZE;
 	unsigned char		ROOMNO;
-	unsigned char		OBJECTNO;
-
 	unsigned char		NUM_OBJINFO;
 	unsigned char		NUM_ACTIONINFO;
 
-	char				packer;
+	unsigned int		OBJECTNO;
 };
 
 struct NGPMSG {
@@ -101,19 +100,22 @@ struct NGPMSG {
 
 // 메세지를 만들어낸다.
 // 타입, 사이즈, 룸 정보, 오브젝트 정보, 세부사항
-inline NGPMSG* CreateMSG(char type, short size, char roomno, char objectno, char nObjinfo, char nActioninfo, void* objinfo, void* actioninfo)
+inline NGPMSG* CreateMSG(UCHAR type, UCHAR roomno, UINT objectno, UCHAR nObjinfo, UCHAR nActioninfo, void* objinfo, void* actioninfo)
 {
 	NGPMSG* msg = new NGPMSG();
 
-	// 메세지 헤더의 타입, 크기, 방 번호, 오브젝트 번호, 오브젝트 정보 갯수, 액션 정보 갯수
-	MSGHEADER msgHeader = { type, size, roomno, objectno, nObjinfo, nActioninfo };
+	MSGHEADER msgHeader = { type, roomno, nObjinfo, nActioninfo , objectno };
 
 	msg->header = msgHeader;
-	memcpy(msg->actioninfo, actioninfo, MSGSIZE::SIZE_ACTIONINFO*nActioninfo);
-	memcpy(msg->objinfo, objinfo, MSGSIZE::SIZE_OBJINFO*nObjinfo);
+	if (nActioninfo != 0)
+		memcpy(msg->actioninfo, actioninfo, MSGSIZE::SIZE_ACTIONINFO*nActioninfo);
+
+	if (nObjinfo != 0)
+		memcpy(msg->objinfo, objinfo, MSGSIZE::SIZE_OBJINFO*nObjinfo);
 
 	return msg;
 }
+
 
 inline int DispatchMSG(NGPMSG* msg, ActionInfo& actionlist, ObjInfo& objlist)
 {

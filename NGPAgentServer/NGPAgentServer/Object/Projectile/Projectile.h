@@ -15,13 +15,12 @@ public:
 	virtual ~CProjectile();
 
 	virtual void Update(float fTimeElapsed) override;
-	virtual void Draw(ID2D1HwndRenderTarget* pd2dRenderTarget) override;
-	virtual void RegisterResourceManager(shared_ptr<CResourceManager> resMng);
+	//virtual void Draw(ID2D1HwndRenderTarget* pd2dRenderTarget) override;
 
 	void SetParent(CObject* pParent) { m_pParent = pParent; }
 
 protected:
-	shared_ptr<CResourceManager>	m_pResMng;
+	std::shared_ptr<CResourceManager>	m_pResMng;
 	D2D1_SIZE_U						m_szImg;
 	D2D1_POINT_2F					m_ptCurrImg;
 

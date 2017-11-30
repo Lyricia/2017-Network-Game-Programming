@@ -30,27 +30,27 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -93,6 +93,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -106,6 +107,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -121,6 +123,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -138,6 +141,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -148,13 +152,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="D2D_Operator.h" />
-    <ClInclude Include="NGPmsg.h" />
+    <ClInclude Include="GameWorld\GameWorld.h" />
+    <ClInclude Include="GameWorld\Timer\Timer.h" />
+    <ClInclude Include="Object\Brick\Brick.h" />
     <ClInclude Include="Object\Object.h" />
+    <ClInclude Include="Object\Projectile\Grenade\Grenade.h" />
+    <ClInclude Include="Object\Projectile\Projectile.h" />
     <ClInclude Include="Object\Unit\Agent\Agent.h" />
     <ClInclude Include="Object\Unit\Agent\AgentFSM.h" />
     <ClInclude Include="Object\Unit\Agent\State.h" />
     <ClInclude Include="Object\Unit\Agent\StateMachine.h" />
+    <ClInclude Include="Object\Unit\Player\Player.h" />
     <ClInclude Include="Object\Unit\Unit.h" />
+    <ClInclude Include="Scene\Main\MainScene.h" />
+    <ClInclude Include="Scene\Scene.h" />
     <ClInclude Include="Server\AgentServer.h" />
     <ClInclude Include="Server\NGPmsg.h" />
     <ClInclude Include="Server\Server.h" />
@@ -163,11 +174,19 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GameWorld\GameWorld.cpp" />
+    <ClCompile Include="GameWorld\Timer\Timer.cpp" />
     <ClCompile Include="NGPAgentServer.cpp" />
+    <ClCompile Include="Object\Brick\Brick.cpp" />
     <ClCompile Include="Object\Object.cpp" />
+    <ClCompile Include="Object\Projectile\Grenade\Grenade.cpp" />
+    <ClCompile Include="Object\Projectile\Projectile.cpp" />
     <ClCompile Include="Object\Unit\Agent\Agent.cpp" />
     <ClCompile Include="Object\Unit\Agent\AgentFSM.cpp" />
+    <ClCompile Include="Object\Unit\Player\Player.cpp" />
     <ClCompile Include="Object\Unit\Unit.cpp" />
+    <ClCompile Include="Scene\Main\MainScene.cpp" />
+    <ClCompile Include="Scene\Scene.cpp" />
     <ClCompile Include="Server\AgentServer.cpp" />
     <ClCompile Include="Server\Server.cpp" />
     <ClCompile Include="stdafx.cpp">

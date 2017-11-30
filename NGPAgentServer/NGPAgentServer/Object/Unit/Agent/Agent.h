@@ -60,8 +60,9 @@ public:
 	virtual ~CAgent();
 
 	virtual void Update(float fTimeElapsed) override;
+#ifdef WITH_RENDER_AGENT
 	virtual void Draw(ID2D1HwndRenderTarget* pd2dRenderTarget) override;
-
+#endif
 	StateMachine<CAgent>*  GetFSM()const { return m_pStateMachine; }
 
 	bool IsDirectionChangable() const { return (m_changedir_timer > m_next_change_dir_timer); };

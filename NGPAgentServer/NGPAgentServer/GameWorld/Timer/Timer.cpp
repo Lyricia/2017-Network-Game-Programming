@@ -84,6 +84,6 @@ void CTimer::UpdateCaption()
 
 	_itow_s(m_nLastFps, m_CaptionTitle + m_TitleLength, TITLE_MAX_LENGTH - m_TitleLength, 10);
 	wcscat_s(m_CaptionTitle + m_TitleLength, TITLE_MAX_LENGTH - m_TitleLength, TEXT(" FPS)"));
-	SetWindowText(m_hWnd, m_CaptionTitle);
+	//SetWindowText(m_hWnd, m_CaptionTitle);
 #endif
 }

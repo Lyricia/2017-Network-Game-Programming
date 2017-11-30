@@ -133,99 +133,101 @@ DWORD WINAPI RecvMessage(LPVOID arg)
 	}
 
 	closesocket(Main_Server->sock);
+
 	printf("[TCP 서버] 클라이언트 종료: IP 주소=%s, 포트 번호=%d\n",
 		inet_ntoa(Main_Server->addr.sin_addr), ntohs(Main_Server->addr.sin_port));
 	return 0;
 }
 
 
-DWORD WINAPI RoomProcess(LPVOID arg)
+
+AgentServer::AgentServer()
 {
-	RoomInfo* room = (RoomInfo*)arg;
+}
 
-	int i = 0;
-	int retval;
-	
-	//////////////////////
+AgentServer::~AgentServer()
+{
+	for (auto& p : m_RoomList) delete p;
+	for (auto& p : m_MsgQueue) delete p;
 
-
-
-
-	//////////////////////
-
-
-
-	return 0;
-
+	m_RoomList.clear();
+	m_MsgQueue.clear();
 }
 
 void AgentServer::Run()
 {
 	AcceptMainServer();
 	
-	
+	int retval;
+	char buf[BUFSIZE + 1];
+	int len;
+
+
+	while (1) {
+		// 데이터 받기(고정 길이)
+		retval = recvn(m_MainServer.sock, (char *)&len, sizeof(int), 0);
+		if (retval == SOCKET_ERROR) {
+			break;
+		}
+		else if (retval == 0)
+			break;
+
+		// 데이터 받기(가변 길이)
+		retval = recvn(m_MainServer.sock, buf, len, 0);
+		if (retval == SOCKET_ERROR) {
+			break;
+		}
+		else if (retval == 0)
+			break;
+
+		//retval = send(Main_Server->sock, "test", sizeof("test"), NULL);
+
+		if (retval == SOCKET_ERROR)
+		{
+			closesocket(m_MainServer.sock);
+			return;
+		}
+	}
 
 }
 
 void AgentServer::AcceptMainServer()
 {
-
-	
-
-
-	// 데이터 통신용 버퍼
-	char buf[BUFSIZE];
 	// 주소의 길이를 받아낸다.
 	int addrlen;
-	// 받아낸 데이터 길이를 저장한다.
-	int datalen;
 	// 오류 시 결과 값을 저장한다.
 	int retval;
 	
-	//~~~~~~~~~~~~~~~~~<서버 연결을 위한 정보를 입력한다>~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-	//std::string SERVERIP;
-	int SERVERPORT;
-	
-
-	//std::cout << "Insert MainServer IP :: ";
-	//std::cin >> SERVERIP;
-
-	std::cout << "Insert MainServer PORT :: ";
-	std::cin >> SERVERPORT;
-
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-	// socket()
-	m_MainServer.sock = socket(AF_INET, SOCK_STREAM, 0);
-	if (m_MainServer.sock == INVALID_SOCKET) err_quit("socket()");
-
-	std::cout << "Create Socket" << std::endl;
-
-	// connect()
-	ZeroMemory(&m_MainServer.addr , sizeof(m_MainServer.addr));
-	m_MainServer.addr.sin_family = AF_INET;
-	m_MainServer.addr.sin_addr.s_addr = inet_addr(SERVERIP);
-	m_MainServer.addr.sin_port = htons(SERVERPORT);
-
-	retval = connect(m_MainServer.sock, (SOCKADDR *)&m_MainServer.addr, sizeof(m_MainServer.addr));
-	std::cout << "Connect" << std::endl;
-
-	if (retval == SOCKET_ERROR)
+	addrlen = sizeof(m_MainServer.addr);
+	m_MainServer.sock = accept(m_ListenSock, (SOCKADDR *)&m_MainServer.addr, &addrlen);
+	if (m_MainServer.sock == INVALID_SOCKET)
 	{
-		err_quit("connect()");
+		std::cout << "client socket error" << std::endl;
 	}
-	
-	std::cout << "[TCP 서버] 메인서버 접속: IP 주소 :: " << inet_ntoa(m_MainServer.addr.sin_addr) << "포트 번호 :: " << ntohs(m_MainServer.addr.sin_port) << std::endl;
 
-	HANDLE hThread;
-	hThread = CreateThread(NULL, 0, RecvMessage, (LPVOID)m_MainServer.sock, 0, NULL);
 
 }
 
 void AgentServer::CreateAgentsToRoom()
 {
 
+	RoomInfo* newroom = new RoomInfo();
+	newroom->RoomID = m_iRoomCounter++;
+
+	newroom->GameWorld.RegisterRoomInfo(newroom);
+	newroom->GameWorld.Initailize();
+	newroom->hGameWorld = CreateThread(NULL, 0, RunGameWorld, (LPVOID)newroom, 0, NULL);
+
+	if (newroom->hGameWorld == NULL)
+	{
+		std::cout << "Thread Creation failed" << std::endl;
+		//Assert
+		return;
+	}
+
+	m_RoomList.push_back(newroom);
+	std::cout << "Create New Room " << newroom->RoomID << std::endl;
 
 
 }
@@ -236,8 +238,4 @@ void AgentServer::DeleteAgentsFromRoom()
 
 
 
-}
-
-void RoomInfo::UpdateWorld()
-{
 }

@@ -23,7 +23,6 @@
 #define REFLACTION_FACTOR		0.8f
 
 class CEffect;
-class CResourceManager;
 class CPlayer : public CUnit
 {
 public:
@@ -31,10 +30,10 @@ public:
 	virtual ~CPlayer();
 
 	virtual void Update(float fTimeElapsed) override;
-	virtual void Draw(ID2D1HwndRenderTarget* pd2dRenderTarget) override;
-	virtual void DrawUI(ID2D1HwndRenderTarget* pd2dRenderTarget, float fScaleFactor);
+	//virtual void Draw(ID2D1HwndRenderTarget* pd2dRenderTarget) override;
+	//virtual void DrawUI(ID2D1HwndRenderTarget* pd2dRenderTarget, float fScaleFactor);
 
-	virtual void RegisterResourceManager(shared_ptr<CResourceManager> resMng);
+	//virtual void RegisterResourceManager(shared_ptr<CResourceManager> resMng);
 
 	virtual void Collide(float atk) override;
 
@@ -47,9 +46,9 @@ public:
 	CObject* GrenadeOut();
 
 private:
-	ComPtr<ID2D1Bitmap1>			m_bmpImage;
+	//ComPtr<ID2D1Bitmap1>			m_bmpImage;
+	//ComPtr<ID2D1Bitmap1>			m_bmpWeaponImage;
 
-	ComPtr<ID2D1Bitmap1>			m_bmpWeaponImage;
 	D2D_RECT_F						m_rcWeaponSize;
 
 	float							m_fBlockStunTimer;

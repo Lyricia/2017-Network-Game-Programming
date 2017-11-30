@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "GameWorld\ResourceManager\ResourceManager.h"
 #include "Grenade.h"
 #include "Object\Unit\Player\Player.h"
 #include "Object\Brick\Brick.h"
@@ -29,39 +28,6 @@ void CGrenade::Update(float fTimeElapsed)
 		((float)m_szImg.width / GRENADE_EXPLOSION_DELAY);
 	if (m_ptCurrImg.x >= (float)m_szImg.width)
 		m_bExplosion = true;
-}
-
-void CGrenade::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
-{
-	if (m_bExplosion) return;
-	auto bmpSize = m_bmpImage->GetSize();
-	float aniWidthFactor = bmpSize.width / (float)m_szImg.width;
-	float aniHeightFactor = bmpSize.height / (float)m_szImg.height;
-	pd2dRenderTarget->DrawBitmap(
-		m_bmpImage.Get()
-		, m_rcSize + m_ptPos
-		, 1.f
-		, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR
-		, RectF(
-			aniWidthFactor * (int)m_ptCurrImg.x
-			, aniHeightFactor * (int)m_ptCurrImg.y
-			, aniWidthFactor * ((int)m_ptCurrImg.x + 1)
-			, aniHeightFactor * ((int)m_ptCurrImg.y + 1)));
-}
-
-void CGrenade::RegisterResourceManager(shared_ptr<CResourceManager> resMng)
-{
-	m_pResMng = resMng;
-	m_bmpImage = m_pResMng->GetImageRef(ResImgName::grenade);
-	m_szImg = m_pResMng->GetImgLength(ResImgName::grenade);
-
-	if (IsRectInvalid(m_rcSize))
-	{
-		auto sz = m_bmpImage->GetSize();
-		sz.width /= m_szImg.width;
-		sz.height /= m_szImg.height;
-		m_rcSize = SizeToRect(sz);
-	}
 }
 
 void CGrenade::Reflection(const D2D_POINT_2F & ptDirReflect)

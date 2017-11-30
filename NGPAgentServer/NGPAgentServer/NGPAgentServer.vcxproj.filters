@@ -28,12 +28,33 @@
     <Filter Include="소스 파일\Object\Unit\Agent">
       <UniqueIdentifier>{c9c11656-b925-44e4-8f76-fe16e6e5fe0a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\GameWorld">
+      <UniqueIdentifier>{bef15ad1-57ae-4df8-8970-df4b44528e69}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\GameWorld\Timer">
+      <UniqueIdentifier>{6d680908-5d77-4125-aa69-831c749dfa8f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Scene">
+      <UniqueIdentifier>{3701e909-368f-4e87-902e-fb6052986944}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Scene\Main">
+      <UniqueIdentifier>{33b76384-3c9a-4358-8c74-85099fa03bd4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Object\Brick">
+      <UniqueIdentifier>{57779dfc-0ece-4a32-ac8a-733ce83bb2f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Object\Projectile">
+      <UniqueIdentifier>{d40886c6-9307-4f9d-bccf-773573ef55f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Object\Projectile\Grenade">
+      <UniqueIdentifier>{a54b6c65-79cf-4de0-866f-719be570b0d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Object\Unit\Player">
+      <UniqueIdentifier>{c5f0cbef-272d-47ad-bd93-87810f3ffe2e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="NGPmsg.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Server\AgentServer.h">
@@ -72,6 +93,30 @@
     <ClInclude Include="Object\Unit\Unit.h">
       <Filter>소스 파일\Object\Unit</Filter>
     </ClInclude>
+    <ClInclude Include="Scene\Scene.h">
+      <Filter>소스 파일\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Main\MainScene.h">
+      <Filter>소스 파일\Scene\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="GameWorld\Timer\Timer.h">
+      <Filter>소스 파일\GameWorld\Timer</Filter>
+    </ClInclude>
+    <ClInclude Include="GameWorld\GameWorld.h">
+      <Filter>소스 파일\GameWorld</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Brick\Brick.h">
+      <Filter>소스 파일\Object\Brick</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Projectile\Projectile.h">
+      <Filter>소스 파일\Object\Projectile</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Projectile\Grenade\Grenade.h">
+      <Filter>소스 파일\Object\Projectile\Grenade</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Unit\Player\Player.h">
+      <Filter>소스 파일\Object\Unit\Player</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="NGPAgentServer.cpp">
@@ -97,6 +142,30 @@
     </ClCompile>
     <ClCompile Include="Object\Unit\Unit.cpp">
       <Filter>소스 파일\Object\Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Scene.cpp">
+      <Filter>소스 파일\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Main\MainScene.cpp">
+      <Filter>소스 파일\Scene\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="GameWorld\Timer\Timer.cpp">
+      <Filter>소스 파일\GameWorld\Timer</Filter>
+    </ClCompile>
+    <ClCompile Include="GameWorld\GameWorld.cpp">
+      <Filter>소스 파일\GameWorld</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Brick\Brick.cpp">
+      <Filter>소스 파일\Object\Brick</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Projectile\Projectile.cpp">
+      <Filter>소스 파일\Object\Projectile</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Projectile\Grenade\Grenade.cpp">
+      <Filter>소스 파일\Object\Projectile\Grenade</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Unit\Player\Player.cpp">
+      <Filter>소스 파일\Object\Unit\Player</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
