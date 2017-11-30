@@ -3,68 +3,98 @@
 #define ACTIONINFOBUFSIZE	128
 #define OBJINFOBUFSIZE		256
 
-
-//struct D2D_POINT_2F {};
-
 enum MSGSIZE {
-	SIZE_HEADER = 8,
-	SIZE_ACTIONINFO = 12,
-	SIZE_OBJINFO = 24,
-	SIZE_AMMUNITION = 4
+	  SIZE_HEADER		= 8
+	, SIZE_ACTIONINFO	= 16
+	, SIZE_OBJINFO		= 24
+	, SIZE_AMMUNITION	= 4
 };
 
 namespace MSGTYPE {
 	enum MSGSTATE {
-		ROOMCREATION = 10,
-		CLIENTREADY,
-		CLIENTGAMEOVER,
-		AICREATTIONREQUEST,
-		AIAGENTINFO
+		  ROOMCREATION = 10
+		, CLIENTREADY
+		, CLIENTGAMEOVER
+		, AICREATTIONREQUEST
+		, AIAGENTINFO
 	};
 
 	enum MSGACTION {
-		MOVE = 20,
-		SHOOT,
-		BUILDTURRET,
-		RELOAD
+		  MOVE = 20
+		, SHOOT
+		, RELOAD
+		, GRENADE
+		, BUILDTURRET
 	};
 
 	enum MSGUPDATE {
-		ADJUSTPOS = 30,
-		CREATEOBJECT,
-		DELETEOBJECT,
-		UPDATEOBJECTSTATE
+		  ADJUSTPOS = 30
+		, CREATEOBJECT
+		, DELETEOBJECT
+		, UPDATEOBJECTSTATE
 	};
 }
 
 struct ActionInfo {
-	D2D_POINT_2F		Direction;
-	unsigned int		ObjectID;
+	union {
+		struct { // MOVE
+			D2D_POINT_2F	MoveVelocity;
+			UCHAR			Packer8[8];
+		}; 
+		struct { // SHOOT
+			UINT			TargetID;
+			D2D_POINT_2F	TargetHitPos;
+			UCHAR			Packer4[4];
+		};
+		struct { // GRENADE
+			D2D_POINT_2F	SetVelocity;
+			D2D_POINT_2F	TargetPos;
+		};
+		struct { // RELOAD
+			UCHAR			Packer16[16];
+		};
+	};
+};
+
+enum class OBJECTTYPE : UCHAR {
+	  Player = 0
+	, Agent
+	, Brick
+	, Grenade
+	, Effect_ShootingHit
+	, Effect_Explosion
 };
 
 struct AMMUNITION {
-	unsigned char		Granade;
-	unsigned char		GunAmmo;
-	unsigned char		TurretKit;
-	unsigned char		packer;
+	UCHAR		Granade;
+	UCHAR		GunAmmo;
+	UCHAR		TurretKit;
+	UCHAR		packer1;
 };
 
 struct ObjInfo {
-	AMMUNITION			Ammo;
+	UCHAR				ObjectID;
+	OBJECTTYPE			ObjectType;
+	UCHAR				HP;
+	bool				Collision;
 	D2D_POINT_2F		Position;
-	D2D_POINT_2F		Direction;
-	unsigned char		ObjectID;
-	unsigned char		HP;
-	short				packer;
+	union {
+		AMMUNITION		Ammo;
+		UINT			ParentID;
+	};
+	union {
+		D2D_POINT_2F	Direction;
+		D2D_POINT_2F	Velocity;
+	};
 };
 
 struct MSGHEADER {
-	unsigned char		MSGTYPE;
-	unsigned char		ROOMNO;
-	unsigned char		NUM_OBJINFO;
-	unsigned char		NUM_ACTIONINFO;
+	UCHAR		MSGTYPE;
+	UCHAR		ROOMNO;
+	UCHAR		NUM_OBJINFO;
+	UCHAR		NUM_ACTIONINFO;
 
-	unsigned int		OBJECTNO;
+	UINT		OBJECTNO;
 };
 
 struct NGPMSG {
@@ -78,7 +108,7 @@ inline NGPMSG* CreateMSG(UCHAR type, UCHAR roomno, UINT objectno, UCHAR nObjinfo
 	NGPMSG* msg = new NGPMSG();
 
 	MSGHEADER msgHeader = { type, roomno, nObjinfo, nActioninfo , objectno };
-
+	
 	msg->header = msgHeader;
 	if (nActioninfo != 0)
 		memcpy(msg->actioninfo, actioninfo, MSGSIZE::SIZE_ACTIONINFO*nActioninfo);
@@ -96,9 +126,9 @@ inline int DispatchMSG(NGPMSG* msg, ActionInfo& actionlist, ObjInfo& objlist)
 
 	if (num_actioninfo > 0)
 		memcpy(&actionlist, msg->actioninfo, MSGSIZE::SIZE_ACTIONINFO * num_actioninfo);
-
+	
 	if (num_objinfo > 0)
 		memcpy(&objlist, msg->objinfo, MSGSIZE::SIZE_OBJINFO * num_objinfo);
 
-	return msg->header.MSGTYPE;
+	return msg->header.MSGTYPE;	
 }

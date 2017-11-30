@@ -8,6 +8,7 @@ CProjectile::CProjectile(D2D_POINT_2F pt, D2D_RECT_F rc)
 	, m_szImg(SizeU())
 	, m_pResMng(nullptr)
 {
+	m_Id = g_ObjectID++;
 }
 
 CProjectile::~CProjectile()

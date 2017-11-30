@@ -2,13 +2,10 @@
 #include "Player.h"
 #include "Object\Brick\Brick.h"
 #include "Object\Projectile\Grenade\Grenade.h"
-#include "Object\Effect\Effect.h"
-
 
 CPlayer::CPlayer(D2D_POINT_2F pt, D2D_RECT_F rc)
 	: CUnit(pt, rc)
 	, m_pTarget(nullptr)
-	, m_rcWeaponSize(RectF())
 	, m_fBlockStunTimer(0)
 	, m_fShootTimer(0)
 	, m_fGrenadeTimer(0)

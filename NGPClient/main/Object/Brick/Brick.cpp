@@ -10,6 +10,7 @@ CBrick::CBrick(D2D_POINT_2F pt, D2D_RECT_F rc)
 	, m_fBlockStunTimer(0)
 {
 	m_Tag = CObject::Type::Brick;
+	m_Id = g_ObjectID++;
 }
 
 CBrick::~CBrick()

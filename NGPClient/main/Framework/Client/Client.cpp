@@ -45,6 +45,7 @@ int recvn(SOCKET s, char * buf, int len, int flags)
 
 CClient::CClient()
 	: m_Local_id(-1)
+	, m_CS(NULL)
 {
 	ZeroMemory(&m_MainServer, sizeof(m_MainServer));
 }
@@ -64,6 +65,8 @@ void CClient::Initialize()
 	m_MainServer.sock = socket(AF_INET, SOCK_STREAM, 0);
 	if (m_MainServer.sock == INVALID_SOCKET)
 		err_quit("socket()");
+
+	::InitializeCriticalSection(m_CS);
 }
 
 void CClient::Release()
@@ -76,6 +79,8 @@ void CClient::Release()
 	for (auto& p : m_MsgQueue)
 		delete p;
 	m_MsgQueue.clear();
+
+	::DeleteCriticalSection(m_CS);
 }
 
 void CClient::ConnectServer()
@@ -85,16 +90,15 @@ void CClient::ConnectServer()
 	m_MainServer.addr.sin_addr.s_addr = inet_addr("127.0.0.1");
 	m_MainServer.addr.sin_port = htons(SERVERPORT);
 	int retval = connect(m_MainServer.sock, (SOCKADDR *)&m_MainServer.addr, sizeof(m_MainServer.addr));
-	if (retval == SOCKET_ERROR)
-		err_quit("connect()");
+	if (retval == SOCKET_ERROR) err_quit("connect()");
 
 	NGPMSG msg;
 	retval = recvn(m_MainServer.sock, (char*)&msg, sizeof(NGPMSG), 0);
-	if (retval == SOCKET_ERROR) {
-		return;
-	}
+	if (retval == SOCKET_ERROR) err_quit("Connect recvn()");
+	m_Local_id = msg.header.OBJECTNO;
 
 	m_MainServer.pMsgQueue = &m_MsgQueue;
+	m_MainServer.pCS = &m_CS;
 	m_MainServer.hReceiver = CreateThread(NULL, 0, RecvMessage, (LPVOID)&m_MainServer, 0, NULL);
 }
 
@@ -110,8 +114,12 @@ DWORD RecvMessage(LPVOID arg)
 	char buf[64 + 1];
 	int len;
 
-	printf("\n[TCP 클라이언트] 서버접속: IP 주소=%s, 포트 번호=%d\n",
+	printf("\n[TCP 클라이언트] Receiver Ready: Server IP Address=%s, Server Port=%d\n",
 		inet_ntoa(main_server->addr.sin_addr), ntohs(main_server->addr.sin_port));
+
+	::EnterCriticalSection((*main_server->pCS));
+	::LeaveCriticalSection((*main_server->pCS));
+
 
 	while (1) {
 		// 데이터 받기(고정 길이)

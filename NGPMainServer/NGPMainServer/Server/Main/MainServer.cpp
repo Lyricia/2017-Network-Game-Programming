@@ -35,8 +35,6 @@ DWORD WINAPI RunGameWorld(LPVOID arg)
 		client->pMsgQueue = &room->MsgQueue;
 		client->RecvThreadHandle = CreateThread(NULL, 0, RecvMessage, (LPVOID)client, 0, NULL);
 	}
-
-	room->GameWorld.RegisterRoomInfo(room);
 	room->GameWorld.Run();
 
 	return 0;
@@ -166,7 +164,14 @@ void MainServer::CreateRoom()
 	cout << "Create New Room " << newroom->RoomID << endl;
 }
 
-void MainServer::DeleteRoom()
+void MainServer::DeleteRoom(UINT room_id)
 {
+	m_RoomList.remove_if([room_id](RoomInfo* pRoom)->bool {
+		if (pRoom->RoomID == room_id)
+		{
+			delete pRoom;
+			return true;
+		}
+		return false;
+	});
 }
-

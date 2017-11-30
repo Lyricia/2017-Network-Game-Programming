@@ -19,7 +19,7 @@ struct ConnectionInfo {
 };
 
 struct RoomInfo {
-	int						RoomID;
+	UINT					RoomID;
 	ConnectionInfo			*serverinfo;
 	list<ConnectionInfo*>	clientlist;
 	//list<ConnectionInfo*>	agentlist;
@@ -57,7 +57,7 @@ public:
 	void ConnectAgentServer();
 	void RequestAddAgentServer();
 	void CreateRoom();
-	void DeleteRoom();
+	void DeleteRoom(UINT room_id);
 };
 
 static int recvn(SOCKET s, char *buf, int len, int flags);

@@ -3,7 +3,7 @@
 class CObject
 {
 public:
-	enum class Type { Player, Agent, Brick, Grenade, Effect };
+	enum class Type : UCHAR { Player = 0, Agent, Brick, Grenade, Effect };
 
 public:
 	CObject(D2D_POINT_2F pt = Point2F(), D2D_RECT_F rc = RectF());

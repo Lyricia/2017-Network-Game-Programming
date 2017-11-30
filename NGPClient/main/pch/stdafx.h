@@ -56,3 +56,5 @@ using namespace D2DBitmap;
 #include "D2D_Operator.h"
 
 #include "NGPmsg.h"
+
+UINT	g_ObjectID = 0;
