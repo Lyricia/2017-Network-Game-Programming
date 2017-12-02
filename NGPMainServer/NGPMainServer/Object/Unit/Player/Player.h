@@ -22,7 +22,7 @@
 #define FRICTIONAL_DRAG			2.5f
 #define REFLACTION_FACTOR		0.8f
 
-class CEffect;
+struct RoomInfo;
 class CPlayer : public CUnit
 {
 public:
@@ -41,7 +41,8 @@ public:
 	void Move(float fSpeed);
 	void Reflection(const D2D_POINT_2F& ptDirReflect = Point2F());
 	void Stop();
-	CEffect* Shoot();
+	void Shoot();
+	void Shoot(RoomInfo* pRoomInfo, CObject* pTarget, const D2D_POINT_2F& ptHitPos);
 	void RayCastingToShoot(std::vector<CObject*>& pvecObjects);
 	CObject* GrenadeOut();
 

@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Server\Main\MainServer.h"
 #include "Player.h"
 #include "Object\Brick\Brick.h"
 #include "Object\Projectile\Grenade\Grenade.h"
@@ -151,12 +152,16 @@ void CPlayer::Stop()
 	SetMoveDirection(Point2F());
 }
 
-CEffect* CPlayer::Shoot()
+void CPlayer::Shoot()
 {
-	if (m_bShoot) return nullptr;
-	if (m_bReload) return nullptr;
+	if (m_bShoot) return;
+	if (m_bReload) return;
 
-	if (m_iAmmo == 0) m_bReload = true;
+	if (m_iAmmo == 0)
+	{
+		m_bReload = true;
+		return;
+	}
 	else --m_iAmmo;
 	
 	m_bShoot = true;
@@ -182,7 +187,50 @@ CEffect* CPlayer::Shoot()
 		}
 		}
 	}
-	return nullptr;
+	return;
+}
+
+void CPlayer::Shoot(
+	  RoomInfo*				pRoomInfo
+	, CObject*				pTarget
+	, const D2D_POINT_2F&	ptHitPos)
+{
+	if (m_bShoot) return;
+	if (m_bReload) return;
+
+	if (m_iAmmo == 0)
+	{
+		m_bReload = true;
+		return;
+	}
+	else --m_iAmmo;
+
+	m_pTarget = pTarget;
+	m_bShoot = true;
+	m_ptMuzzleDirection = m_ptDirection;
+	m_ptMuzzleStartPos = m_ptPos + m_ptMuzzleDirection * MUZZLE_OFFSET;
+	m_ptMuzzleEndPos = ptHitPos;
+
+	if (m_pTarget)
+	{
+		switch (m_pTarget->GetTag())
+		{
+		case CObject::Type::Player:
+		{
+			CPlayer* player = static_cast<CPlayer*>(m_pTarget);
+			player->Collide(SHOOT_DAMAGE);
+			player->Move(m_ptMuzzleDirection * PLAYER_VELOCITY);
+			break;
+		}
+		case CObject::Type::Brick:
+		{
+			CBrick* brick = static_cast<CBrick*>(m_pTarget);
+			brick->Collide(SHOOT_DAMAGE);
+			break;
+		}
+		}
+	}
+	return;
 }
 
 void CPlayer::RayCastingToShoot(std::vector<CObject*>& pvecObjects)

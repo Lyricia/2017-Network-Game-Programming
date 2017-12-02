@@ -242,7 +242,25 @@ void CMainScene::ProcessMsgs()
 			break;
 		}
 		case MSGTYPE::MSGACTION::SHOOT:
+		{
+			//arrActionInfo = new ActionInfo[msg->header.NUM_ACTIONINFO];
+			//DispatchMSG(msg, arrActionInfo, arrObjInfo);
+			//for (auto& p : m_pRoomInfo->clientlist)
+			//{
+			//	CPlayer* player = static_cast<CPlayer*>(p->pUserdata);
+			//	if (player->GetID() == msg->header.OBJECTNO)
+			//	{
+			//		for (int i = 0; i < msg->header.NUM_ACTIONINFO; ++i)
+			//		{
+			//			player->SetMoveDirection(arrActionInfo[i].MoveDirection);
+			//			player->SetDirection(arrActionInfo[i].LookDirection);
+			//		}
+			//	}
+			//}
+			//delete[] arrActionInfo;
+			//arrActionInfo = nullptr;
 			break;
+		}
 		case MSGTYPE::MSGACTION::BUILDTURRET:
 			break;
 		case MSGTYPE::MSGACTION::RELOAD:

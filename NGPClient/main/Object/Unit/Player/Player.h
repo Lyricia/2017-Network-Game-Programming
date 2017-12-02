@@ -49,9 +49,11 @@ public:
 	void Stop(CClient* pClient);
 
 	CEffect* Shoot();
+	void Shoot(CClient* pClient);
 	void RayCastingToShoot(std::vector<CObject*>& pvecObjects);
 
 	CObject* GrenadeOut();
+	void GrenadeOut(CClient* pClient);
 
 private:
 	ComPtr<ID2D1Bitmap1>			m_bmpImage;

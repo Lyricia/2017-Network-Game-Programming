@@ -310,7 +310,11 @@ CEffect* CPlayer::Shoot()
 	if (m_bShoot) return nullptr;
 	if (m_bReload) return nullptr;
 
-	if (m_iAmmo == 0) m_bReload = true;
+	if (m_iAmmo == 0)
+	{
+		m_bReload = true;
+		return nullptr;
+	}
 	else --m_iAmmo;
 	
 	m_bShoot = true;
@@ -343,6 +347,44 @@ CEffect* CPlayer::Shoot()
 		return effect;
 	}
 	return nullptr;
+}
+
+void CPlayer::Shoot(CClient * pClient)
+{
+	if (m_bShoot) return;
+	if (m_bReload) return;
+
+	NGPMSG* msg = nullptr;
+	if (m_iAmmo == 0)
+	{
+		m_bReload = true;
+		UCHAR type = MSGTYPE::MSGACTION::RELOAD;
+		UCHAR roomNo = pClient->GetRoomID();
+		UINT objNo = GetID();
+
+		msg = CreateMSG(type, roomNo, objNo, 0, 0, NULL, NULL);
+		pClient->SendMsgs((char*)msg, sizeof(NGPMSG));
+		delete msg;
+		return;
+	}
+	else --m_iAmmo;
+
+	m_bShoot = true;
+	m_ptMuzzleDirection = m_ptDirection;
+	m_ptMuzzleStartPos = m_ptPos + m_ptMuzzleDirection * MUZZLE_OFFSET;
+
+	UCHAR type = MSGTYPE::MSGACTION::SHOOT;
+	UCHAR roomNo = pClient->GetRoomID();
+	UINT objNo = GetID();
+	ActionInfo action_info;
+	action_info.TargetHitPos = m_ptMuzzleEndPos;
+
+	if (m_pTarget)	action_info.TargetID = m_pTarget->GetID();
+	else			action_info.TargetID = INVALID_OBJECT_ID;
+
+	msg = CreateMSG(type, roomNo, objNo, 0, 1, NULL, &action_info);
+	pClient->SendMsgs((char*)msg, sizeof(NGPMSG));
+	delete msg;
 }
 
 void CPlayer::RayCastingToShoot(std::vector<CObject*>& pvecObjects)
@@ -398,4 +440,8 @@ CObject * CPlayer::GrenadeOut()
 		* Length(m_ptTargetPos - m_ptPos) 
 		* PROJECTILE_FRICTIONAL_DRAG);
 	return grenade;
+}
+
+void CPlayer::GrenadeOut(CClient * pClient)
+{
 }
