@@ -79,10 +79,9 @@ int APIENTRY wWinMain(
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-
+		framework.ProcessMsgs();
 		if (!timer->Update()) continue;
 		framework.FrameAdvance();
-
     }
 #ifdef _DEBUG
 	fclose(fp);

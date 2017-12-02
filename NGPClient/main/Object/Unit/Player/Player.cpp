@@ -311,6 +311,7 @@ void CPlayer::RayCastingToShoot(std::vector<CObject*>& pvecObjects)
 			{
 			case CObject::Type::Player:
 			{
+				if (p == this) break;
 				if (Length(p->GetPos() - ptDevidedRay) < p->GetSize().right)
 				{
 					m_ptMuzzleEndPos = ptDevidedRay;

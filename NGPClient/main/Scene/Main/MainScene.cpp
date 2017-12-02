@@ -147,6 +147,30 @@ bool CMainScene::OnCreate(wstring && tag, CFramework * pFramework)
 	return true;
 }
 
+void CMainScene::ProcessMsgs()
+{
+	auto start_time = std::chrono::system_clock::now();
+	auto now = std::chrono::system_clock::now();
+
+	std::chrono::duration<float> timeElapsed = start_time - now;
+	while (timeElapsed.count() < MESSAGE_PROCESSING_TIME)
+	{
+		if (!m_pClient->MsgQueue().size()) return;
+		m_pClient->EnterCriticalSection();
+		NGPMSG* msg = m_pClient->MsgQueue().front();
+		m_pClient->MsgQueue().pop_front();
+		m_pClient->LeaveCriticalSection();
+
+
+
+
+		delete msg;
+
+		now = std::chrono::system_clock::now();
+		timeElapsed = start_time - now;
+	}
+}
+
 void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 {
 	m_lstEffects.remove_if([](CEffect* pEffect)->bool {
@@ -167,6 +191,8 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 			CPlayer* player = static_cast<CPlayer*>((*iter));
 			if (player->IsDie())
 			{
+				if (player == m_pPlayer)
+					m_pPlayer = nullptr;
 				delete (*iter);
 				iter = m_vecObjects.erase(iter);
 			}
@@ -219,14 +245,14 @@ void CMainScene::Update(float fTimeElapsed)
 	ProcessInput(fTimeElapsed);
 	PreprocessingUpdate(fTimeElapsed);
 
-	m_Camera.SetPosition(m_pPlayer->GetPos());
+	if (m_pPlayer) m_Camera.SetPosition(m_pPlayer->GetPos());
 
-	m_pPlayer->Update(fTimeElapsed);
-	m_pPlayer->LookAt((m_ptMouseCursor * m_Camera.GetScaleFactor()) + m_pPlayer->GetPos());
-	m_pPlayer->RayCastingToShoot(m_vecObjects);
-
+	//m_pPlayer->Update(fTimeElapsed);
 	for (auto& p : m_vecObjects)
 		p->Update(fTimeElapsed);
+
+	if(m_pPlayer) m_pPlayer->LookAt((m_ptMouseCursor * m_Camera.GetScaleFactor()) + m_pPlayer->GetPos());
+	if(m_pPlayer) m_pPlayer->RayCastingToShoot(m_vecObjects);
 
 	for (auto& p : m_lstEffects)
 		p->Update(fTimeElapsed);
@@ -324,22 +350,18 @@ void CMainScene::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
 	for (auto& p : m_vecObjects)
 		p->Draw(pd2dRenderTarget);
 
-	m_pPlayer->Draw(pd2dRenderTarget);
+	if(m_pPlayer) m_pPlayer->Draw(pd2dRenderTarget);
 
 	for (auto& p : m_lstEffects)
 		p->Draw(pd2dRenderTarget);
 
-	m_pPlayer->DrawUI(pd2dRenderTarget, m_Camera.GetScaleFactor());
+	if (m_pPlayer) m_pPlayer->DrawUI(pd2dRenderTarget, m_Camera.GetScaleFactor());
 
 	pd2dRenderTarget->DrawBitmap(
 		m_bmpCrossHair.Get()
 		, SizeToRect(m_bmpCrossHair->GetSize()) + 
 		m_ptMouseCursor * m_Camera.GetScaleFactor() +
 		m_pPlayer->GetPos());
-
-	auto pt = m_ptMouseCursor * m_Camera.GetScaleFactor() +
-		m_pPlayer->GetPos();
-	printf("\r %f, %f", pt.x, pt.y);
 }
 
 void CMainScene::ProcessInput(float fTimeElapsed)
@@ -369,11 +391,11 @@ void CMainScene::ProcessInput(float fTimeElapsed)
 			m_pPlayer->Move(Normalize(ptDir) * PLAYER_VELOCITY * fTimeElapsed);
 			UCHAR type = MSGTYPE::MSGACTION::MOVE;
 			UCHAR roomNo = m_pClient->GetRoomID();
-			UCHAR objNo = m_pPlayer->GetID();
+			UINT objNo = m_pPlayer->GetID();
 			ActionInfo action_info;
 			action_info.MoveVelocity = Normalize(ptDir) * PLAYER_VELOCITY * fTimeElapsed;
 			NGPMSG* msg = CreateMSG(type, roomNo, objNo, 0, 1, NULL, &action_info);
-			m_pClient->SendMsgs((char*)msg, sizeof(msg));
+			m_pClient->SendMsgs((char*)msg, sizeof(NGPMSG));
 			delete msg;
 		}
 

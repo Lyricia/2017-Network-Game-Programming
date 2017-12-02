@@ -157,22 +157,29 @@ inline NGPMSG* CreateMSG(UCHAR type, UCHAR roomno, UINT objectno, UCHAR nMapinfo
 	return msg;
 }
 
-inline int DispatchMSG(NGPMSG* msg, ActionInfo* actionlist, ObjInfo* objlist)
+inline UCHAR DispatchMSG(NGPMSG* msg, ActionInfo* actionlist, ObjInfo* objlist)
 {
 	int num_actioninfo = msg->header.NUM_ACTIONINFO;
 	int num_objinfo = msg->header.NUM_OBJINFO;
 	
 	if (num_actioninfo > 0)
+	{
+
 		memcpy(actionlist, msg->actioninfo, MSGSIZE::SIZE_ACTIONINFO * num_actioninfo);
+	}
 	
 	if (num_objinfo > 0)
+	{
+
 		memcpy(objlist, msg->objinfo, MSGSIZE::SIZE_OBJINFO * num_objinfo);
+	}
 
 	return msg->header.MSGTYPE;	
 }
 
-inline int DispatchMSG(NGPMSG* msg, MapInfo* mapdata)
+inline UCHAR DispatchMSG(NGPMSG* msg, MapInfo* mapdata)
 {
+	mapdata = new MapInfo[msg->header.NUM_OBJINFO];
 	memcpy(mapdata, msg->Mapdata, msg->header.NUM_OBJINFO);
 
 	return msg->header.MSGTYPE;

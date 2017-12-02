@@ -47,9 +47,11 @@ void CGameWorld::Run()
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		if (!m_pTimer->Update()) continue;
-		Update(m_pTimer->GetTimeElapsed());
-		SendMsgs();
+		BYTE time_state = m_pTimer->Update();
+		if (time_state & CTimer::TIME_STATE_UPDATE_GAMELOOP)
+			Update(m_pTimer->GetTimeElapsed());
+		if (time_state & CTimer::TIME_STATE_PROCESS_MESSAGE)
+			SendMsgs();
 	}
 }
 

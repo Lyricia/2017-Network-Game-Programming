@@ -41,15 +41,12 @@ public:
 	void FrameAdvance();
 	void Draw();
 	void Update(float fTimeElapsed);
+	void ProcessMsgs();
 
-	// 후 처리가 없을 경우 true 반환
 	bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
-	// 후 처리가 없을 경우 true 반환
 	bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
-	// 후 처리가 없을 경우 true 반환
 	virtual LRESULT OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
-	// Framework 에서 호출하는 윈도우 프로시저입니다.
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
 	void ChangeScene(std::wstring Tag, bool bDestroyPostScene = false);

@@ -25,6 +25,12 @@ constexpr LONG CLIENT_MINIMUM_HEIGHT = 600;
 #define MAX_UPDATE_FPS 0.0
 #endif
 
+#if USE_LIMIT_MAX_FPS
+#define MAX_PROCESS_MSG_FPS 1.0 / 30.0
+#else
+#define MAX_UPDATE_FPS 0.0
+#endif
+
 // √÷¥Î FPS
 #if USE_LIMIT_MAX_FPS
 #define MAX_FPS 1.0 / 144.0

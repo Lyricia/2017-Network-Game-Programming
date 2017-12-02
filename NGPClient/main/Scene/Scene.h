@@ -17,6 +17,7 @@ public:
 
 	virtual void Update(float fTimeElapsed) = 0;
 	virtual void Draw(ID2D1HwndRenderTarget * pd2dRenderTarget) = 0;
+	virtual void ProcessMsgs() = 0;
 
 	bool FindByTag(const wstring& Tag) const { return Tag == m_strTag; }
 

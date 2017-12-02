@@ -66,6 +66,11 @@ void CFramework::Update(float fTimeElapsed)
 	if (m_pCurrentScene) m_pCurrentScene->Update(fTimeElapsed);
 }
 
+void CFramework::ProcessMsgs()
+{
+	if (m_pCurrentScene) m_pCurrentScene->ProcessMsgs();
+}
+
 bool CFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	switch (nMessageID)

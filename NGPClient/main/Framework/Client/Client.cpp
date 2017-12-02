@@ -88,7 +88,7 @@ void CClient::ConnectServer()
 {
 	// connect()
 	m_MainServer.addr.sin_family = AF_INET;
-	m_MainServer.addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	m_MainServer.addr.sin_addr.s_addr = inet_addr(std::string("127.0.0.1").c_str());
 	m_MainServer.addr.sin_port = htons(SERVERPORT);
 	int retval = connect(m_MainServer.sock, (SOCKADDR *)&m_MainServer.addr, sizeof(m_MainServer.addr));
 	if (retval == SOCKET_ERROR) err_quit("connect()");
@@ -113,47 +113,29 @@ DWORD RecvMessage(LPVOID arg)
 {
 	ConnectedServerInfo* main_server = (ConnectedServerInfo*)arg;
 	int retval;
-	char buf[64 + 1];
-	int len;
+
+	NGPMSG* msg;
 
 	printf("\n[TCP 클라이언트] Receiver Ready: Server IP Address=%s, Server Port=%d\n",
 		inet_ntoa(main_server->addr.sin_addr), ntohs(main_server->addr.sin_port));
 
-	::EnterCriticalSection(main_server->pCS);
-	::LeaveCriticalSection(main_server->pCS);
-
-
 	while (1) {
-		//// 데이터 받기(고정 길이)
-		//retval = recvn(main_server->sock, (char *)&len, sizeof(int), 0);
-		//if (retval == SOCKET_ERROR) {
-		//	break;
-		//}
-		//else if (retval == 0)
-		//	break;
-
-		//// 데이터 받기(가변 길이)
-		//retval = recvn(main_server->sock, buf, len, 0);
-		//if (retval == SOCKET_ERROR) {
-		//	break;
-		//}
-		//else if (retval == 0)
-		//	break;
-
-		//// 받은 데이터 출력
-		//buf[retval] = '\0';
-		//cout << "ID : " << " " << buf << endl;
-
-		//retval = send(main_server->sock, "test", sizeof("test"), NULL);
-		//if (retval == SOCKET_ERROR)
-		//{
-		//	closesocket(main_server->sock);
-		//	return 0;
-		//}
+		msg = new NGPMSG();
+		retval = recvn(main_server->sock, (char *)msg, sizeof(NGPMSG), 0);
+		//retval = WSAGetLastError();
+		if (retval == SOCKET_ERROR)
+		{
+			break;
+		}
+		main_server->EnterCriticalSection();
+		main_server->pMsgQueue->push_back(msg);
+		main_server->LeaveCriticalSection();
+		Sleep(1);
 	}
 
 	closesocket(main_server->sock);
 	printf("[TCP 클라이언트] 서버연결 종료: IP 주소=%s, 포트 번호=%d\n",
 		inet_ntoa(main_server->addr.sin_addr), ntohs(main_server->addr.sin_port));
+
 	return 0;
 }

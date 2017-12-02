@@ -11,16 +11,18 @@ CTimer::~CTimer()
 {
 }
 
-bool CTimer::Update()
+BYTE CTimer::Update()
 {
+	BYTE TimeState = TIME_STATE_WAIT_MAX_FPS;
 	auto now = clock::now();
 
 	duration<float> timeElapsed = now - m_current_time;
 	auto fElapsed = timeElapsed.count();
 
 	/////////////////////////////////////////////////////////////////////////
-	if (fElapsed <= MAX_FPS)									return false;
-	
+	if (fElapsed <= MAX_FPS)								return TimeState;
+	TimeState = TIME_STATE_UPDATE_GAMELOOP;
+
 	m_current_time = now;
 	m_TimeElapsed = fElapsed;
 	float fps = 1.f / m_TimeElapsed;
@@ -28,11 +30,19 @@ bool CTimer::Update()
 	m_dCumulativefps += fps;
 	m_nCumulativefpsCount++;
 
+	duration<float> ProcessMsgElapsed = now - m_LastProcessMsg_time;
+	if (ProcessMsgElapsed.count() > MAX_PROCESS_MSG_FPS)
+	{
+		TimeState |= TIME_STATE_PROCESS_MESSAGE;
+		m_LastProcessMsg_time = now;
+	}
+
 	duration<float> UpdateElapsed = now - m_LastUpdate_time;
 
 	/////////////////////////////////////////////////////////////////////////
-	if (UpdateElapsed.count() <= MAX_UPDATE_FPS)				return true;
-		
+	if (UpdateElapsed.count() <= MAX_UPDATE_FPS)			return TimeState;
+	TimeState |= TIME_STATE_UPDATE_CAPTION;
+
 	m_LastUpdate_time = now;
 
 	m_olddCumulativefps = m_dCumulativefps;
@@ -43,7 +53,7 @@ bool CTimer::Update()
 
 	if (m_hWnd) UpdateCaption();
 
-	return true;
+	return TimeState;
 }
 
 void CTimer::SetUpdateCaptionHwnd(HWND hWnd)

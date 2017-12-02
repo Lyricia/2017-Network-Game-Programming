@@ -49,6 +49,7 @@ bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 		p->pUserdata =(LPVOID)player;
 		NGPMSG* msg = CreateMSG(type, roomNo, objNo, 0, 0, NULL, NULL);
 		send(p->sock, (char*)msg, sizeof(NGPMSG), 0);
+		delete msg;
 	}
 
 	return true;
@@ -184,51 +185,57 @@ void CMainScene::PhysicsUpdate(float fTimeElapsed)
 
 void CMainScene::ProcessMsgs()
 {
-	int msgtype = 0;
+	auto start_time = std::chrono::system_clock::now();
+	auto now = std::chrono::system_clock::now();
 
-	//ActionInfo* Actionlist = new ActionInfo();
-	//ObjInfo* Objlist = new ObjInfo();
+	std::chrono::duration<float> timeElapsed = start_time - now;
+	while (timeElapsed.count() < MESSAGE_PROCESSING_TIME)
+	{
+		if (!m_pRoomInfo->MsgQueue.size()) return;
+		m_pRoomInfo->EnterCriticalSection();
+		NGPMSG* msg = m_pRoomInfo->MsgQueue.front();
+		m_pRoomInfo->MsgQueue.pop_front();
+		m_pRoomInfo->LeaveCriticalSection();
 
-	//NGPMSG msg;
-	//::ZeroMemory(&msg, sizeof(msg));
-	//if (!m_pRoomInfo->MsgQueue.empty())
-	//{
-	//	msgtype = DispatchMSG(m_pRoomInfo->MsgQueue.front(), *Actionlist, *Objlist);
-	//	m_pRoomInfo->MsgQueue.pop_front();
-	//}
-	//else return;
-	//
-	//switch (msgtype)
-	//{
-	//case MSGTYPE::MSGACTION::MOVE:
-	//	cout << "c ID: " << msg.header.OBJECTNO << " move!" << endl;
-	//	break;
-	//case MSGTYPE::MSGACTION::SHOOT:
-	//	break;
-	//case MSGTYPE::MSGACTION::BUILDTURRET:
-	//	break;
-	//case MSGTYPE::MSGACTION::RELOAD:
-	//	break;
-	//case MSGTYPE::MSGSTATE::AIAGENTINFO:
-	//	break;
-	//case MSGTYPE::MSGSTATE::AICREATTIONREQUEST:
-	//	break;
-	//case MSGTYPE::MSGSTATE::CLIENTGAMEOVER:
-	//	break;
-	//case MSGTYPE::MSGSTATE::CLIENTREADY:
-	//	break;
-	//case MSGTYPE::MSGSTATE::ROOMCREATION:
-	//	break;
-	//case MSGTYPE::MSGUPDATE::ADJUSTPOS:
-	//	break;
-	//case MSGTYPE::MSGUPDATE::CREATEOBJECT:
-	//	break;
-	//case MSGTYPE::MSGUPDATE::DELETEOBJECT:
-	//	break;
-	//case MSGTYPE::MSGUPDATE::UPDATEOBJECTSTATE:
-	//	break;
-	//}
+		cout << "msg queue size: " << m_pRoomInfo->MsgQueue.size() << endl;
+		switch (msg->header.MSGTYPE)
+		{
+		case MSGTYPE::MSGACTION::MOVE:
+		{
+			cout << "client ID: " << msg->header.OBJECTNO << " move!" << endl;
+			msg->objinfo;
+			break;
+		}
+		case MSGTYPE::MSGACTION::SHOOT:
+			break;
+		case MSGTYPE::MSGACTION::BUILDTURRET:
+			break;
+		case MSGTYPE::MSGACTION::RELOAD:
+			break;
+		case MSGTYPE::MSGSTATE::AIAGENTINFO:
+			break;
+		case MSGTYPE::MSGSTATE::AICREATTIONREQUEST:
+			break;
+		case MSGTYPE::MSGSTATE::CLIENTGAMEOVER:
+			break;
+		case MSGTYPE::MSGSTATE::CLIENTREADY:
+			break;
+		case MSGTYPE::MSGSTATE::ROOMCREATION:
+			break;
+		case MSGTYPE::MSGUPDATE::ADJUSTPOS:
+			break;
+		case MSGTYPE::MSGUPDATE::CREATEOBJECT:
+			break;
+		case MSGTYPE::MSGUPDATE::DELETEOBJECT:
+			break;
+		case MSGTYPE::MSGUPDATE::UPDATEOBJECTSTATE:
+			break;
+		}
+		delete msg;
 
+		now = std::chrono::system_clock::now();
+		timeElapsed = start_time - now;
+	}
 }
 
 void CMainScene::SendMsgs()
@@ -249,10 +256,12 @@ void CMainScene::SendMsgs()
 	idx = 0;
 	for (auto &obj : m_vecObjects)
 	{
-		if (obj->GetTag() == CObject::Type::Player) continue;
-		MapInfo* tmp = (MapInfo*)obj->GetObjectInfo();
-		mapdata[idx++] = *(tmp);
-		delete tmp;
+		if (obj->GetTag() == CObject::Type::Brick)
+		{
+			MapInfo* tmp = (MapInfo*)obj->GetObjectInfo();
+			mapdata[idx++] = *(tmp);
+			delete tmp;
+		}
 	}
 
 	NGPMSG* objmsg = CreateMSG(
@@ -271,7 +280,6 @@ void CMainScene::SendMsgs()
 
 	for (int i = 0; i < nMapmsg; ++i)
 	{
-		mapmsg[i] = new NGPMSG();
 		mapmsg[i] = CreateMSG(
 			MSGTYPE::MSGUPDATE::UPDATEMAPSTATE
 			, m_pRoomInfo->RoomID
@@ -301,7 +309,7 @@ void CMainScene::SendMsgs()
 
 	delete objmsg;
 	for (int i = 0; i < nMapmsg; ++i)
-		delete[] mapmsg[i];
+		delete mapmsg[i];
 
 	delete[] mapmsg;
 	delete[] mapdata;

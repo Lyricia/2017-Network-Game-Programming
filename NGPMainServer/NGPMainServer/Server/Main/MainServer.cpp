@@ -46,12 +46,13 @@ DWORD WINAPI RecvMessage(LPVOID arg)
 	ConnectionInfo* client = (ConnectionInfo*)arg;
 	int retval;
 	
-	NGPMSG* msg = new NGPMSG();
+	NGPMSG* msg;
 
 	printf("\n[TCP 서버] 클라이언트 접속: IP 주소=%s, 포트 번호=%d\n",
 		inet_ntoa(client->addr.sin_addr), ntohs(client->addr.sin_port));
 	
 	while (1) {
+		msg= new NGPMSG();
 		retval = recvn(client->sock, (char *)msg, sizeof(NGPMSG), 0);
 		//retval = WSAGetLastError();
 		if (retval == SOCKET_ERROR)
@@ -61,13 +62,13 @@ DWORD WINAPI RecvMessage(LPVOID arg)
 		client->EnterCriticalSection();
 		client->pMsgQueue->push_back(msg);
 		client->LeaveCriticalSection();
-
-		cout << "ID : " << client->ID << "msg id:" << msg->header.OBJECTNO << endl;
+		Sleep(1);
 	}
 	
 	closesocket(client->sock);
 	printf("[TCP 서버] 클라이언트 종료: IP 주소=%s, 포트 번호=%d\n",
 		inet_ntoa(client->addr.sin_addr), ntohs(client->addr.sin_port));
+
 	return 0;
 }
 
@@ -93,7 +94,7 @@ void MainServer::Run()
 	SOCKADDR_IN clientaddr;
 	int addrlen;
 	int retval;
-	int clientcounter = 0;
+	UINT clientcounter = 0;
 
 	while (1)
 	{

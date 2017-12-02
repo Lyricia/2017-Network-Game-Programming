@@ -2,8 +2,10 @@
 #include "Server\Server.h"
 #include "GameWorld\GameWorld.h"
 
+#define MESSAGE_PROCESSING_TIME 0.1
+
 struct ConnectionInfo {
-	int					ID;
+	UINT				ID;
 	SOCKET				sock;
 	SOCKADDR_IN			addr;
 	HANDLE				RecvThreadHandle;
@@ -25,7 +27,7 @@ struct ConnectionInfo {
 };
 
 struct RoomInfo {
-	UINT					RoomID;
+	UCHAR					RoomID;
 	ConnectionInfo			*serverinfo;
 	list<ConnectionInfo*>	clientlist;
 	//list<ConnectionInfo*>	agentlist;
@@ -61,7 +63,7 @@ class MainServer : public Server
 	list<ConnectionInfo*>		m_WaitingClientList;
 	list<NGPMSG*>				m_MsgQueue;
 
-	int							m_iRoomCounter;
+	UCHAR						m_iRoomCounter;
 
 public:
 	MainServer();
