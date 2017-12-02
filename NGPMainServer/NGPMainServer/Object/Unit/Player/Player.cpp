@@ -13,7 +13,9 @@ CPlayer::CPlayer(D2D_POINT_2F pt, D2D_RECT_F rc)
 	, m_bShoot(true)
 	, m_bReload(false)
 	, m_bGrenade(false)
+	, m_ptMoveDirection(Point2F())
 	, m_ptVelocity(Point2F())
+	, m_bMove(false)
 	, m_iAmmo(MAX_AMMO)
 	, m_iGrenade(MAX_GRENADE)
 	, m_iTurretKit(MAX_TURRET)
@@ -27,11 +29,15 @@ CPlayer::~CPlayer()
 
 void CPlayer::Update(float fTimeElapsed)
 {
+	Move(PLAYER_VELOCITY * fTimeElapsed);
 	m_ptPos += m_ptVelocity * fTimeElapsed;
 
 	m_ptVelocity -= m_ptVelocity * fTimeElapsed * FRICTIONAL_DRAG;
 	if (Length(m_ptVelocity) < FRICTIONAL_DRAG)
+	{
 		m_ptVelocity = Point2F();
+		m_bMove = false;
+	}
 
 	if (m_bReload)
 	{
@@ -74,7 +80,6 @@ void CPlayer::Update(float fTimeElapsed)
 		}
 	}
 }
-
 void CPlayer::Collide(float atk)
 {
 	if (m_bCollision) return;
@@ -82,6 +87,40 @@ void CPlayer::Collide(float atk)
 	m_fHP -= atk;
 	if (m_fHP < 0)
 		m_fHP = 0;
+}
+
+void CPlayer::SetObjectInfo(LPVOID info)
+{
+	ObjInfo* objinfo = static_cast<ObjInfo*>(info);
+	float damage = m_fHP - objinfo->HP;
+
+	m_iGrenade = objinfo->Ammo.Granade;
+	m_iAmmo = objinfo->Ammo.GunAmmo;
+	m_iTurretKit = objinfo->Ammo.TurretKit;
+	m_ptDirection = objinfo->Direction;
+	m_ptPos = objinfo->Position;
+
+	if(damage > 0) Collide(damage);
+}
+LPVOID CPlayer::GetObjectInfo()
+{
+	ObjInfo* objinfo = new ObjInfo();
+
+	objinfo->Ammo = { m_iGrenade, m_iAmmo, m_iTurretKit };
+	objinfo->Direction = m_ptDirection;
+	objinfo->Position = m_ptPos;
+	objinfo->HP = m_fHP;
+	objinfo->ObjectID = m_Id;
+	objinfo->ObjectType = OBJECTTYPE::Player;
+	objinfo->Collision = m_bCollision;
+
+	return objinfo;
+}
+
+void CPlayer::SetMoveDirection(const D2D_POINT_2F & ptMoveDirection)
+{
+	m_ptMoveDirection = ptMoveDirection;
+	m_bMove = true;
 }
 
 void CPlayer::Move(const D2D_POINT_2F& ptVelocity)
@@ -92,17 +131,24 @@ void CPlayer::Move(const D2D_POINT_2F& ptVelocity)
 		m_ptVelocity -= Normalize(m_ptVelocity) * (len - PLAYER_MAX_VELOCITY);
 }
 
+void CPlayer::Move(float fSpeed)
+{
+	if (m_bMove) Move(m_ptMoveDirection * fSpeed);
+}
+
 void CPlayer::Reflection(const D2D_POINT_2F& ptDirReflect)
 {
-	if(ptDirReflect == Point2F())
+	if (ptDirReflect == Point2F())
 		m_ptVelocity = m_ptVelocity * -REFLACTION_FACTOR;
 	else
 		m_ptVelocity = ptDirReflect * Length(m_ptVelocity * REFLACTION_FACTOR);
+	SetMoveDirection(Normalize(m_ptVelocity));
 }
 
 void CPlayer::Stop()
 {
 	m_ptVelocity = Point2F();
+	SetMoveDirection(Point2F());
 }
 
 CEffect* CPlayer::Shoot()
@@ -177,21 +223,6 @@ void CPlayer::RayCastingToShoot(std::vector<CObject*>& pvecObjects)
 	m_ptMuzzleEndPos = m_ptPos + (m_ptDirection * SHOOT_RANGE);
 }
 
-LPVOID CPlayer::GetObjectInfo()
-{
-	ObjInfo* objinfo = new ObjInfo();
-
-	objinfo->Ammo = { m_iGrenade, m_iAmmo, m_iTurretKit };
-	objinfo->Direction = m_ptDirection;
-	objinfo->Position = m_ptPos;
-	objinfo->HP = m_fHP;
-	objinfo->ObjectID = m_Id;
-	objinfo->ObjectType = OBJECTTYPE::Player;
-	objinfo->Collision = m_bCollision;
-
-	return objinfo;
-}
-
 CObject * CPlayer::GrenadeOut()
 {
 	if (m_bGrenade) return nullptr;
@@ -201,8 +232,11 @@ CObject * CPlayer::GrenadeOut()
 
 	CGrenade* grenade = new CGrenade(m_ptPos);
 	grenade->SetParent(this);
-	grenade->SetVelocity(m_ptDirection 
-		* Length(m_ptTargetPos - m_ptPos) 
+	grenade->SetVelocity(m_ptDirection
+		* Length(m_ptTargetPos - m_ptPos)
 		* PROJECTILE_FRICTIONAL_DRAG);
 	return grenade;
 }
+
+
+

@@ -62,6 +62,13 @@ void CBrick::RegisterResourceManager(shared_ptr<CResourceManager> resMng)
 	}
 }
 
+void CBrick::SetObjectInfo(LPVOID info)
+{
+	MapInfo* pMapInfo = static_cast<MapInfo*>(info);
+	float damage = m_fHP - pMapInfo->HP;
+	if (damage > 0) Collide(damage);
+}
+
 void CBrick::Collide(float atk)
 {
 	if (m_bCollision) return;

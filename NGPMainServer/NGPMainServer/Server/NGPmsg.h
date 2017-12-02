@@ -22,6 +22,7 @@ namespace MSGTYPE {
 
 	enum MSGACTION {
 		  MOVE = 20
+		, STOP
 		, SHOOT
 		, RELOAD
 		, GRENADE
@@ -40,7 +41,7 @@ namespace MSGTYPE {
 struct ActionInfo {
 	union {
 		struct { // MOVE
-			D2D_POINT_2F	MoveVelocity;
+			D2D_POINT_2F	LookDirection;
 			D2D_POINT_2F	MoveDirection;
 		}; 
 		struct { // SHOOT
@@ -159,28 +160,18 @@ inline NGPMSG* CreateMSG(UCHAR type, UCHAR roomno, UINT objectno, UCHAR nMapinfo
 
 inline UCHAR DispatchMSG(NGPMSG* msg, ActionInfo* actionlist, ObjInfo* objlist)
 {
-	int num_actioninfo = msg->header.NUM_ACTIONINFO;
-	int num_objinfo = msg->header.NUM_OBJINFO;
-	
-	if (num_actioninfo > 0)
-	{
+	if (msg->header.NUM_ACTIONINFO > 0)
+		memcpy(actionlist, msg->actioninfo, sizeof(ActionInfo) * msg->header.NUM_ACTIONINFO);
 
-		memcpy(actionlist, msg->actioninfo, MSGSIZE::SIZE_ACTIONINFO * num_actioninfo);
-	}
-	
-	if (num_objinfo > 0)
-	{
+	if (msg->header.NUM_OBJINFO > 0)
+		memcpy(objlist, msg->objinfo, sizeof(ObjInfo) * msg->header.NUM_OBJINFO);
 
-		memcpy(objlist, msg->objinfo, MSGSIZE::SIZE_OBJINFO * num_objinfo);
-	}
-
-	return msg->header.MSGTYPE;	
+	return msg->header.MSGTYPE;
 }
 
 inline UCHAR DispatchMSG(NGPMSG* msg, MapInfo* mapdata)
 {
-	mapdata = new MapInfo[msg->header.NUM_OBJINFO];
-	memcpy(mapdata, msg->Mapdata, msg->header.NUM_OBJINFO);
+	memcpy(mapdata, msg->Mapdata, sizeof(MapInfo) * msg->header.NUM_OBJINFO);
 
 	return msg->header.MSGTYPE;
 }

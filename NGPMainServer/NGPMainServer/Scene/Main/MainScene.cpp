@@ -11,6 +11,7 @@
 UINT g_nBrick = 0;
 
 CMainScene::CMainScene()
+	: m_ObjectIDCounter(0)
 {
 }
 CMainScene::~CMainScene()
@@ -32,6 +33,8 @@ bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 			{
 				CBrick* brick = new CBrick(Point2F((j - map_size_half)*g_iMapSize, (i - map_size_half)*g_iMapSize));
 				m_vecObjects.push_back(brick);
+				brick->SetID(m_ObjectIDCounter++);
+				brick->SetSize(RectF(-32, -32, 32, 32));
 			}
 		}
 
@@ -40,6 +43,9 @@ bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 	for(auto& p: m_pRoomInfo->clientlist)
 	{
 		CPlayer* player = new CPlayer(Point2F(-100, 10));
+		player->SetID(m_ObjectIDCounter++);
+		player->SetSize(RectF(-32, -32, 32, 32));
+
 		p->ID = player->GetID();
 		m_vecObjects.push_back(player);
 		UCHAR type = MSGTYPE::MSGSTATE::ROOMCREATION;
@@ -185,25 +191,54 @@ void CMainScene::PhysicsUpdate(float fTimeElapsed)
 
 void CMainScene::ProcessMsgs()
 {
-	auto start_time = std::chrono::system_clock::now();
-	auto now = std::chrono::system_clock::now();
-
+	auto start_time		= std::chrono::system_clock::now();
+	auto now			= std::chrono::system_clock::now();
 	std::chrono::duration<float> timeElapsed = start_time - now;
+	
+	NGPMSG*		msg				= nullptr;
+	ActionInfo* arrActionInfo	= nullptr;
+	ObjInfo*	arrObjInfo		= nullptr;
+	MapInfo*	arrMapInfo		= nullptr;
+
 	while (timeElapsed.count() < MESSAGE_PROCESSING_TIME)
 	{
 		if (!m_pRoomInfo->MsgQueue.size()) return;
 		m_pRoomInfo->EnterCriticalSection();
-		NGPMSG* msg = m_pRoomInfo->MsgQueue.front();
+		msg = m_pRoomInfo->MsgQueue.front();
 		m_pRoomInfo->MsgQueue.pop_front();
 		m_pRoomInfo->LeaveCriticalSection();
 
-		cout << "msg queue size: " << m_pRoomInfo->MsgQueue.size() << endl;
 		switch (msg->header.MSGTYPE)
 		{
 		case MSGTYPE::MSGACTION::MOVE:
 		{
-			cout << "client ID: " << msg->header.OBJECTNO << " move!" << endl;
-			msg->objinfo;
+			arrActionInfo = new ActionInfo[msg->header.NUM_ACTIONINFO];
+			DispatchMSG(msg, arrActionInfo, arrObjInfo);
+			for (auto& p : m_pRoomInfo->clientlist)
+			{
+				CPlayer* player = static_cast<CPlayer*>(p->pUserdata);
+				if (player->GetID() == msg->header.OBJECTNO)
+				{
+					for (int i = 0; i < msg->header.NUM_ACTIONINFO; ++i)
+					{
+						player->SetMoveDirection(arrActionInfo[i].MoveDirection);
+						player->SetDirection(arrActionInfo[i].LookDirection);
+					}
+				}
+			}
+			delete[] arrActionInfo;
+			arrActionInfo = nullptr;
+			break;
+		}
+		case MSGTYPE::MSGACTION::STOP:
+		{
+			DispatchMSG(msg, arrActionInfo, arrObjInfo);
+			for (auto& p : m_pRoomInfo->clientlist)
+			{
+				CPlayer* player = static_cast<CPlayer*>(p->pUserdata);
+				if (player->GetID() == msg->header.OBJECTNO)
+					player->Stop();
+			}
 			break;
 		}
 		case MSGTYPE::MSGACTION::SHOOT:
@@ -231,7 +266,13 @@ void CMainScene::ProcessMsgs()
 		case MSGTYPE::MSGUPDATE::UPDATEOBJECTSTATE:
 			break;
 		}
+
 		delete msg;
+		//delete[] arrObjInfo;
+		//delete[] arrMapInfo;
+		//msg					= nullptr;
+		//arrObjInfo			= nullptr;
+		//arrMapInfo			= nullptr;
 
 		now = std::chrono::system_clock::now();
 		timeElapsed = start_time - now;

@@ -149,10 +149,15 @@ bool CMainScene::OnCreate(wstring && tag, CFramework * pFramework)
 
 void CMainScene::ProcessMsgs()
 {
-	auto start_time = std::chrono::system_clock::now();
-	auto now = std::chrono::system_clock::now();
-
+	auto start_time		= std::chrono::system_clock::now();
+	auto now			= std::chrono::system_clock::now();
 	std::chrono::duration<float> timeElapsed = start_time - now;
+
+	NGPMSG*		msg				= nullptr;
+	ActionInfo* arrActionInfo	= nullptr;
+	ObjInfo*	arrObjInfo		= nullptr;
+	MapInfo*	arrMapInfo		= nullptr;
+
 	while (timeElapsed.count() < MESSAGE_PROCESSING_TIME)
 	{
 		if (!m_pClient->MsgQueue().size()) return;
@@ -161,10 +166,69 @@ void CMainScene::ProcessMsgs()
 		m_pClient->MsgQueue().pop_front();
 		m_pClient->LeaveCriticalSection();
 
-
-
+		int nObjInfo = msg->header.NUM_OBJINFO;
+		switch (msg->header.MSGTYPE)
+		{
+		case MSGTYPE::MSGSTATE::CLIENTGAMEOVER:
+			break;
+		case MSGTYPE::MSGSTATE::CLIENTREADY:
+			break;
+		case MSGTYPE::MSGSTATE::ROOMCREATION:
+			break;
+		case MSGTYPE::MSGUPDATE::ADJUSTPOS:
+			break;
+		case MSGTYPE::MSGUPDATE::CREATEOBJECT:
+			break;
+		case MSGTYPE::MSGUPDATE::DELETEOBJECT:
+			break;
+		case MSGTYPE::MSGUPDATE::UPDATEOBJECTSTATE:
+		{
+			arrObjInfo = new ObjInfo[msg->header.NUM_OBJINFO];
+			DispatchMSG(msg, arrActionInfo, arrObjInfo);
+			for (int i = 0; i < nObjInfo; ++i)
+			{
+				if (arrObjInfo[i].ObjectType != OBJECTTYPE::Brick)
+				{
+					for (auto iter = m_vecObjects.rbegin();
+						iter != m_vecObjects.rend(); ++iter)
+					{
+						if (arrObjInfo[i].ObjectID == (*iter)->GetID())
+						{
+							(*iter)->SetObjectInfo(&arrObjInfo[i]);
+							break;
+						}
+					}
+				}
+			}
+			delete[] arrObjInfo;
+			arrObjInfo = nullptr;
+			break;
+		}
+		case MSGTYPE::MSGUPDATE::UPDATEMAPSTATE:
+		{
+			arrMapInfo = new MapInfo[msg->header.NUM_OBJINFO];
+			DispatchMSG(msg, arrMapInfo);
+			for (int i = 0; i < nObjInfo; ++i)
+			{
+				for (auto& p : m_vecObjects)
+					if (arrMapInfo[i].ObjectID == p->GetID())
+					{
+						p->SetObjectInfo(&arrMapInfo[i]);
+						break;
+					}
+			}
+			delete[] arrMapInfo;
+			arrMapInfo = nullptr;
+			break;
+		}
+		}
 
 		delete msg;
+		//delete[] arrActionInfo;
+		//delete[] arrMapInfo;
+		//msg					= nullptr;
+		//arrActionInfo		= nullptr;
+		//arrMapInfo			= nullptr;
 
 		now = std::chrono::system_clock::now();
 		timeElapsed = start_time - now;
@@ -251,7 +315,6 @@ void CMainScene::Update(float fTimeElapsed)
 	for (auto& p : m_vecObjects)
 		p->Update(fTimeElapsed);
 
-	if(m_pPlayer) m_pPlayer->LookAt((m_ptMouseCursor * m_Camera.GetScaleFactor()) + m_pPlayer->GetPos());
 	if(m_pPlayer) m_pPlayer->RayCastingToShoot(m_vecObjects);
 
 	for (auto& p : m_lstEffects)
@@ -262,8 +325,6 @@ void CMainScene::Update(float fTimeElapsed)
 
 void CMainScene::PhysicsUpdate(float fTimeElapsed)
 {
-	D2D_POINT_2F ptPlayerPos =  m_pPlayer->GetPos();
-	float fPlayerRadius = m_pPlayer->GetSize().right;
 	D2D_POINT_2F dir = Point2F();
 
 	for (auto& p : m_vecObjects)
@@ -272,40 +333,31 @@ void CMainScene::PhysicsUpdate(float fTimeElapsed)
 		{
 		case CObject::Type::Player:
 		{
-			for (auto& q : m_vecObjects)
-			{
-				if (p == q) continue;
-				switch (q->GetTag())
-				{
-				case CObject::Type::Brick:
-				{
-					dir = Normalize(q->GetPos() - p->GetPos());
-					if (PtInRect(
-						&(q->GetSize() + q->GetPos())
-						, p->GetPos() + (dir * p->GetSize().right))
-						)
-					{
-						CPlayer* player = static_cast<CPlayer*>(p);
-						player->Reflection(-1.f * dir);
-						player->Move(-PLAYER_VELOCITY * dir * fTimeElapsed);
-					}
-					break;
-				}
-				}
-			}
+			//for (auto& q : m_vecObjects)
+			//{
+			//	if (p == q) continue;
+			//	switch (q->GetTag())
+			//	{
+			//	case CObject::Type::Brick:
+			//	{
+			//		dir = Normalize(q->GetPos() - p->GetPos());
+			//		if (PtInRect(
+			//			&(q->GetSize() + q->GetPos())
+			//			, p->GetPos() + (dir * p->GetSize().right))
+			//			)
+			//		{
+			//			CPlayer* player = static_cast<CPlayer*>(p);
+			//			player->Reflection(-1.f * dir);
+			//			player->Move(m_pClient.get(), -PLAYER_VELOCITY * dir * fTimeElapsed);
+			//		}
+			//		break;
+			//	}
+			//	}
+			//}
 			break;
 		}
 		case CObject::Type::Brick:
 		{
-			dir = Normalize(p->GetPos() - ptPlayerPos);
-			if (PtInRect(
-					&(p->GetSize() + p->GetPos())
-					, ptPlayerPos + (dir * fPlayerRadius))
-				)
-			{
-				m_pPlayer->Reflection(-1.f * dir);
-				m_pPlayer->Move(- PLAYER_VELOCITY * dir * fTimeElapsed);
-			}
 			break;
 		}
 		case CObject::Type::Grenade:
@@ -368,6 +420,7 @@ void CMainScene::ProcessInput(float fTimeElapsed)
 {
 	static UCHAR pKeyBuffer[256];
 	DWORD dwDirection = 0;
+	D2D_POINT_2F ptDir = Point2F();
 
 	if (::GetKeyboardState(pKeyBuffer))
 	{
@@ -379,25 +432,13 @@ void CMainScene::ProcessInput(float fTimeElapsed)
 			CObject* grenade = m_pPlayer->GrenadeOut();
 			if(grenade) m_vecObjects.push_back(grenade);
 		}
-		if (pKeyBuffer[VK_SPACE] & 0xF0) m_pPlayer->Stop();
+		if (pKeyBuffer[VK_SPACE] & 0xF0) m_pPlayer->Stop(m_pClient.get());
 
-		D2D_POINT_2F ptDir = Point2F();
 		if (dwDirection & DIR_UP) ptDir.y += -1;
 		if (dwDirection & DIR_DOWN) ptDir.y += 1;
 		if (dwDirection & DIR_LEFT) ptDir.x += -1;
 		if (dwDirection & DIR_RIGHT) ptDir.x += 1;
-		if (dwDirection && Length(ptDir))
-		{
-			m_pPlayer->Move(Normalize(ptDir) * PLAYER_VELOCITY * fTimeElapsed);
-			UCHAR type = MSGTYPE::MSGACTION::MOVE;
-			UCHAR roomNo = m_pClient->GetRoomID();
-			UINT objNo = m_pPlayer->GetID();
-			ActionInfo action_info;
-			action_info.MoveVelocity = Normalize(ptDir) * PLAYER_VELOCITY * fTimeElapsed;
-			NGPMSG* msg = CreateMSG(type, roomNo, objNo, 0, 1, NULL, &action_info);
-			m_pClient->SendMsgs((char*)msg, sizeof(NGPMSG));
-			delete msg;
-		}
+		if (dwDirection && Length(ptDir)) ptDir = Normalize(ptDir);
 
 		if (pKeyBuffer[VK_LBUTTON] & 0xF0)
 		{
@@ -414,4 +455,7 @@ void CMainScene::ProcessInput(float fTimeElapsed)
 	m_ptMouseCursor = Point2F(
 		ptCursorPos.x - rcWindow.left - 5 - rcClient.right / 2
 		, ptCursorPos.y - rcWindow.top - 30 - rcClient.bottom / 2);
+
+	m_pPlayer->LookAt((m_ptMouseCursor * m_Camera.GetScaleFactor()) + m_pPlayer->GetPos());
+	m_pPlayer->Move(m_pClient.get(), ptDir);
 }

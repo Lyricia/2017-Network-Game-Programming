@@ -16,6 +16,7 @@ public:
 	virtual void Draw(ID2D1HwndRenderTarget* pd2dRenderTarget) override;
 
 	virtual void RegisterResourceManager(shared_ptr<CResourceManager> resMng);
+	virtual void SetObjectInfo(LPVOID info) override;
 
 	void Collide(float atk);
 	void UpdateImg();

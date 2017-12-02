@@ -22,6 +22,7 @@
 #define FRICTIONAL_DRAG			2.5f
 #define REFLACTION_FACTOR		0.8f
 
+class CClient;
 class CEffect;
 class CResourceManager;
 class CPlayer : public CUnit
@@ -37,10 +38,16 @@ public:
 	virtual void RegisterResourceManager(shared_ptr<CResourceManager> resMng);
 
 	virtual void Collide(float atk) override;
+	virtual void SetObjectInfo(LPVOID info) override;
 
 	void Move(const D2D_POINT_2F& ptVelocity);
+	void Move(CClient* pClient, const D2D_POINT_2F& ptMoveDirection);
+
 	void Reflection(const D2D_POINT_2F& ptDirReflect = Point2F());
+
 	void Stop();
+	void Stop(CClient* pClient);
+
 	CEffect* Shoot();
 	void RayCastingToShoot(std::vector<CObject*>& pvecObjects);
 

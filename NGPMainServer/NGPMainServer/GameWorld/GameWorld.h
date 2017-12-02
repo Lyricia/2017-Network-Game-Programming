@@ -21,7 +21,7 @@ public:
 	void Run();
 	void ProcessMsgs();
 	void SendMsgs();
-	void CheckClients();
+	bool CheckClients();
 
 	void RegisterRoomInfo(RoomInfo* room) { m_pRoomInfo = room; }
 

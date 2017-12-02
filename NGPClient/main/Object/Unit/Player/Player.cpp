@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Framework\ResourceManager\ResourceManager.h"
+#include "Framework\Client\Client.h"
 #include "Player.h"
 #include "Object\Brick\Brick.h"
 #include "Object\Projectile\Grenade\Grenade.h"
@@ -237,12 +238,47 @@ void CPlayer::Collide(float atk)
 		m_fHP = 0;
 }
 
+void CPlayer::SetObjectInfo(LPVOID info)
+{
+	ObjInfo* objinfo = static_cast<ObjInfo*>(info);
+	float damage = m_fHP - objinfo->HP;
+
+	m_iGrenade = objinfo->Ammo.Granade;
+	m_iAmmo = objinfo->Ammo.GunAmmo;
+	m_iTurretKit = objinfo->Ammo.TurretKit;
+	m_ptDirection = objinfo->Direction;
+	m_ptPos = objinfo->Position;
+
+	if (damage > 0) Collide(damage);
+	m_fHP = objinfo->HP;
+
+	float angle = -acosf(m_ptDirection*Point2F(1, 0));
+	if (m_ptDirection.y > 0)
+		angle = -angle;
+	m_mtxRotate = Matrix3x2F::Rotation(
+		RADIAN_TO_DEGREE(angle), m_ptPos);
+}
+
 void CPlayer::Move(const D2D_POINT_2F& ptVelocity)
 {
 	m_ptVelocity += ptVelocity;
 	float len = Length(m_ptVelocity);
 	if (len > PLAYER_MAX_VELOCITY)
 		m_ptVelocity -= Normalize(m_ptVelocity) * (len - PLAYER_MAX_VELOCITY);
+}
+
+void CPlayer::Move(CClient* pClient, const D2D_POINT_2F& ptMoveDirection)
+{
+	UCHAR type = MSGTYPE::MSGACTION::MOVE;
+	UCHAR roomNo = pClient->GetRoomID();
+	UINT objNo = GetID();
+	ActionInfo action_info;
+	action_info.LookDirection = m_ptDirection;
+	action_info.MoveDirection = ptMoveDirection;
+
+	NGPMSG* msg = CreateMSG(type, roomNo, objNo, 0, 1, NULL, &action_info);
+	pClient->SendMsgs((char*)msg, sizeof(NGPMSG));
+	delete msg;
 }
 
 void CPlayer::Reflection(const D2D_POINT_2F& ptDirReflect)
@@ -256,6 +292,17 @@ void CPlayer::Reflection(const D2D_POINT_2F& ptDirReflect)
 void CPlayer::Stop()
 {
 	m_ptVelocity = Point2F();
+}
+
+void CPlayer::Stop(CClient * pClient)
+{
+	UCHAR type = MSGTYPE::MSGACTION::STOP;
+	UCHAR roomNo = pClient->GetRoomID();
+	UINT objNo = GetID();
+
+	NGPMSG* msg = CreateMSG(type, roomNo, objNo, 0, 0, NULL, NULL);
+	pClient->SendMsgs((char*)msg, sizeof(NGPMSG));
+	delete msg;
 }
 
 CEffect* CPlayer::Shoot()

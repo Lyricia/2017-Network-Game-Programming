@@ -38,7 +38,7 @@ void CGameWorld::Run()
 	// 기본 메시지 루프입니다.
 	while (true)
 	{
-		CheckClients();
+		if (!CheckClients()) break;
 		ProcessMsgs();
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 		{
@@ -64,7 +64,7 @@ void CGameWorld::SendMsgs()
 	m_pMainScene->SendMsgs();
 }
 
-void CGameWorld::CheckClients()
+bool CGameWorld::CheckClients()
 {
 	if (m_pRoomInfo) {
 		m_pRoomInfo->clientlist.remove_if([&](ConnectionInfo* client)->bool {
@@ -81,7 +81,8 @@ void CGameWorld::CheckClients()
 		if (m_pRoomInfo->clientlist.empty())
 		{
 			cout << "Terminate Room " << m_pRoomInfo->RoomID << endl;
-			ExitThread(NULL);
+			return false;
 		}
 	}
+	return true;
 }

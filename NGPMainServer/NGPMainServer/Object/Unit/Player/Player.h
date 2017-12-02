@@ -32,22 +32,26 @@ public:
 	virtual void Update(float fTimeElapsed) override;
 	virtual void Collide(float atk) override;
 
+	virtual void SetObjectInfo(LPVOID info) override;
+	virtual LPVOID GetObjectInfo() override;
+
+	void SetMoveDirection(const D2D_POINT_2F& ptMoveDirection);
+
 	void Move(const D2D_POINT_2F& ptVelocity);
+	void Move(float fSpeed);
 	void Reflection(const D2D_POINT_2F& ptDirReflect = Point2F());
 	void Stop();
 	CEffect* Shoot();
 	void RayCastingToShoot(std::vector<CObject*>& pvecObjects);
-
-	virtual LPVOID GetObjectInfo();
-
-
 	CObject* GrenadeOut();
 
 private:
 	float							m_fBlockStunTimer;
 	bool							m_bCollision;
 
+	D2D_POINT_2F					m_ptMoveDirection;
 	D2D_POINT_2F					m_ptVelocity;
+	bool							m_bMove;
 
 	CObject*						m_pTarget;
 

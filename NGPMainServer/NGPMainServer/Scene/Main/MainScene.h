@@ -33,6 +33,7 @@ public:
 
 private:
 	RoomInfo*						m_pRoomInfo;
+	UINT							m_ObjectIDCounter;
 
 	std::vector<CObject*>			m_vecObjects;
 

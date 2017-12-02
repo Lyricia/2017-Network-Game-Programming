@@ -5,15 +5,15 @@
 #define MAPINFOBUFSIZE		128	
 
 enum MSGSIZE {
-	  SIZE_HEADER		= 8
-	, SIZE_ACTIONINFO	= 16
-	, SIZE_OBJINFO		= 40
-	, SIZE_AMMUNITION	= 4
+	SIZE_HEADER = 8
+	, SIZE_ACTIONINFO = 16
+	, SIZE_OBJINFO = 40
+	, SIZE_AMMUNITION = 4
 };
 
 namespace MSGTYPE {
 	enum MSGSTATE {
-		  ROOMCREATION = 10
+		ROOMCREATION = 10
 		, CLIENTREADY
 		, CLIENTGAMEOVER
 		, AICREATTIONREQUEST
@@ -21,7 +21,8 @@ namespace MSGTYPE {
 	};
 
 	enum MSGACTION {
-		  MOVE = 20
+		MOVE = 20
+		, STOP
 		, SHOOT
 		, RELOAD
 		, GRENADE
@@ -29,7 +30,7 @@ namespace MSGTYPE {
 	};
 
 	enum MSGUPDATE {
-		  ADJUSTPOS = 30
+		ADJUSTPOS = 30
 		, CREATEOBJECT
 		, DELETEOBJECT
 		, UPDATEOBJECTSTATE
@@ -40,9 +41,9 @@ namespace MSGTYPE {
 struct ActionInfo {
 	union {
 		struct { // MOVE
-			D2D_POINT_2F	MoveVelocity;
+			D2D_POINT_2F	LookDirection;
 			D2D_POINT_2F	MoveDirection;
-		}; 
+		};
 		struct { // SHOOT
 			UINT			TargetID;
 			D2D_POINT_2F	TargetHitPos;
@@ -59,7 +60,7 @@ struct ActionInfo {
 };
 
 enum class OBJECTTYPE : UCHAR {
-	  Player = 0
+	Player = 0
 	, Agent
 	, Brick
 	, Grenade
@@ -108,12 +109,12 @@ struct MSGHEADER {
 
 struct NGPMSG {
 	MSGHEADER			header;
-	union{
+	union {
 		struct {
 			char		objinfo[OBJINFOBUFSIZE];									// union member
 			char		actioninfo[ACTIONINFOBUFSIZE];								// union member
 		};
-		
+
 		MapInfo			Mapdata[MAPINFOBUFSIZE];		// union member
 	};
 };
@@ -129,7 +130,7 @@ inline NGPMSG* CreateMSG(UCHAR type, UCHAR roomno, UINT objectno, UCHAR nObjinfo
 	Header.ROOMNO = roomno;
 	Header.NUM_ACTIONINFO = nActioninfo;
 	Header.NUM_OBJINFO = nObjinfo;
-	
+
 	msg->header = Header;
 	if (nActioninfo != 0)
 		memcpy(msg->actioninfo, actioninfo, MSGSIZE::SIZE_ACTIONINFO*nActioninfo);
@@ -145,7 +146,7 @@ inline NGPMSG* CreateMSG(UCHAR type, UCHAR roomno, UINT objectno, UCHAR nMapinfo
 	NGPMSG* msg = new NGPMSG();
 
 	MSGHEADER Header = {};
-	
+
 	Header.MSGTYPE = type;
 	Header.OBJECTNO = objectno;
 	Header.NUM_OBJINFO = nMapinfo;
@@ -157,23 +158,20 @@ inline NGPMSG* CreateMSG(UCHAR type, UCHAR roomno, UINT objectno, UCHAR nMapinfo
 	return msg;
 }
 
-inline int DispatchMSG(NGPMSG* msg, ActionInfo* actionlist, ObjInfo* objlist)
+inline UCHAR DispatchMSG(NGPMSG* msg, ActionInfo* actionlist, ObjInfo* objlist)
 {
-	int num_actioninfo = msg->header.NUM_ACTIONINFO;
-	int num_objinfo = msg->header.NUM_OBJINFO;
-	
-	if (num_actioninfo > 0)
-		memcpy(actionlist, msg->actioninfo, MSGSIZE::SIZE_ACTIONINFO * num_actioninfo);
-	
-	if (num_objinfo > 0)
-		memcpy(objlist, msg->objinfo, MSGSIZE::SIZE_OBJINFO * num_objinfo);
+	if (msg->header.NUM_ACTIONINFO > 0)
+		memcpy(actionlist, msg->actioninfo, sizeof(ActionInfo) * msg->header.NUM_ACTIONINFO);
 
-	return msg->header.MSGTYPE;	
+	if (msg->header.NUM_OBJINFO > 0)
+		memcpy(objlist, msg->objinfo, sizeof(ObjInfo) * msg->header.NUM_OBJINFO);
+
+	return msg->header.MSGTYPE;
 }
 
-inline int DispatchMSG(NGPMSG* msg, MapInfo* mapdata)
+inline UCHAR DispatchMSG(NGPMSG* msg, MapInfo* mapdata)
 {
-	memcpy(mapdata, msg->Mapdata, msg->header.NUM_OBJINFO);
+	memcpy(mapdata, msg->Mapdata, sizeof(MapInfo) * msg->header.NUM_OBJINFO);
 
 	return msg->header.MSGTYPE;
 }

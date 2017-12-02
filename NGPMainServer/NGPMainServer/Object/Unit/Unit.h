@@ -16,6 +16,7 @@ public:
 	virtual void Collide(float atk) {}
 	void LookAt(const D2D1_POINT_2F& target_pos);
 	void SetHP(float hp) { m_fHP = hp; }
+	void SetDirection(const D2D1_POINT_2F& direction) { m_ptDirection = direction; }
 
 	const D2D1_POINT_2F& GetDirection() const { return m_ptDirection; }
 	bool IsDie() const { return m_fHP <= 0; }

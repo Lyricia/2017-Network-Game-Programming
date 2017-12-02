@@ -11,11 +11,14 @@ public:
 	virtual ~CBrick();
 
 	virtual void Update(float fTimeElapsed) override;
-	virtual LPVOID GetObjectInfo();
+
+	virtual void SetObjectInfo(LPVOID info) override;
+	virtual LPVOID GetObjectInfo() override;
+
 	void Collide(float atk);
 
-	float GetHP() const { return m_fHP; }
 	void SetHP(float hp) { m_fHP = hp; }
+	float GetHP() const { return m_fHP; }
 	bool IsBroken() const { return m_fHP <= 0; }
 
 

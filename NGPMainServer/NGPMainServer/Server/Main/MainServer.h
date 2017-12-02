@@ -18,7 +18,10 @@ struct ConnectionInfo {
 		, pMsgQueue(nullptr) {}
 	~ConnectionInfo() {
 		if (RecvThreadHandle)
-			TerminateThread(RecvThreadHandle, 0);
+		{
+			closesocket(sock);
+			//TerminateThread(RecvThreadHandle, 0);
+		}
 	}
 
 	void EnterCriticalSection() { ::EnterCriticalSection(pCs); }
@@ -36,24 +39,31 @@ struct RoomInfo {
 	HANDLE					hGameWorld;
 	CRITICAL_SECTION		Cs;
 	
-	RoomInfo()
+	RoomInfo() 
 		: hGameWorld(NULL)
 	{
 		::InitializeCriticalSection(&Cs);
 	}
-	~RoomInfo() {
+	~RoomInfo() { 
+		Release(); 
 		::DeleteCriticalSection(&Cs);
-		for (auto& p : MsgQueue) delete p;
-		for (auto& p : clientlist) delete p;
-		MsgQueue.clear();
-		clientlist.clear();
 		if (hGameWorld) {
-			TerminateThread(hGameWorld, 0);
+			//TerminateThread(hGameWorld, 0);
 		}
 	}
 
 	void EnterCriticalSection() { ::EnterCriticalSection(&Cs); }
 	void LeaveCriticalSection() { ::LeaveCriticalSection(&Cs); }
+
+	void Release() {
+		EnterCriticalSection();
+		for (auto& p : MsgQueue) delete p;
+		MsgQueue.clear();
+		LeaveCriticalSection();
+
+		for (auto& p : clientlist) delete p;
+		clientlist.clear();
+	}
 };
 
 class MainServer : public Server
@@ -74,7 +84,7 @@ public:
 	void ConnectAgentServer();
 	void RequestAddAgentServer();
 	void CreateRoom();
-	void DeleteRoom(UINT room_id);
+	void DeleteRoom();
 };
 
 static int recvn(SOCKET s, char *buf, int len, int flags);

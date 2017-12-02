@@ -12,6 +12,8 @@ public:
 	virtual void Update(float fTimeElapsed) {}
 	virtual void Draw(ID2D1HwndRenderTarget * pd2dRenderTarget) = 0;
 
+	virtual void SetObjectInfo(LPVOID info) {}
+
 	void SetPos(D2D_POINT_2F pt) { m_ptPos = pt; }
 	void SetSize(D2D_RECT_F rc) { m_rcSize = rc; }
 	void SetID(UINT id) { m_Id = id; }
