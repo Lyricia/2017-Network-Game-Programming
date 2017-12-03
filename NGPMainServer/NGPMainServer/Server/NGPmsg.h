@@ -90,8 +90,10 @@ struct ObjInfo {
 		AMMUNITION		Ammo;
 		UINT			ParentID;
 	};
-
-	D2D_POINT_2F	Direction;
+	union {
+		D2D_POINT_2F	Direction;
+		D2D_POINT_2F	Grenade_ptCurrImg;
+	};
 	D2D_POINT_2F	Velocity;
 };
 

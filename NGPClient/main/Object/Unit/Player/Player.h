@@ -4,12 +4,12 @@
 #define PLAYER_MAX_HP			100.0
 #define BLOCK_STUN_TIME			0.2
 
-#define SHOOT_TIME				0.3
+#define SHOOT_TIME				0.4
 #define SHOOT_RANGE				1000.f
 #define SHOOT_DAMAGE			10.f
 #define SHOOT_STROKE			6.0f // 레이저 두께
-#define RELOAD_TIME				3.0f
-#define GRENADE_DELAY			1.0f
+#define RELOAD_TIME				3.5f
+#define GRENADE_DELAY			1.5f
 #define MUZZLE_OFFSET			64.f
 
 #define MAX_AMMO				30
@@ -49,6 +49,7 @@ public:
 	void Stop(CClient* pClient);
 
 	CEffect* Shoot();
+	void Shoot(const D2D_POINT_2F& ptHitPos);
 	void Shoot(CClient* pClient);
 	void RayCastingToShoot(std::vector<CObject*>& pvecObjects);
 

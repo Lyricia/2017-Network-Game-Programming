@@ -28,9 +28,7 @@ public:
 
 	bool OnCreate(wstring&& tag, CFramework* pFramework)	override;
 	void ProcessMsgs()										override;
-	void PreprocessingUpdate(float fTimeElapsed);
 	void Update(float fTimeElapsed)							override;
-	void PhysicsUpdate(float fTimeElapsed);
 	void Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)		override;
 
 	void ProcessInput(float fTimeElapsed);

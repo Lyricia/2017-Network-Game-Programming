@@ -211,6 +211,25 @@ void CPlayer::Shoot(
 	m_ptMuzzleStartPos = m_ptPos + m_ptMuzzleDirection * MUZZLE_OFFSET;
 	m_ptMuzzleEndPos = ptHitPos;
 
+	NGPMSG* msg = nullptr;
+
+	UCHAR type = MSGTYPE::MSGACTION::SHOOT;
+	UCHAR roomNo = pRoomInfo->RoomID;
+	UINT objNo = GetID();
+	ActionInfo action_info;
+	action_info.TargetHitPos = m_ptMuzzleEndPos;
+	action_info.TargetID = INVALID_OBJECT_ID;
+
+	msg = CreateMSG(type, roomNo, objNo, 0, 1, NULL, &action_info);
+	for (auto& client : pRoomInfo->clientlist)
+	{
+		int retval = send(client->sock, (char*)msg, sizeof(NGPMSG), NULL);
+		if (retval == SOCKET_ERROR) {
+			//assert
+		}
+	}
+	delete msg;
+
 	if (m_pTarget)
 	{
 		switch (m_pTarget->GetTag())
@@ -229,8 +248,30 @@ void CPlayer::Shoot(
 			break;
 		}
 		}
+		ObjInfo* objdata = new ObjInfo();
+		objdata->ObjectID = INVALID_OBJECT_ID;
+		objdata->ObjectType = OBJECTTYPE::Effect_ShootingHit;
+		objdata->Position = ptHitPos;
+
+		msg = CreateMSG(
+			MSGTYPE::MSGUPDATE::CREATEOBJECT
+			, pRoomInfo->RoomID
+			, 0
+			, 1
+			, 0
+			, objdata
+			, nullptr
+		);
+		for (auto& client : pRoomInfo->clientlist)
+		{
+			int retval = send(client->sock, (char*)msg, sizeof(NGPMSG), NULL);
+			if (retval == SOCKET_ERROR) {
+				//assert
+			}
+		}
+		delete msg;
+		delete objdata;
 	}
-	return;
 }
 
 void CPlayer::RayCastingToShoot(std::vector<CObject*>& pvecObjects)
@@ -271,19 +312,12 @@ void CPlayer::RayCastingToShoot(std::vector<CObject*>& pvecObjects)
 	m_ptMuzzleEndPos = m_ptPos + (m_ptDirection * SHOOT_RANGE);
 }
 
-CObject * CPlayer::GrenadeOut()
+void CPlayer::GrenadeOut()
 {
-	if (m_bGrenade) return nullptr;
-	if (m_iGrenade == 0) return nullptr;
+	if (m_bGrenade) return;
+	if (m_iGrenade == 0) return;
 	--m_iGrenade;
 	m_bGrenade = true;
-
-	CGrenade* grenade = new CGrenade(m_ptPos);
-	grenade->SetParent(this);
-	grenade->SetVelocity(m_ptDirection
-		* Length(m_ptTargetPos - m_ptPos)
-		* PROJECTILE_FRICTIONAL_DRAG);
-	return grenade;
 }
 
 

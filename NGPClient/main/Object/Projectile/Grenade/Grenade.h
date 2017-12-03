@@ -16,6 +16,8 @@ public:
 	virtual void Draw(ID2D1HwndRenderTarget* pd2dRenderTarget) override;
 	virtual void RegisterResourceManager(shared_ptr<CResourceManager> resMng) override;
 
+	virtual void SetObjectInfo(LPVOID info) override;
+
 	void SetVelocity(const D2D_POINT_2F& ptVelocity) { m_ptVelocity = ptVelocity; }
 	void Reflection(const D2D_POINT_2F& ptDirReflect = Point2F());
 	void Explosion(std::vector<CObject*>& pvecObjects);

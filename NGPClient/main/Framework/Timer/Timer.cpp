@@ -81,11 +81,6 @@ void CTimer::UpdateCaption()
 	// 프레임레이트를 출력합니다.
 #if defined(SHOW_CAPTIONFPS)
 
-#if USE_DEBUG_WINDOW
-	Event_CutsomLogger eventShowFPS(string("FPS"), to_string(m_fps));
-	CLogSystem::PropagateNotification(nullptr, &eventShowFPS);
-#endif
-
 	int nCurrentFps = static_cast<int>(GetFPS());
 
 	if (m_nLastFps == nCurrentFps) return;

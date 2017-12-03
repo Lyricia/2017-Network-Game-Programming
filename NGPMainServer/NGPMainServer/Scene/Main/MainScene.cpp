@@ -8,6 +8,7 @@
 
 #include "MainScene.h"
 
+#define OBJECT_RECT RectF(-32, -32, 32, 32)
 UINT g_nBrick = 0;
 
 CMainScene::CMainScene()
@@ -34,7 +35,7 @@ bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 				CBrick* brick = new CBrick(Point2F((j - map_size_half)*g_iMapSize, (i - map_size_half)*g_iMapSize));
 				m_vecObjects.push_back(brick);
 				brick->SetID(m_ObjectIDCounter++);
-				brick->SetSize(RectF(-32, -32, 32, 32));
+				brick->SetSize(OBJECT_RECT);
 			}
 		}
 
@@ -44,7 +45,7 @@ bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 	{
 		CPlayer* player = new CPlayer(Point2F(-100, 10));
 		player->SetID(m_ObjectIDCounter++);
-		player->SetSize(RectF(-32, -32, 32, 32));
+		player->SetSize(OBJECT_RECT);
 
 		p->ID = player->GetID();
 		m_vecObjects.push_back(player);
@@ -72,6 +73,27 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 			CPlayer* player = static_cast<CPlayer*>((*iter));
 			if (player->IsDie())
 			{
+				NGPMSG* msg = CreateMSG(
+					MSGTYPE::MSGUPDATE::DELETEOBJECT
+					, m_pRoomInfo->RoomID
+					, (*iter)->GetID()
+					, 0, 0, nullptr, nullptr);
+				for (auto& client : m_pRoomInfo->clientlist)
+				{
+					int retval = send(client->sock, (char*)msg, sizeof(NGPMSG), NULL);
+					if (retval == SOCKET_ERROR) {
+						//assert
+					}
+				}
+				delete msg;
+
+				for (auto& p : m_pRoomInfo->clientlist)
+					if (p->pUserdata)
+					{
+						CPlayer* client = static_cast<CPlayer*>(p->pUserdata);
+						if (client->GetID() == player->GetID())
+							p->pUserdata = nullptr;
+					}
 				delete (*iter);
 				iter = m_vecObjects.erase(iter);
 			}
@@ -84,6 +106,20 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 			CBrick* brick = static_cast<CBrick*>((*iter));
 			if (brick->IsBroken())
 			{
+				NGPMSG* msg = CreateMSG(
+					MSGTYPE::MSGUPDATE::DELETEOBJECT
+					, m_pRoomInfo->RoomID
+					, (*iter)->GetID()
+					, 0, 0, nullptr, nullptr);
+				for (auto& client : m_pRoomInfo->clientlist)
+				{
+					int retval = send(client->sock, (char*)msg, sizeof(NGPMSG), NULL);
+					if (retval == SOCKET_ERROR) {
+						//assert
+					}
+				}
+				delete msg;
+
 				delete (*iter);
 				iter = m_vecObjects.erase(iter);
 				g_nBrick--;
@@ -98,6 +134,44 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 			if (grenade->IsExplosion())
 			{
 				grenade->Explosion(m_vecObjects);
+
+				ObjInfo* objdata = new ObjInfo();
+				objdata->ObjectID = INVALID_OBJECT_ID;
+				objdata->ObjectType = OBJECTTYPE::Effect_Explosion;
+				objdata->Position = grenade->GetPos();
+
+				NGPMSG* msg = CreateMSG(
+					MSGTYPE::MSGUPDATE::CREATEOBJECT
+					, m_pRoomInfo->RoomID
+					, 0
+					, 1
+					, 0
+					, objdata
+					, nullptr
+				);
+				for (auto& client : m_pRoomInfo->clientlist)
+				{
+					int retval = send(client->sock, (char*)msg, sizeof(NGPMSG), NULL);
+					if (retval == SOCKET_ERROR) {
+						//assert
+					}
+				}
+				delete msg;
+				delete objdata;
+
+				msg = CreateMSG(
+					  MSGTYPE::MSGUPDATE::DELETEOBJECT
+					, m_pRoomInfo->RoomID
+					, grenade->GetID()
+					, 0 , 0 , nullptr , nullptr);
+				for (auto& client : m_pRoomInfo->clientlist)
+				{
+					int retval = send(client->sock, (char*)msg, sizeof(NGPMSG), NULL);
+					if (retval == SOCKET_ERROR) {
+						//assert
+					}
+				}
+				delete msg;
 
 				delete (*iter);
 				iter = m_vecObjects.erase(iter);
@@ -216,14 +290,15 @@ void CMainScene::ProcessMsgs()
 			DispatchMSG(msg, arrActionInfo, arrObjInfo);
 			for (auto& p : m_pRoomInfo->clientlist)
 			{
-				CPlayer* player = static_cast<CPlayer*>(p->pUserdata);
-				if (player->GetID() == msg->header.OBJECTNO)
+				if (p->pUserdata)
 				{
-					for (int i = 0; i < msg->header.NUM_ACTIONINFO; ++i)
-					{
-						player->SetMoveDirection(arrActionInfo[i].MoveDirection);
-						player->SetDirection(arrActionInfo[i].LookDirection);
-					}
+					CPlayer* player = static_cast<CPlayer*>(p->pUserdata);
+					if (player->GetID() == msg->header.OBJECTNO)
+						for (int i = 0; i < msg->header.NUM_ACTIONINFO; ++i)
+						{
+							player->SetMoveDirection(arrActionInfo[i].MoveDirection);
+							player->SetDirection(arrActionInfo[i].LookDirection);
+						}
 				}
 			}
 			delete[] arrActionInfo;
@@ -234,36 +309,109 @@ void CMainScene::ProcessMsgs()
 		{
 			DispatchMSG(msg, arrActionInfo, arrObjInfo);
 			for (auto& p : m_pRoomInfo->clientlist)
-			{
-				CPlayer* player = static_cast<CPlayer*>(p->pUserdata);
-				if (player->GetID() == msg->header.OBJECTNO)
-					player->Stop();
-			}
+				if (p->pUserdata)
+				{
+					CPlayer* player = static_cast<CPlayer*>(p->pUserdata);
+					if (player->GetID() == msg->header.OBJECTNO)
+						player->Stop();
+				}
 			break;
 		}
 		case MSGTYPE::MSGACTION::SHOOT:
 		{
-			//arrActionInfo = new ActionInfo[msg->header.NUM_ACTIONINFO];
-			//DispatchMSG(msg, arrActionInfo, arrObjInfo);
-			//for (auto& p : m_pRoomInfo->clientlist)
-			//{
-			//	CPlayer* player = static_cast<CPlayer*>(p->pUserdata);
-			//	if (player->GetID() == msg->header.OBJECTNO)
-			//	{
-			//		for (int i = 0; i < msg->header.NUM_ACTIONINFO; ++i)
-			//		{
-			//			player->SetMoveDirection(arrActionInfo[i].MoveDirection);
-			//			player->SetDirection(arrActionInfo[i].LookDirection);
-			//		}
-			//	}
-			//}
-			//delete[] arrActionInfo;
-			//arrActionInfo = nullptr;
+			CObject* target = nullptr;
+			D2D_POINT_2F hit_pos = Point2F();
+			arrActionInfo = new ActionInfo[msg->header.NUM_ACTIONINFO];
+			DispatchMSG(msg, arrActionInfo, arrObjInfo);
+			for (int i = 0; i < msg->header.NUM_ACTIONINFO; ++i)
+			{
+				hit_pos = arrActionInfo[i].TargetHitPos;
+				for (auto& p : m_vecObjects)
+					if (p->GetID() == arrActionInfo[i].TargetID)
+					{
+						target = p;
+						break;
+					}
+				for (auto& p : m_pRoomInfo->clientlist)
+					if (p->pUserdata)
+					{
+						CPlayer* player = static_cast<CPlayer*>(p->pUserdata);
+						if (player->GetID() == msg->header.OBJECTNO)
+						{
+							player->Shoot(m_pRoomInfo, target, hit_pos);
+							break;
+						}
+					}
+			}
+			delete[] arrActionInfo;
+			arrActionInfo = nullptr;
+			break;
+		}
+		case MSGTYPE::MSGACTION::RELOAD:
+		{
+			DispatchMSG(msg, arrActionInfo, arrObjInfo);
+			for (auto& p : m_pRoomInfo->clientlist)
+				if (p->pUserdata)
+				{
+					CPlayer* player = static_cast<CPlayer*>(p->pUserdata);
+					if (player->GetID() == msg->header.OBJECTNO)
+						player->Reload();
+				}
+			break;
+		}
+		case MSGTYPE::MSGACTION::GRENADE:
+		{
+			arrActionInfo = new ActionInfo[msg->header.NUM_ACTIONINFO];
+			DispatchMSG(msg, arrActionInfo, arrObjInfo);
+			for (int i = 0; i < msg->header.NUM_ACTIONINFO; ++i)
+			{
+				CGrenade* grenade = new CGrenade(arrActionInfo[i].TargetPos, OBJECT_RECT);
+				grenade->SetID(m_ObjectIDCounter++);
+				grenade->SetVelocity(arrActionInfo[i].SetVelocity);
+				for (auto& p : m_pRoomInfo->clientlist)
+					if (p->pUserdata)
+					{
+						CPlayer* player = static_cast<CPlayer*>(p->pUserdata);
+						if (player->GetID() == msg->header.OBJECTNO)
+						{
+							player->GrenadeOut();
+							grenade->SetParent(player);
+							break;
+						}
+					}
+				m_vecObjects.push_back(grenade);
+
+				ObjInfo* objdata = new ObjInfo();
+				objdata->ObjectID = grenade->GetID();
+				objdata->ObjectType = OBJECTTYPE::Grenade;
+				objdata->Position = arrActionInfo[i].TargetPos;
+				objdata->Velocity = arrActionInfo[i].SetVelocity;
+				objdata->ParentID = msg->header.OBJECTNO;
+
+				NGPMSG* grenade_msg = CreateMSG(
+					MSGTYPE::MSGUPDATE::CREATEOBJECT
+					, m_pRoomInfo->RoomID
+					, 0
+					, 1
+					, 0
+					, objdata
+					, nullptr
+				);
+				for (auto& client : m_pRoomInfo->clientlist)
+				{
+					int retval = send(client->sock, (char*)grenade_msg, sizeof(NGPMSG), NULL);
+					if (retval == SOCKET_ERROR) {
+						//assert
+					}
+				}
+				delete grenade_msg;
+				delete objdata;
+			}
+			delete[] arrActionInfo;
+			arrActionInfo = nullptr;
 			break;
 		}
 		case MSGTYPE::MSGACTION::BUILDTURRET:
-			break;
-		case MSGTYPE::MSGACTION::RELOAD:
 			break;
 		case MSGTYPE::MSGSTATE::AIAGENTINFO:
 			break;
@@ -299,40 +447,75 @@ void CMainScene::ProcessMsgs()
 
 void CMainScene::SendMsgs()
 {
-	int nPlayer = m_pRoomInfo->clientlist.size();
-	ObjInfo* objdata = new ObjInfo[nPlayer];
-	int idx = 0, retval;
-
-	for (auto &client : m_pRoomInfo->clientlist)
-	{
-		CPlayer* p = (CPlayer*)client->pUserdata;
-		ObjInfo* tmp = (ObjInfo*)p->GetObjectInfo();
-		objdata[idx++] = *tmp;
-		delete tmp;
-	}
-
+	int idx = 0;
+	int retval = 0;
+	int nGrenade = 0;
 	MapInfo* mapdata = new MapInfo[g_nBrick];
-	idx = 0;
+
 	for (auto &obj : m_vecObjects)
 	{
-		if (obj->GetTag() == CObject::Type::Brick)
+		switch (obj->GetTag())
+		{
+		case CObject::Type::Brick:
 		{
 			MapInfo* tmp = (MapInfo*)obj->GetObjectInfo();
 			mapdata[idx++] = *(tmp);
 			delete tmp;
+			break;
+		}
+		case CObject::Type::Grenade:
+		{
+			++nGrenade;
+			break;
+		}
 		}
 	}
 
-	NGPMSG* objmsg = CreateMSG(
+	int nPlayer = m_pRoomInfo->clientlist.size();
+	ObjInfo* playerdata = new ObjInfo[nPlayer];
+	idx = 0;
+	for (auto &client : m_pRoomInfo->clientlist)
+		if (client->pUserdata)
+		{
+			CPlayer* p = static_cast<CPlayer*>(client->pUserdata);
+			ObjInfo* tmp = (ObjInfo*)p->GetObjectInfo();
+			playerdata[idx++] = *tmp;
+			delete tmp;
+		}
+	NGPMSG* playermsg = CreateMSG(
 		MSGTYPE::MSGUPDATE::UPDATEOBJECTSTATE
 		, m_pRoomInfo->RoomID
 		, 0
 		, nPlayer
 		, 0
-		, objdata
+		, playerdata
 		, nullptr
 	);
-	
+	delete[] playerdata;
+
+	ObjInfo* Grenadedata = new ObjInfo[nGrenade];
+	idx = 0;
+	for (auto iter = m_vecObjects.rbegin();
+		iter != m_vecObjects.rend(); ++iter)
+	{
+		if ((*iter)->GetTag() == CObject::Type::Grenade)
+		{
+			ObjInfo* tmp = (ObjInfo*)(*iter)->GetObjectInfo();
+			Grenadedata[idx++] = *tmp;
+			delete tmp;
+		}
+	}
+	NGPMSG* grenademsg = CreateMSG(
+		MSGTYPE::MSGUPDATE::UPDATEOBJECTSTATE
+		, m_pRoomInfo->RoomID
+		, 0
+		, nGrenade
+		, 0
+		, Grenadedata
+		, nullptr
+	);
+	delete[] Grenadedata;
+
 	int nMapmsg = g_nBrick / MAPINFOBUFSIZE + 1;
 	NGPMSG** mapmsg = new NGPMSG*[nMapmsg];
 	int offset = MAPINFOBUFSIZE;
@@ -347,13 +530,20 @@ void CMainScene::SendMsgs()
 			, mapdata + offset * i
 		);
 	}
+	delete[] mapdata;
+
 
 	for (auto & client : m_pRoomInfo->clientlist)
 	{
-		objmsg->header.OBJECTNO = client->ID;
+		playermsg->header.OBJECTNO = client->ID;
 
-		retval = send(client->sock, (char*)objmsg, sizeof(NGPMSG), NULL);
+		retval = send(client->sock, (char*)playermsg, sizeof(NGPMSG), NULL);
 		if(retval == SOCKET_ERROR){
+			//assert
+		}
+
+		retval = send(client->sock, (char*)grenademsg, sizeof(NGPMSG), NULL);
+		if (retval == SOCKET_ERROR) {
 			//assert
 		}
 
@@ -366,11 +556,9 @@ void CMainScene::SendMsgs()
 		}
 	}
 
-	delete objmsg;
+	delete playermsg;
+	delete grenademsg;
 	for (int i = 0; i < nMapmsg; ++i)
 		delete mapmsg[i];
-
 	delete[] mapmsg;
-	delete[] mapdata;
-	delete[] objdata;
 }

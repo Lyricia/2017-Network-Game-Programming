@@ -64,6 +64,15 @@ void CGrenade::RegisterResourceManager(shared_ptr<CResourceManager> resMng)
 	}
 }
 
+void CGrenade::SetObjectInfo(LPVOID info)
+{
+	ObjInfo* objinfo = static_cast<ObjInfo*>(info);
+
+	m_ptVelocity = objinfo->Velocity;
+	m_ptPos = objinfo->Position;
+	m_ptCurrImg = objinfo->Grenade_ptCurrImg;
+}
+
 void CGrenade::Reflection(const D2D_POINT_2F & ptDirReflect)
 {
 	if (ptDirReflect == Point2F())

@@ -43,8 +43,9 @@ public:
 	void Stop();
 	void Shoot();
 	void Shoot(RoomInfo* pRoomInfo, CObject* pTarget, const D2D_POINT_2F& ptHitPos);
+	void Reload() { m_bReload = true; }
 	void RayCastingToShoot(std::vector<CObject*>& pvecObjects);
-	CObject* GrenadeOut();
+	void GrenadeOut();
 
 private:
 	float							m_fBlockStunTimer;

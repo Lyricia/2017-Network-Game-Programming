@@ -169,6 +169,28 @@ void CMainScene::ProcessMsgs()
 		int nObjInfo = msg->header.NUM_OBJINFO;
 		switch (msg->header.MSGTYPE)
 		{
+		case MSGTYPE::MSGACTION::SHOOT:
+		{
+			D2D_POINT_2F hit_pos = Point2F();
+			arrActionInfo = new ActionInfo[msg->header.NUM_ACTIONINFO];
+			DispatchMSG(msg, arrActionInfo, arrObjInfo);
+			for (int i = 0; i < msg->header.NUM_ACTIONINFO; ++i)
+			{
+				for (auto iter = m_vecObjects.rbegin();
+					iter != m_vecObjects.rend(); ++iter)
+				{
+					if (msg->header.OBJECTNO == (*iter)->GetID())
+					{
+						CPlayer* player = static_cast<CPlayer*>(*iter);
+						player->Shoot(arrActionInfo[i].TargetHitPos);
+						break;
+					}
+				}
+			}
+			delete[] arrActionInfo;
+			arrActionInfo = nullptr;
+			break;
+		}
 		case MSGTYPE::MSGSTATE::CLIENTGAMEOVER:
 			break;
 		case MSGTYPE::MSGSTATE::CLIENTREADY:
@@ -178,28 +200,85 @@ void CMainScene::ProcessMsgs()
 		case MSGTYPE::MSGUPDATE::ADJUSTPOS:
 			break;
 		case MSGTYPE::MSGUPDATE::CREATEOBJECT:
-			break;
-		case MSGTYPE::MSGUPDATE::DELETEOBJECT:
-			break;
-		case MSGTYPE::MSGUPDATE::UPDATEOBJECTSTATE:
 		{
 			arrObjInfo = new ObjInfo[msg->header.NUM_OBJINFO];
 			DispatchMSG(msg, arrActionInfo, arrObjInfo);
 			for (int i = 0; i < nObjInfo; ++i)
 			{
+				switch (arrObjInfo[i].ObjectType)
+				{
+				case OBJECTTYPE::Effect_ShootingHit:
+				{
+					auto& rc = SizeToRect(SizeF(32, 32));
+					CEffect* effect = new CEffect(arrObjInfo[i].Position, rc);
+					auto& img = m_pResMng->GetImageRef(ResImgName::MagicBlast);
+					auto& sz = m_pResMng->GetImgLength(ResImgName::MagicBlast);
+					effect->RegisterEffectSprite(img, sz);
+					m_lstEffects.push_back(effect);
+					break;
+				}
+				case OBJECTTYPE::Effect_Explosion:
+				{
+					auto rc = SizeToRect(SizeF(GRENADE_EXPLOSION_RANGE, GRENADE_EXPLOSION_RANGE));
+					CEffect* effect = new CEffect(arrObjInfo[i].Position, rc);
+					auto& img = m_pResMng->GetImageRef(ResImgName::Explosion256);
+					auto& sz = m_pResMng->GetImgLength(ResImgName::Explosion256);
+					effect->RegisterEffectSprite(img, sz);
+					m_lstEffects.push_back(effect);
+					break;
+				}
+				case OBJECTTYPE::Grenade:
+				{
+					CGrenade* grenade = new CGrenade(arrObjInfo[i].Position);
+					grenade->RegisterResourceManager(m_pResMng);
+					for (auto iter = m_vecObjects.rbegin();
+						iter != m_vecObjects.rend(); ++iter)
+						if (arrObjInfo[i].ObjectID == (*iter)->GetID())
+						{
+							grenade->SetParent(*iter);
+							break;
+						}
+					grenade->SetVelocity(arrObjInfo[i].Velocity);
+					m_vecObjects.push_back(grenade);
+					break;
+				}
+				}
+
+			}
+			delete[] arrObjInfo;
+			arrObjInfo = nullptr;
+			break;
+		}
+		case MSGTYPE::MSGUPDATE::DELETEOBJECT:
+		{
+			DispatchMSG(msg, arrActionInfo, arrObjInfo);
+			for (auto& iter = m_vecObjects.begin(); iter != m_vecObjects.end();)
+			{
+				if (msg->header.OBJECTNO == (*iter)->GetID())
+				{
+					if ((*iter) == m_pPlayer) m_pPlayer = nullptr;
+					delete (*iter);
+					iter = m_vecObjects.erase(iter);
+				}
+				else ++iter;
+			}
+			break;
+		}
+		case MSGTYPE::MSGUPDATE::UPDATEOBJECTSTATE:
+		{
+			arrObjInfo = new ObjInfo[msg->header.NUM_OBJINFO];
+			DispatchMSG(msg, arrActionInfo, arrObjInfo);
+			for (int i = 0; i < nObjInfo; ++i)
 				if (arrObjInfo[i].ObjectType != OBJECTTYPE::Brick)
 				{
 					for (auto iter = m_vecObjects.rbegin();
 						iter != m_vecObjects.rend(); ++iter)
-					{
 						if (arrObjInfo[i].ObjectID == (*iter)->GetID())
 						{
 							(*iter)->SetObjectInfo(&arrObjInfo[i]);
 							break;
 						}
-					}
 				}
-			}
 			delete[] arrObjInfo;
 			arrObjInfo = nullptr;
 			break;
@@ -209,14 +288,12 @@ void CMainScene::ProcessMsgs()
 			arrMapInfo = new MapInfo[msg->header.NUM_OBJINFO];
 			DispatchMSG(msg, arrMapInfo);
 			for (int i = 0; i < nObjInfo; ++i)
-			{
 				for (auto& p : m_vecObjects)
 					if (arrMapInfo[i].ObjectID == p->GetID())
 					{
 						p->SetObjectInfo(&arrMapInfo[i]);
 						break;
 					}
-			}
 			delete[] arrMapInfo;
 			arrMapInfo = nullptr;
 			break;
@@ -224,169 +301,25 @@ void CMainScene::ProcessMsgs()
 		}
 
 		delete msg;
-		//delete[] arrActionInfo;
-		//delete[] arrMapInfo;
-		//msg					= nullptr;
-		//arrActionInfo		= nullptr;
-		//arrMapInfo			= nullptr;
+		msg = nullptr;
 
 		now = std::chrono::system_clock::now();
 		timeElapsed = start_time - now;
 	}
 }
 
-void CMainScene::PreprocessingUpdate(float fTimeElapsed)
-{
-	m_lstEffects.remove_if([](CEffect* pEffect)->bool {
-		if (pEffect->IsFinished()) 
-		{
-			delete pEffect;
-			return true;
-		}
-		return false;
-	});
-
-	for (auto& iter = m_vecObjects.begin(); iter != m_vecObjects.end();)
-	{
-		switch ((*iter)->GetTag())
-		{
-		case CObject::Type::Player:
-		{
-			CPlayer* player = static_cast<CPlayer*>((*iter));
-			if (player->IsDie())
-			{
-				if (player == m_pPlayer)
-					m_pPlayer = nullptr;
-				delete (*iter);
-				iter = m_vecObjects.erase(iter);
-			}
-			else
-				++iter;
-			break;
-		}
-		case CObject::Type::Brick:
-		{
-			CBrick* brick = static_cast<CBrick*>((*iter));
-			if (brick->IsBroken())
-			{
-				delete (*iter);
-				iter = m_vecObjects.erase(iter);
-			}
-			else
-				++iter;
-			break;
-		}
-		case CObject::Type::Grenade:
-		{
-			CGrenade* grenade = static_cast<CGrenade*>((*iter));
-			if (grenade->IsExplosion())
-			{
-				grenade->Explosion(m_vecObjects);
-
-				auto rc = SizeToRect(SizeF(GRENADE_EXPLOSION_RANGE, GRENADE_EXPLOSION_RANGE));
-				CEffect* effect = new CEffect(grenade->GetPos(), rc);
-				auto& img = m_pResMng->GetImageRef(ResImgName::Explosion256);
-				auto& sz = m_pResMng->GetImgLength(ResImgName::Explosion256);
-				effect->RegisterEffectSprite(img, sz);
-				m_lstEffects.push_back(effect);
-
-				delete (*iter);
-				iter = m_vecObjects.erase(iter);
-			}
-			else
-				++iter;
-			break;
-		}
-		default:
-			++iter;
-			break;
-		}
-	}
-}
-
 void CMainScene::Update(float fTimeElapsed)
 {
-	ProcessInput(fTimeElapsed);
-	PreprocessingUpdate(fTimeElapsed);
+	if (m_pPlayer) ProcessInput(fTimeElapsed);
 
-	if (m_pPlayer) m_Camera.SetPosition(m_pPlayer->GetPos());
-
-	//m_pPlayer->Update(fTimeElapsed);
 	for (auto& p : m_vecObjects)
 		p->Update(fTimeElapsed);
 
-	if(m_pPlayer) m_pPlayer->RayCastingToShoot(m_vecObjects);
+	if (m_pPlayer) m_Camera.SetPosition(m_pPlayer->GetPos());
+	if (m_pPlayer) m_pPlayer->RayCastingToShoot(m_vecObjects);
 
 	for (auto& p : m_lstEffects)
 		p->Update(fTimeElapsed);
-
-	PhysicsUpdate(fTimeElapsed);
-}
-
-void CMainScene::PhysicsUpdate(float fTimeElapsed)
-{
-	D2D_POINT_2F dir = Point2F();
-
-	for (auto& p : m_vecObjects)
-	{
-		switch (p->GetTag())
-		{
-		case CObject::Type::Player:
-		{
-			//for (auto& q : m_vecObjects)
-			//{
-			//	if (p == q) continue;
-			//	switch (q->GetTag())
-			//	{
-			//	case CObject::Type::Brick:
-			//	{
-			//		dir = Normalize(q->GetPos() - p->GetPos());
-			//		if (PtInRect(
-			//			&(q->GetSize() + q->GetPos())
-			//			, p->GetPos() + (dir * p->GetSize().right))
-			//			)
-			//		{
-			//			CPlayer* player = static_cast<CPlayer*>(p);
-			//			player->Reflection(-1.f * dir);
-			//			player->Move(m_pClient.get(), -PLAYER_VELOCITY * dir * fTimeElapsed);
-			//		}
-			//		break;
-			//	}
-			//	}
-			//}
-			break;
-		}
-		case CObject::Type::Brick:
-		{
-			break;
-		}
-		case CObject::Type::Grenade:
-		{
-			for (auto& q : m_vecObjects)
-			{
-				if (p == q) continue;
-				switch (q->GetTag())
-				{
-				case CObject::Type::Brick:
-				{
-					dir = Normalize(q->GetPos() - p->GetPos());
-					if (PtInRect(
-						&(q->GetSize() + q->GetPos())
-						, p->GetPos() + (dir * p->GetSize().right))
-						)
-					{
-						CGrenade* grenade = static_cast<CGrenade*>(p);
-						grenade->Reflection(-1.f * dir);
-					}
-					break;
-				}
-				}
-			}
-			break;
-		}
-		}
-		
-	}
 }
 
 void CMainScene::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
@@ -407,13 +340,16 @@ void CMainScene::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
 	for (auto& p : m_lstEffects)
 		p->Draw(pd2dRenderTarget);
 
-	if (m_pPlayer) m_pPlayer->DrawUI(pd2dRenderTarget, m_Camera.GetScaleFactor());
+	if (m_pPlayer)
+	{
+		m_pPlayer->DrawUI(pd2dRenderTarget, m_Camera.GetScaleFactor());
 
-	pd2dRenderTarget->DrawBitmap(
-		m_bmpCrossHair.Get()
-		, SizeToRect(m_bmpCrossHair->GetSize()) + 
-		m_ptMouseCursor * m_Camera.GetScaleFactor() +
-		m_pPlayer->GetPos());
+		pd2dRenderTarget->DrawBitmap(
+			m_bmpCrossHair.Get()
+			, SizeToRect(m_bmpCrossHair->GetSize()) +
+			m_ptMouseCursor * m_Camera.GetScaleFactor() +
+			m_pPlayer->GetPos());
+	}
 }
 
 void CMainScene::ProcessInput(float fTimeElapsed)
@@ -428,10 +364,9 @@ void CMainScene::ProcessInput(float fTimeElapsed)
 		if (pKeyBuffer['S'] & 0xF0) dwDirection |= DIR_DOWN;
 		if (pKeyBuffer['A'] & 0xF0) dwDirection |= DIR_LEFT;
 		if (pKeyBuffer['D'] & 0xF0) dwDirection |= DIR_RIGHT;
-		if (pKeyBuffer['G'] & 0xF0) {
-			CObject* grenade = m_pPlayer->GrenadeOut();
-			if(grenade) m_vecObjects.push_back(grenade);
-		}
+		if (pKeyBuffer['G'] & 0xF0) m_pPlayer->GrenadeOut(m_pClient.get());
+
+		if (pKeyBuffer[VK_LBUTTON] & 0xF0) m_pPlayer->Shoot(m_pClient.get());
 		if (pKeyBuffer[VK_SPACE] & 0xF0) m_pPlayer->Stop(m_pClient.get());
 
 		if (dwDirection & DIR_UP) ptDir.y += -1;
@@ -440,12 +375,6 @@ void CMainScene::ProcessInput(float fTimeElapsed)
 		if (dwDirection & DIR_RIGHT) ptDir.x += 1;
 		if (dwDirection && Length(ptDir)) ptDir = Normalize(ptDir);
 
-		if (pKeyBuffer[VK_LBUTTON] & 0xF0)
-		{
-			CEffect* effect = m_pPlayer->Shoot();
-			if (effect)
-				m_lstEffects.push_back(effect);
-		}
 	}
 	static RECT rcWindow;
 	static POINT ptCursorPos;

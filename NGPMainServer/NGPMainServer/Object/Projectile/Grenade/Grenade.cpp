@@ -8,6 +8,7 @@ CGrenade::CGrenade(D2D_POINT_2F pt, D2D_RECT_F rc)
 	, m_bExplosion(false)
 {
 	m_Tag = CObject::Type::Grenade;
+	m_szImg = SizeU(26, 1);
 }
 CGrenade::~CGrenade()
 {
@@ -28,6 +29,29 @@ void CGrenade::Update(float fTimeElapsed)
 		((float)m_szImg.width / GRENADE_EXPLOSION_DELAY);
 	if (m_ptCurrImg.x >= (float)m_szImg.width)
 		m_bExplosion = true;
+}
+
+void CGrenade::SetObjectInfo(LPVOID info)
+{
+	ObjInfo* objinfo = static_cast<ObjInfo*>(info);
+
+	m_ptVelocity = objinfo->Velocity;
+	m_ptPos = objinfo->Position;
+	m_ptCurrImg = objinfo->Grenade_ptCurrImg;
+}
+
+LPVOID CGrenade::GetObjectInfo()
+{
+	ObjInfo* objinfo = new ObjInfo();
+
+	objinfo->ObjectID = m_Id;
+	objinfo->ParentID = m_pParent->GetID();
+	objinfo->Velocity = m_ptVelocity;
+	objinfo->Position = m_ptPos;
+	objinfo->ObjectType = OBJECTTYPE::Grenade;
+	objinfo->Grenade_ptCurrImg = m_ptCurrImg;
+
+	return objinfo;
 }
 
 void CGrenade::Reflection(const D2D_POINT_2F & ptDirReflect)

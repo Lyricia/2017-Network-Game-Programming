@@ -42,7 +42,7 @@ int APIENTRY wWinMain(
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
-#ifdef _DEBUG
+#ifdef USE_CONSOLE_WINDOW
 	if (!AllocConsole())
 		MessageBox(NULL, L"The console window was not created"
 			, NULL, MB_ICONEXCLAMATION);
@@ -83,7 +83,7 @@ int APIENTRY wWinMain(
 		if (!timer->Update()) continue;
 		framework.FrameAdvance();
     }
-#ifdef _DEBUG
+#ifdef USE_CONSOLE_WINDOW
 	fclose(fp);
 	if (!FreeConsole())
 		MessageBox(NULL, L"Failed to free the console!"

@@ -349,6 +349,24 @@ CEffect* CPlayer::Shoot()
 	return nullptr;
 }
 
+void CPlayer::Shoot(const D2D_POINT_2F & ptHitPos)
+{
+	if (m_bShoot) return;
+	if (m_bReload) return;
+
+	if (m_iAmmo == 0)
+	{
+		m_bReload = true;
+		return;
+	}
+	else --m_iAmmo;
+
+	m_bShoot = true;
+	m_ptMuzzleDirection = m_ptDirection;
+	m_ptMuzzleStartPos = m_ptPos + m_ptMuzzleDirection * MUZZLE_OFFSET;
+	m_ptMuzzleEndPos = ptHitPos;
+}
+
 void CPlayer::Shoot(CClient * pClient)
 {
 	if (m_bShoot) return;
@@ -444,4 +462,22 @@ CObject * CPlayer::GrenadeOut()
 
 void CPlayer::GrenadeOut(CClient * pClient)
 {
+	if (m_bGrenade) return;
+	if (m_iGrenade == 0) return;
+	--m_iGrenade;
+	m_bGrenade = true;
+
+	NGPMSG* msg = nullptr;
+	UCHAR type = MSGTYPE::MSGACTION::GRENADE;
+	UCHAR roomNo = pClient->GetRoomID();
+	UINT objNo = GetID();
+	ActionInfo action_info;
+	action_info.TargetPos = m_ptPos;
+	action_info.SetVelocity = m_ptDirection
+		* Length(m_ptTargetPos - m_ptPos)
+		* PROJECTILE_FRICTIONAL_DRAG;
+
+	msg = CreateMSG(type, roomNo, objNo, 0, 1, NULL, &action_info);
+	pClient->SendMsgs((char*)msg, sizeof(NGPMSG));
+	delete msg;
 }
