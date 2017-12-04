@@ -58,6 +58,7 @@ void CGameWorld::Run()
 void CGameWorld::ProcessMsgs()
 {
 	m_pMainScene->ProcessMsgs();
+//	printf("\r%d", m_pRoomInfo->MsgQueue.size());
 }
 void CGameWorld::SendMsgs()
 {

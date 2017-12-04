@@ -58,10 +58,11 @@ DWORD WINAPI RecvMessage(LPVOID arg)
 		{
 			break;
 		}
+
 		client->EnterCriticalSection();
 		client->pMsgQueue->push_back(msg);
 		client->LeaveCriticalSection();
-		Sleep(1);
+
 	}
 	
 	closesocket(client->sock);
