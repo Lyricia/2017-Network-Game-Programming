@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Client.h"
 
+
+
 void err_quit(char* msg)
 {
 	LPVOID lpMsgBuf;
@@ -88,7 +90,7 @@ void CClient::ConnectServer()
 {
 	// connect()
 	m_MainServer.addr.sin_family = AF_INET;
-	m_MainServer.addr.sin_addr.s_addr = inet_addr(std::string("127.0.0.1").c_str());
+	m_MainServer.addr.sin_addr.s_addr = inet_addr(std::string(SERVERIP).c_str());
 	m_MainServer.addr.sin_port = htons(SERVERPORT);
 	int retval = connect(m_MainServer.sock, (SOCKADDR *)&m_MainServer.addr, sizeof(m_MainServer.addr));
 	if (retval == SOCKET_ERROR) err_quit("connect()");

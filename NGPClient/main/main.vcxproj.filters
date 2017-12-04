@@ -61,6 +61,9 @@
     <Filter Include="Object\Effect">
       <UniqueIdentifier>{c535efd7-f836-4297-ad90-79dac10f8307}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object\Unit\Agent">
+      <UniqueIdentifier>{69d4a93e-3b45-4f5c-a75a-03d930fe469a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -135,6 +138,18 @@
     <ClInclude Include="pch\NGPmsg.h">
       <Filter>pch</Filter>
     </ClInclude>
+    <ClInclude Include="Object\Unit\Agent\Agent.h">
+      <Filter>Object\Unit\Agent</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Unit\Agent\AgentFSM.h">
+      <Filter>Object\Unit\Agent</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Unit\Agent\State.h">
+      <Filter>Object\Unit\Agent</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Unit\Agent\StateMachine.h">
+      <Filter>Object\Unit\Agent</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -187,6 +202,12 @@
     </ClCompile>
     <ClCompile Include="Object\Effect\Effect.cpp">
       <Filter>Object\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Unit\Agent\Agent.cpp">
+      <Filter>Object\Unit\Agent</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Unit\Agent\AgentFSM.cpp">
+      <Filter>Object\Unit\Agent</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

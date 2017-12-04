@@ -3,7 +3,6 @@
 #include "Object\Brick\Brick.h"
 #include "Object\Unit\Player\Player.h"
 
-#include "Object\Effect\Effect.h"
 #include "Agent.h"
 
 
@@ -276,6 +275,7 @@ void CAgent::InterActionCheck(std::vector<CObject*>& pObjects)
 
 }
 
+
 void CAgent::SetObjectInfo(LPVOID info)
 {
 	ObjInfo* objinfo = static_cast<ObjInfo*>(info);
@@ -288,10 +288,20 @@ void CAgent::SetObjectInfo(LPVOID info)
 	m_ptPos = objinfo->Position;
 
 	if (damage > 0) Collide(damage);
-	m_fHP = objinfo->HP;
+}
 
-	float angle = -acosf(m_ptDirection*Point2F(1, 0));
-	if (m_ptDirection.y > 0)
-		angle = -angle;
+LPVOID CAgent::GetObjectInfo()
+{
+	ObjInfo* objinfo = new ObjInfo();
+
+	objinfo->Ammo = { 0, 30, 0 };
+	objinfo->Direction = m_ptDirection;
+	objinfo->Position = m_ptPos;
+	objinfo->HP = m_fHP;
+	objinfo->ObjectID = m_Id;
+	objinfo->ObjectType = OBJECTTYPE::Agent;
+	objinfo->Collision = m_bCollision;
+
+	return objinfo;
 }
 

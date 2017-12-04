@@ -3,6 +3,7 @@
 #include "Object\Brick\Brick.h"
 #include "Object\Unit\Player\Player.h"
 #include "Object\Projectile\Grenade\Grenade.h"
+#include "Object\Unit\Agent\Agent.h"
 
 #include "Server\Main\MainServer.h"
 
@@ -59,6 +60,14 @@ bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 		delete msg;
 	}
 
+	for (int i = 0; i< 1; ++i)
+	{
+		CAgent* agent = new CAgent(Point2F(-100, 10));
+		agent->SetID(m_ObjectIDCounter++);
+		agent->SetSize(OBJECT_RECT);
+		m_vecObjects.push_back(agent);
+	}
+
 	return true;
 }
 
@@ -85,6 +94,13 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 						//assert
 					}
 				}
+
+				// 서버에게 삭제될 오브젝트 전송
+				int retval = send(m_pRoomInfo->AgentServer->sock, (char*)msg, sizeof(NGPMSG), NULL);
+				if (retval == SOCKET_ERROR) {
+					//assert
+				}
+
 				delete msg;
 
 				for (auto& p : m_pRoomInfo->clientlist)
@@ -118,6 +134,13 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 						//assert
 					}
 				}
+
+				// 에이전트 서버에게 블럭 제거 정보 전송
+				int retval = send(m_pRoomInfo->AgentServer->sock, (char*)msg, sizeof(NGPMSG), NULL);
+				if (retval == SOCKET_ERROR) {
+					//assert
+				}
+
 				delete msg;
 
 				delete (*iter);
@@ -171,6 +194,13 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 						//assert
 					}
 				}
+
+				// 에이전트 서버에게 수류탄 제거 정보 전송
+				int retval = send(m_pRoomInfo->AgentServer->sock, (char*)msg, sizeof(NGPMSG), NULL);
+				if (retval == SOCKET_ERROR) {
+					//assert
+				}
+
 				delete msg;
 
 				delete (*iter);
@@ -251,6 +281,30 @@ void CMainScene::PhysicsUpdate(float fTimeElapsed)
 					{
 						CGrenade* grenade = static_cast<CGrenade*>(p);
 						grenade->Reflection(-1.f * dir);
+					}
+					break;
+				}
+				}
+			}
+			break;
+		}
+		case CObject::Type::Agent:
+		{
+			for (auto& q : m_vecObjects)
+			{
+				if (p == q) continue;
+				switch (q->GetTag())
+				{
+				case CObject::Type::Brick:
+				{
+					dir = Normalize(q->GetPos() - p->GetPos());
+					if (PtInRect(
+						&(q->GetSize() + q->GetPos())
+						, p->GetPos() + (dir * p->GetSize().right))
+						)
+					{
+						CAgent* agent = static_cast<CAgent*>(p);
+						agent->Reflection(-1.f * dir);
 					}
 					break;
 				}
@@ -404,6 +458,12 @@ void CMainScene::ProcessMsgs()
 						//assert
 					}
 				}
+
+				// 에이전트 서버에게 수류탄 생성 정보를 보낸다.
+				int retval = send(m_pRoomInfo->AgentServer->sock, (char*)grenade_msg, sizeof(NGPMSG), NULL);
+				if (retval == SOCKET_ERROR) {
+					//assert
+				}
 				delete grenade_msg;
 				delete objdata;
 			}
@@ -450,6 +510,8 @@ void CMainScene::SendMsgs()
 	int idx = 0;
 	int retval = 0;
 	int nGrenade = 0;
+	int nAgent = 0;
+
 	MapInfo* mapdata = new MapInfo[g_nBrick];
 
 	for (auto &obj : m_vecObjects)
@@ -466,6 +528,11 @@ void CMainScene::SendMsgs()
 		case CObject::Type::Grenade:
 		{
 			++nGrenade;
+			break;
+		}
+		case CObject::Type::Agent:
+		{
+			++nAgent;
 			break;
 		}
 		}
@@ -533,6 +600,31 @@ void CMainScene::SendMsgs()
 	delete[] mapdata;
 
 
+	ObjInfo* agentdata = new ObjInfo[nAgent];
+	idx = 0;
+	for (auto iter = m_vecObjects.rbegin();
+		iter != m_vecObjects.rend(); ++iter)
+	{
+		if ((*iter)->GetTag() == CObject::Type::Agent)
+		{
+			ObjInfo* tmp = (ObjInfo*)(*iter)->GetObjectInfo();
+			agentdata[idx++] = *tmp;
+			delete tmp;
+		}
+	}
+
+	NGPMSG* agentmsg = CreateMSG(
+		MSGTYPE::MSGUPDATE::UPDATEOBJECTSTATE
+		, m_pRoomInfo->RoomID
+		, 0
+		, nAgent
+		, 0
+		, agentdata
+		, nullptr
+	);
+	delete[] agentdata;
+
+
 	for (auto & client : m_pRoomInfo->clientlist)
 	{
 		playermsg->header.OBJECTNO = client->ID;
@@ -554,6 +646,39 @@ void CMainScene::SendMsgs()
 				//assert
 			}
 		}
+
+		retval = send(client->sock, (char*)agentmsg, sizeof(NGPMSG), NULL);
+		if (retval == SOCKET_ERROR) {
+			//assert
+		}
+	}
+
+	// 에이전트 서버에 오브젝트 업데이트 정보 전송
+	{
+		playermsg->header.OBJECTNO = m_pRoomInfo->AgentServer->ID;
+		retval = send(m_pRoomInfo->AgentServer->sock, (char*)playermsg, sizeof(NGPMSG), NULL);
+		if (retval == SOCKET_ERROR) {
+			//assert
+		}
+
+		retval = send(m_pRoomInfo->AgentServer->sock, (char*)grenademsg, sizeof(NGPMSG), NULL);
+		if (retval == SOCKET_ERROR) {
+			//assert
+		}
+
+		for (int i = 0; i < nMapmsg; ++i) {
+			mapmsg[i]->header.OBJECTNO = m_pRoomInfo->AgentServer->ID;
+			retval = send(m_pRoomInfo->AgentServer->sock, (char*)mapmsg[i], sizeof(NGPMSG), NULL);
+			if (retval == SOCKET_ERROR) {
+				//assert
+			}
+		}
+
+		retval = send(m_pRoomInfo->AgentServer->sock, (char*)agentmsg, sizeof(NGPMSG), NULL);
+		if (retval == SOCKET_ERROR) {
+			//assert
+		}
+
 	}
 
 	delete playermsg;

@@ -28,6 +28,7 @@ void Server::Initialize()
 	m_ServerAddr.sin_family = AF_INET;
 	m_ServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	m_ServerAddr.sin_port = htons(m_ServerPort);
+
 	retval = bind(m_ListenSock, (SOCKADDR *)&m_ServerAddr, sizeof(m_ServerAddr));
 	if (retval == SOCKET_ERROR)
 	{

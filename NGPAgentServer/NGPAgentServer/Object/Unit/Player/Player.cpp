@@ -2,7 +2,6 @@
 #include "Player.h"
 #include "Object\Brick\Brick.h"
 #include "Object\Projectile\Grenade\Grenade.h"
-#include "Object\Effect\Effect.h"
 
 
 CPlayer::CPlayer(D2D_POINT_2F pt, D2D_RECT_F rc)
@@ -78,6 +77,7 @@ void CPlayer::Update(float fTimeElapsed)
 	}
 }
 
+
 void CPlayer::Collide(float atk)
 {
 	if (m_bCollision) return;
@@ -85,6 +85,26 @@ void CPlayer::Collide(float atk)
 	m_fHP -= atk;
 	if (m_fHP < 0)
 		m_fHP = 0;
+}
+
+void CPlayer::SetObjectInfo(LPVOID info)
+{
+	ObjInfo* objinfo = static_cast<ObjInfo*>(info);
+	float damage = m_fHP - objinfo->HP;
+
+	m_iGrenade = objinfo->Ammo.Granade;
+	m_iAmmo = objinfo->Ammo.GunAmmo;
+	m_iTurretKit = objinfo->Ammo.TurretKit;
+	m_ptDirection = objinfo->Direction;
+	m_ptPos = objinfo->Position;
+
+	if (damage > 0) Collide(damage);
+	m_fHP = objinfo->HP;
+
+	float angle = -acosf(m_ptDirection*Point2F(1, 0));
+	if (m_ptDirection.y > 0)
+		angle = -angle;
+
 }
 
 void CPlayer::Move(const D2D_POINT_2F& ptVelocity)
@@ -108,12 +128,17 @@ void CPlayer::Stop()
 	m_ptVelocity = Point2F();
 }
 
-CEffect* CPlayer::Shoot()
-{
-	if (m_bShoot) return nullptr;
-	if (m_bReload) return nullptr;
 
-	if (m_iAmmo == 0) m_bReload = true;
+void CPlayer::Shoot()
+{
+	if (m_bShoot) return;
+	if (m_bReload) return;
+
+	if (m_iAmmo == 0)
+	{
+		m_bReload = true;
+		return;
+	}
 	else --m_iAmmo;
 
 	m_bShoot = true;
@@ -139,8 +164,27 @@ CEffect* CPlayer::Shoot()
 		}
 		}
 	}
-	return nullptr;
+	return;
 }
+
+void CPlayer::Shoot(const D2D_POINT_2F & ptHitPos)
+{
+	if (m_bShoot) return;
+	if (m_bReload) return;
+
+	if (m_iAmmo == 0)
+	{
+		m_bReload = true;
+		return;
+	}
+	else --m_iAmmo;
+
+	m_bShoot = true;
+	m_ptMuzzleDirection = m_ptDirection;
+	m_ptMuzzleStartPos = m_ptPos + m_ptMuzzleDirection * MUZZLE_OFFSET;
+	m_ptMuzzleEndPos = ptHitPos;
+}
+
 
 void CPlayer::RayCastingToShoot(std::vector<CObject*>& pvecObjects)
 {
@@ -155,6 +199,7 @@ void CPlayer::RayCastingToShoot(std::vector<CObject*>& pvecObjects)
 			{
 			case CObject::Type::Player:
 			{
+				if (p == this) break;
 				if (Length(p->GetPos() - ptDevidedRay) < p->GetSize().right)
 				{
 					m_ptMuzzleEndPos = ptDevidedRay;

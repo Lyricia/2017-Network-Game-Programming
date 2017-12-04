@@ -4,6 +4,9 @@
 
 #define MESSAGE_PROCESSING_TIME 0.1
 
+#define AGENT_SERVER_IP		"127.0.0.1"
+#define AGENT_SERVER_PORT		9001
+
 struct ConnectionInfo {
 	UINT				ID;
 	SOCKET				sock;
@@ -33,7 +36,7 @@ struct RoomInfo {
 	UCHAR					RoomID;
 	ConnectionInfo			*serverinfo;
 	list<ConnectionInfo*>	clientlist;
-	//list<ConnectionInfo*>	agentlist;
+	ConnectionInfo*			AgentServer;
 	CGameWorld				GameWorld;
 	list<NGPMSG*>			MsgQueue;
 	HANDLE					hGameWorld;
@@ -68,7 +71,7 @@ struct RoomInfo {
 
 class MainServer : public Server
 {
-	//ConnectedServerInfo		m_AgentServer;
+	ConnectionInfo*				m_AgentServer;
 	list<RoomInfo*>				m_RoomList;
 	list<ConnectionInfo*>		m_WaitingClientList;
 	list<NGPMSG*>				m_MsgQueue;
@@ -82,7 +85,7 @@ public:
 	virtual void Run();
 
 	void ConnectAgentServer();
-	void RequestAddAgentServer();
+	void RequestAddAgentServer(UCHAR room_id);
 	void CreateRoom();
 	void DeleteRoom();
 };

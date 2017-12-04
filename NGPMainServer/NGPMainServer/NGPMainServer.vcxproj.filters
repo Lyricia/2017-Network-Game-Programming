@@ -52,6 +52,9 @@
     <Filter Include="Server\Main">
       <UniqueIdentifier>{ee62a339-cdcd-4f62-aaec-358f3263c223}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object\Unit\Agent">
+      <UniqueIdentifier>{33b98af0-b056-4a0c-869d-162f890560a5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Object\Object.cpp">
@@ -95,6 +98,12 @@
     </ClCompile>
     <ClCompile Include="Server\Main\MainServer.cpp">
       <Filter>Server\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Unit\Agent\Agent.cpp">
+      <Filter>Object\Unit\Agent</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Unit\Agent\AgentFSM.cpp">
+      <Filter>Object\Unit\Agent</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -154,6 +163,18 @@
     </ClInclude>
     <ClInclude Include="Server\NGPmsg.h">
       <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Unit\Agent\Agent.h">
+      <Filter>Object\Unit\Agent</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Unit\Agent\AgentFSM.h">
+      <Filter>Object\Unit\Agent</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Unit\Agent\State.h">
+      <Filter>Object\Unit\Agent</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Unit\Agent\StateMachine.h">
+      <Filter>Object\Unit\Agent</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

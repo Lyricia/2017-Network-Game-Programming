@@ -3,14 +3,6 @@
 // 네트워크 게임 프로그래밍 메세지 구조체
 #include "NGPmsg.h"
 
-struct ConnectedServerInfo
-{
-	SOCKET 	   		sock;
-	SOCKADDR_IN  	addr;
-	HANDLE 	    	hReceiver;
-	//MsgQueue      *pMsgQueue;
-};
-
 void err_quit(char *msg);
 void err_display(char *msg);
 
@@ -22,7 +14,7 @@ protected:
 	WSADATA			m_WSA;
 	SOCKET			m_ListenSock;
 	SOCKADDR_IN		m_ServerAddr;
-	u_short			m_ServerPort = 9000;
+	u_short			m_ServerPort = 9001;
 	//MsgQueue		m_MsgQueue;
 
 public:

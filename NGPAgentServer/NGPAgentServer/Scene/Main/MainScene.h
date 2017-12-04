@@ -22,9 +22,7 @@ public:
 	~CMainScene();
 
 	bool OnCreate(std::wstring&& tag, CGameWorld* pGameWorld) override;
-	void PreprocessingUpdate(float fTimeElapsed);
 	void Update(float fTimeElapsed) override;
-	void PhysicsUpdate(float fTimeElapsed);
 
 	void ProcessMsgs();
 	void SendMsgs();
@@ -33,6 +31,7 @@ public:
 
 private:
 	RoomInfo*						m_pRoomInfo;
+	UINT							m_ObjectIDCounter;
 
 	std::vector<CObject*>			m_vecObjects;
 

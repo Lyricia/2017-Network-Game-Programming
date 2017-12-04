@@ -1,5 +1,5 @@
 #include "stdafx.h"
-
+#include "Framework\ResourceManager\ResourceManager.h"
 #include "Object\Brick\Brick.h"
 #include "Object\Unit\Player\Player.h"
 
@@ -36,7 +36,7 @@ void CAgent::Update(float fTimeElapsed)
 	m_changedir_timer += fTimeElapsed;
 	m_shoot_timer += fTimeElapsed;
 
-	m_pStateMachine->Update(fTimeElapsed);
+	//m_pStateMachine->Update(fTimeElapsed);
 
 	m_fClosestTargetDistance = 99999999;
 
@@ -293,5 +293,7 @@ void CAgent::SetObjectInfo(LPVOID info)
 	float angle = -acosf(m_ptDirection*Point2F(1, 0));
 	if (m_ptDirection.y > 0)
 		angle = -angle;
+	m_mtxRotate = Matrix3x2F::Rotation(
+		RADIAN_TO_DEGREE(angle), m_ptPos);
 }
 

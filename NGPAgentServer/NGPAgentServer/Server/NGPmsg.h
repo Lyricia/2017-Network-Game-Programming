@@ -1,112 +1,142 @@
 #pragma once
-#include "stdafx.h"
 
+#define ACTIONINFOBUFSIZE	512
+#define OBJINFOBUFSIZE		512
+#define MAPINFOBUFSIZE		128	
 
-#define ACTIONINFOBUFSIZE	128
-#define OBJINFOBUFSIZE		256
+#define INVALID_OBJECT_ID	-1
 
 enum MSGSIZE {
-	SIZE_HEADER = 8,
-	SIZE_ACTIONINFO = 12,
-	SIZE_OBJINFO = 24,
-	SIZE_AMMUNITION = 4
+	SIZE_HEADER = 8
+	, SIZE_ACTIONINFO = 16
+	, SIZE_OBJINFO = 40
+	, SIZE_AMMUNITION = 4
 };
 
 namespace MSGTYPE {
-
-	/*-----------------
-	
-	0 - 새로운 룸을 만든다.
-	1 - 클라이언트가 준비되었다.
-	2 - 클라이언트의 게임이 종료되었다.
-	3 - 에이전트 방 생성 요청을 받는다.
-	4 - 에이전트의 정보
-
-	-------------------*/
 	enum MSGSTATE {
-		ROOMCREATION = 10,
-		CLIENTREADY,
-		CLIENTGAMEOVER,
-		AICREATTIONREQUEST,
-		AIAGENTINFO
+		ROOMCREATION = 10
+		, CLIENTREADY
+		, CLIENTGAMEOVER
+		, AICREATTIONREQUEST
+		, AIAGENTINFO
 	};
-
-	/*-----------------
-	0 - 움직여
-	1 - 발사해
-	2 - 터렛을 지어
-	3 - 재장전해
-	------------------*/
 
 	enum MSGACTION {
-		MOVE = 20,
-		SHOOT,
-		BUILDTURRET,
-		RELOAD
+		MOVE = 20
+		, STOP
+		, SHOOT
+		, RELOAD
+		, GRENADE
+		, BUILDTURRET
 	};
 
-	/*-----------------
-	0 - 위치 보정
-	1 - 오브젝트 생성
-	2 - 오브젝트 삭제
-	3 - 오브젝트 상태 갱신
-	------------------*/
-
 	enum MSGUPDATE {
-		ADJUSTPOS = 30,
-		CREATEOBJECT,
-		DELETEOBJECT,
-		UPDATEOBJECTSTATE
+		ADJUSTPOS = 30
+		, CREATEOBJECT
+		, DELETEOBJECT
+		, UPDATEOBJECTSTATE
+		, UPDATEMAPSTATE
 	};
 }
 
-
 struct ActionInfo {
-	D2D_POINT_2F		Direction;
-	unsigned int		ObjectID;
+	union {
+		struct { // MOVE
+			D2D_POINT_2F	LookDirection;
+			D2D_POINT_2F	MoveDirection;
+		};
+		struct { // SHOOT
+			UINT			TargetID;
+			D2D_POINT_2F	TargetHitPos;
+			UCHAR			Packer4[4];
+		};
+		struct { // GRENADE
+			D2D_POINT_2F	SetVelocity;
+			D2D_POINT_2F	TargetPos;
+		};
+		struct { // RELOAD
+			UCHAR			Packer16[16];
+		};
+	};
+};
+
+enum class OBJECTTYPE : UCHAR {
+	Player = 0
+	, Agent
+	, Brick
+	, Grenade
+	, Effect_ShootingHit
+	, Effect_Explosion
 };
 
 struct AMMUNITION {
-	unsigned char		Granade;
-	unsigned char		GunAmmo;
-	unsigned char		TurretKit;
-	unsigned char		packer;
+	UCHAR		Granade;
+	UCHAR		GunAmmo;
+	UCHAR		TurretKit;
+	UCHAR		packer1;
 };
 
 struct ObjInfo {
-	AMMUNITION			Ammo;
+	UINT				ObjectID;
+	float				HP;
+
+	OBJECTTYPE			ObjectType;
+	bool				Collision;
+	USHORT				packer;
+
 	D2D_POINT_2F		Position;
-	D2D_POINT_2F		Direction;
-	unsigned char		ObjectID;
-	unsigned char		HP;
-	short				packer;
+	union {
+		AMMUNITION		Ammo;
+		UINT			ParentID;
+	};
+	union {
+		D2D_POINT_2F	Direction;
+		D2D_POINT_2F	Grenade_ptCurrImg;
+	};
+	D2D_POINT_2F	Velocity;
+};
+
+struct MapInfo {
+	UINT				ObjectID;
+	float				HP;
 };
 
 struct MSGHEADER {
-	unsigned char		MSGTYPE;
-	unsigned char		ROOMNO;
-	unsigned char		NUM_OBJINFO;
-	unsigned char		NUM_ACTIONINFO;
+	UCHAR		MSGTYPE;
+	UCHAR		ROOMNO;
+	UCHAR		NUM_OBJINFO;
+	UCHAR		NUM_ACTIONINFO;
 
-	unsigned int		OBJECTNO;
+	UINT		OBJECTNO;
 };
 
 struct NGPMSG {
 	MSGHEADER			header;
-	char				objinfo[OBJINFOBUFSIZE];
-	char				actioninfo[ACTIONINFOBUFSIZE];
+	union {
+		struct {
+			char		objinfo[OBJINFOBUFSIZE];									// union member
+			char		actioninfo[ACTIONINFOBUFSIZE];								// union member
+		};
+
+		MapInfo			Mapdata[MAPINFOBUFSIZE];		// union member
+	};
 };
 
 
-// 메세지를 만들어낸다.
-// 타입, 사이즈, 룸 정보, 오브젝트 정보, 세부사항
 inline NGPMSG* CreateMSG(UCHAR type, UCHAR roomno, UINT objectno, UCHAR nObjinfo, UCHAR nActioninfo, void* objinfo, void* actioninfo)
 {
 	NGPMSG* msg = new NGPMSG();
 
-	MSGHEADER msgHeader = { type, roomno, nObjinfo, nActioninfo , objectno };
+	MSGHEADER Header = {};
 
-	msg->header = msgHeader;
+	Header.MSGTYPE = type;
+	Header.OBJECTNO = objectno;
+	Header.ROOMNO = roomno;
+	Header.NUM_ACTIONINFO = nActioninfo;
+	Header.NUM_OBJINFO = nObjinfo;
+
+	msg->header = Header;
 	if (nActioninfo != 0)
 		memcpy(msg->actioninfo, actioninfo, MSGSIZE::SIZE_ACTIONINFO*nActioninfo);
 
@@ -116,17 +146,37 @@ inline NGPMSG* CreateMSG(UCHAR type, UCHAR roomno, UINT objectno, UCHAR nObjinfo
 	return msg;
 }
 
-
-inline int DispatchMSG(NGPMSG* msg, ActionInfo& actionlist, ObjInfo& objlist)
+inline NGPMSG* CreateMSG(UCHAR type, UCHAR roomno, UINT objectno, UCHAR nMapinfo, MapInfo* mapdata)
 {
-	int num_actioninfo = msg->header.NUM_ACTIONINFO;
-	int num_objinfo = msg->header.NUM_OBJINFO;
+	NGPMSG* msg = new NGPMSG();
 
-	if (num_actioninfo > 0)
-		memcpy(&actionlist, msg->actioninfo, MSGSIZE::SIZE_ACTIONINFO * num_actioninfo);
+	MSGHEADER Header = {};
 
-	if (num_objinfo > 0)
-		memcpy(&objlist, msg->objinfo, MSGSIZE::SIZE_OBJINFO * num_objinfo);
+	Header.MSGTYPE = type;
+	Header.OBJECTNO = objectno;
+	Header.NUM_OBJINFO = nMapinfo;
+	Header.ROOMNO = roomno;
+
+	msg->header = Header;
+	memcpy(msg->Mapdata, mapdata, sizeof(MapInfo)*nMapinfo);
+
+	return msg;
+}
+
+inline UCHAR DispatchMSG(NGPMSG* msg, ActionInfo* actionlist, ObjInfo* objlist)
+{
+	if (msg->header.NUM_ACTIONINFO > 0)
+		memcpy(actionlist, msg->actioninfo, sizeof(ActionInfo) * msg->header.NUM_ACTIONINFO);
+
+	if (msg->header.NUM_OBJINFO > 0)
+		memcpy(objlist, msg->objinfo, sizeof(ObjInfo) * msg->header.NUM_OBJINFO);
+
+	return msg->header.MSGTYPE;
+}
+
+inline UCHAR DispatchMSG(NGPMSG* msg, MapInfo* mapdata)
+{
+	memcpy(mapdata, msg->Mapdata, sizeof(MapInfo) * msg->header.NUM_OBJINFO);
 
 	return msg->header.MSGTYPE;
 }

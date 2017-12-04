@@ -5,7 +5,7 @@
 #include "AgentFSM.h"
 #include "Object\Unit\Unit.h"
 
-//#define WITH_RENDER_AGENT
+#define WITH_RENDER_AGENT
 
 #define AGENT_BLOCK_STUN_TIME		0.2
 #define AGENT_REFLACTION_FACTOR		0.8f
@@ -19,7 +19,7 @@ class CEffect;
 class CResourceManager;
 class CAgent : public CUnit {
 
-protected:
+private:
 	//상태기계
 	StateMachine<CAgent>*	m_pStateMachine;
 
@@ -102,6 +102,7 @@ public:
 
 	void InterActionCheck(std::vector<CObject*>& pObjects);
 	virtual void SetObjectInfo(LPVOID info) override;
+
 	void SetHP(float hp) { m_fHP = hp; }
 
 	void SetDirection(D2D_POINT_2F pt) { m_ptDirection = pt; }

@@ -15,7 +15,6 @@ public:
 	virtual ~CProjectile();
 
 	virtual void Update(float fTimeElapsed) override;
-	//virtual void Draw(ID2D1HwndRenderTarget* pd2dRenderTarget) override;
 
 	void SetParent(CObject* pParent) { m_pParent = pParent; }
 

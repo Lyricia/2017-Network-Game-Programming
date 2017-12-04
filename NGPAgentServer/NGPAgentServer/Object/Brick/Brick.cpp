@@ -26,6 +26,21 @@ void CBrick::Update(float fTimeElapsed)
 	}
 }
 
+void CBrick::SetObjectInfo(LPVOID info)
+{
+	MapInfo* pMapInfo = static_cast<MapInfo*>(info);
+	float damage = m_fHP - pMapInfo->HP;
+	if (damage > 0) Collide(damage);
+}
+LPVOID CBrick::GetObjectInfo()
+{
+	MapInfo* info = new MapInfo();
+	info->HP = m_fHP;
+	info->ObjectID = m_Id;
+
+	return info;
+}
+
 void CBrick::Collide(float atk)
 {
 	if (m_bCollision) return;

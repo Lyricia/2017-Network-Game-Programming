@@ -26,6 +26,8 @@
     <ClCompile Include="Object\Object.cpp" />
     <ClCompile Include="Object\Projectile\Grenade\Grenade.cpp" />
     <ClCompile Include="Object\Projectile\Projectile.cpp" />
+    <ClCompile Include="Object\Unit\Agent\Agent.cpp" />
+    <ClCompile Include="Object\Unit\Agent\AgentFSM.cpp" />
     <ClCompile Include="Object\Unit\Player\Player.cpp" />
     <ClCompile Include="Object\Unit\Unit.cpp" />
     <ClCompile Include="pch\stdafx.cpp">
@@ -46,6 +48,10 @@
     <ClInclude Include="Object\Object.h" />
     <ClInclude Include="Object\Projectile\Grenade\Grenade.h" />
     <ClInclude Include="Object\Projectile\Projectile.h" />
+    <ClInclude Include="Object\Unit\Agent\Agent.h" />
+    <ClInclude Include="Object\Unit\Agent\AgentFSM.h" />
+    <ClInclude Include="Object\Unit\Agent\State.h" />
+    <ClInclude Include="Object\Unit\Agent\StateMachine.h" />
     <ClInclude Include="Object\Unit\Player\Player.h" />
     <ClInclude Include="Object\Unit\Unit.h" />
     <ClInclude Include="pch\D2DLoadBitmap.h" />

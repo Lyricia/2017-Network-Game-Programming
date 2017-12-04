@@ -25,6 +25,7 @@ int recvn(SOCKET s, char *buf, int len, int flags)
 // Update World
 DWORD WINAPI UpdateWorld(LPVOID arg)
 {
+	AgentServer* Server = (AgentServer*)arg;
 	int msgtype = 0;
 	
 
@@ -36,6 +37,8 @@ DWORD WINAPI UpdateWorld(LPVOID arg)
 
 	}
 
+	
+
 	return 0;
 }
 
@@ -45,34 +48,36 @@ DWORD WINAPI MessageDispatcher(LPVOID arg)
 	int retval;
 	int len;
 
+	NGPMSG* msg;
 
 	while (1) {
 		
 
-
 		if (!Server->m_MsgQueue.empty())
 		{
 
-			NGPMSG msg =  Server->m_MsgQueue.front();
-			Server->m_MsgQueue.front();
+			Server->EnterCriticalSection();
+			msg = Server->m_MsgQueue.front();
+			Server->m_MsgQueue.pop_front();
+			Server->LeaveCriticalSection();
 
+			switch (msg->header.MSGTYPE)
+			{
+			case MSGTYPE::AICREATTIONREQUEST:
+			{
+				Server->CreateAgentsToRoom(msg->header.ROOMNO);
+				break;
+			}
 
+			default:
+				break;
 
+			}
 
+			delete msg;
 
-
-		}
-		
-
-
-		if (retval == SOCKET_ERROR)
-		{
-			return 0;
 		}
 	}
-
-
-
 
 
 	return 0;
@@ -82,6 +87,7 @@ DWORD WINAPI MessageDispatcher(LPVOID arg)
 
 AgentServer::AgentServer()
 {
+	
 }
 
 AgentServer::~AgentServer()
@@ -96,50 +102,101 @@ AgentServer::~AgentServer()
 // 룸 정보를 받아와서 지속적인 갱신을 한다.
 DWORD WINAPI RunGameWorld(LPVOID arg)
 {
-	RoomInfo* room = (RoomInfo*)arg;
-	int retval;
+	ThreadPack* threadpack = (ThreadPack*)arg;
 
-	room->GameWorld.Run();
+	AgentServer* Server = threadpack->server;
+	int			room_id = threadpack->m_roomid;
+
+	RoomInfo*	room = nullptr;
+
+	for (auto& d : Server->m_RoomList)
+	{
+		if (d->RoomID == room_id)
+		{
+			room = d;
+			break;
+		}
+	}
+
+	while (1)
+	{
+		std::cout << "Running Room" << room->RoomID << std::endl;
+		room->GameWorld.Run();
+	}
 
 	return 0;
 }
 
 void AgentServer::Run()
 {
+	::InitializeCriticalSection(&ServerCs);
+
 	AcceptMainServer();
-	
+
 	int retval;
 	char buf[BUFSIZE + 1];
+	NGPMSG* msg = nullptr;
 	int len;
 	////////////////////////////////////////////////////////////////////////////////////////
 	
 	HANDLE Dispatcher = CreateThread(NULL, 0, MessageDispatcher, this , 0, NULL);
 
+	while (m_MainServer.sock) {
 
-
-	while (1) {
-		NGPMSG* msg = new NGPMSG();
+		msg = new NGPMSG();
 
 		// 데이터 받기(고정 길이)
 		// 메세지의 헤더만큼 읽는다.
-		retval = recvn(m_MainServer.sock, (char *)&msg, sizeof(NGPMSG), 0);
+		//std::cout << "ReceiveMsg" << std::endl;
+
+		retval = recvn(m_MainServer.sock,
+			(char *)msg, sizeof(NGPMSG), 0);
 		if (retval == SOCKET_ERROR) {
 			break;
 		}
-		else if (retval == 0)
-			break;
 
-		
-
-		m_MsgQueue.push_back(msg);
-
-		if (retval == SOCKET_ERROR)
+		switch (msg->header.MSGTYPE)
 		{
-			closesocket(m_MainServer.sock);
-			return;
+		case MSGTYPE::ROOMCREATION:
+		case MSGTYPE::CLIENTREADY:
+		case MSGTYPE::CLIENTGAMEOVER:
+		case MSGTYPE::AICREATTIONREQUEST:
+		case MSGTYPE::AIAGENTINFO:
+		{
+			//m_MainServer.
+			EnterCriticalSection();
+			m_MsgQueue.push_back(msg);
+			LeaveCriticalSection();
+			break;
+		}
+		case MSGTYPE::MOVE:
+		case MSGTYPE::STOP:
+		case MSGTYPE::SHOOT:
+		case MSGTYPE::RELOAD:
+		case MSGTYPE::GRENADE:
+		case MSGTYPE::BUILDTURRET:
+		case MSGTYPE::ADJUSTPOS:
+		case MSGTYPE::CREATEOBJECT:
+		case MSGTYPE::DELETEOBJECT:
+		case MSGTYPE::UPDATEOBJECTSTATE:
+		case MSGTYPE::UPDATEMAPSTATE:
+		{
+			for (auto&d : m_RoomList)
+			{
+				if (d->RoomID == msg->header.ROOMNO)
+				{
+					d->EnterCriticalSection();
+					d->MsgQueue.push_back(msg);
+					d->LeaveCriticalSection();
+					break;
+				}
+			}
+			break;
+		}
+
 		}
 	}
-
+	closesocket(m_MainServer.sock);
 	///////////////////////////////////////////////////////////////////////////////////////
 
 }
@@ -157,37 +214,45 @@ void AgentServer::AcceptMainServer()
 	{
 		std::cout << "client socket error" << std::endl;
 	}
-
-
+	std::cout << "MainServer Connection Complete" << std::endl;
 }
 
-void AgentServer::CreateAgentsToRoom()
+void AgentServer::CreateAgentsToRoom(UINT room_id)
 {
 
 	RoomInfo* newroom = new RoomInfo();
-	newroom->RoomID = m_iRoomCounter++;
+	newroom->RoomID = room_id;
 
 	newroom->GameWorld.RegisterRoomInfo(newroom);
 	newroom->GameWorld.Initailize();
-	
-	//HANDLE hThread = CreateThread(NULL, 0, RoomProcess, (LPVOID)newroom, 0, NULL);
+
+	ThreadPack* threadpack = new ThreadPack();
+	threadpack->server = this;
+	threadpack->m_roomid = room_id;
+
+	newroom->hGameWorld = CreateThread(NULL, 0, RunGameWorld, (LPVOID)threadpack, 0, NULL);
+
 	if (newroom->hGameWorld == NULL)
 	{
 		std::cout << "Thread Creation failed" << std::endl;
 		//Assert
 		return;
 	}
-
 	m_RoomList.push_back(newroom);
-	std::cout << "Create New Room " << newroom->RoomID << std::endl;
-
+	std::cout << "Create New Room :: " << newroom->RoomID << std::endl;
 
 }
 
-void AgentServer::DeleteAgentsFromRoom()
+void AgentServer::DeleteAgentsFromRoom(UINT room_id)
 {
-
-
+	m_RoomList.remove_if([room_id](RoomInfo* pRoom)->bool {
+		if (pRoom->RoomID == room_id)
+		{
+			delete pRoom;
+			return true;
+		}
+		return false;
+	});
 	std::cout << "Delete Room "  << std::endl;
 
 }

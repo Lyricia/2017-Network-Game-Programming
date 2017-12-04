@@ -51,7 +51,7 @@ DWORD WINAPI RecvMessage(LPVOID arg)
 		inet_ntoa(client->addr.sin_addr), ntohs(client->addr.sin_port));
 	
 	while (1) {
-		msg= new NGPMSG();
+		msg = new NGPMSG();
 		retval = recvn(client->sock, (char *)msg, sizeof(NGPMSG), 0);
 		//retval = WSAGetLastError();
 		if (retval == SOCKET_ERROR)
@@ -82,7 +82,7 @@ MainServer::~MainServer()
 	for (auto& p : m_RoomList) delete p;
 	for (auto& p : m_WaitingClientList) delete p;
 	for (auto& p : m_MsgQueue) delete p;
-
+	
 	m_RoomList.clear();
 	m_WaitingClientList.clear();
 	m_MsgQueue.clear();
@@ -95,6 +95,8 @@ void MainServer::Run()
 	int addrlen;
 	int retval;
 	UINT clientcounter = 0;
+
+	ConnectAgentServer();
 
 	while (1)
 	{
@@ -117,21 +119,63 @@ void MainServer::Run()
 			CreateRoom();
 		}
 		DeleteRoom();
-	} 
+	}
+
+	delete m_AgentServer;
 }
 
 void MainServer::ConnectAgentServer()
 {
+	m_AgentServer = new ConnectionInfo();
+
+	m_AgentServer->sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (m_AgentServer->sock == INVALID_SOCKET)
+	{
+		cout << "Create Agent Socket failed" << endl;
+		//Assert
+		return;
+
+	}
+	// connect()
+	m_AgentServer->addr.sin_family = AF_INET;
+	m_AgentServer->addr.sin_addr.s_addr = inet_addr(std::string(AGENT_SERVER_IP).c_str());
+	m_AgentServer->addr.sin_port = htons(AGENT_SERVER_PORT);
+
+
+	int retval = connect(m_AgentServer->sock, (SOCKADDR *)&m_AgentServer->addr, sizeof(m_AgentServer->addr));
+	if (retval == SOCKET_ERROR)
+	{
+		cout << "Connection failed" << endl;
+		//Assert
+		return;
+	}
+
 }
 
-void MainServer::RequestAddAgentServer()
+void MainServer::RequestAddAgentServer(UCHAR room_id)
 {
+	NGPMSG* msg = CreateMSG(
+		MSGTYPE::AICREATTIONREQUEST
+		, room_id
+		, 0
+		, 0
+		, 0
+		, nullptr
+		, nullptr
+	);
+	
+	int retval = send(m_AgentServer->sock, (char*)msg, sizeof(NGPMSG), NULL);
+	if (retval == SOCKET_ERROR) {
+		//assert
+	}
+
 }
 
 void MainServer::CreateRoom()
 {
 	RoomInfo* newroom = new RoomInfo();
 	newroom->RoomID = m_iRoomCounter++;
+	newroom->AgentServer = m_AgentServer;
 
 	for (int i = 0; i < 3; ++i)
 	{
@@ -147,6 +191,8 @@ void MainServer::CreateRoom()
 		//Assert
 		return;
 	}
+
+	RequestAddAgentServer(newroom->RoomID);
 
 	m_RoomList.push_back(newroom);
 	cout << "Create New Room " << newroom->RoomID << endl;

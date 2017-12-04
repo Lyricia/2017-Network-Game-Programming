@@ -18,7 +18,7 @@ public:
 
 protected:
 
-	CGameWorld*				m_pGameWorld{ nullptr };
+	CGameWorld*				m_pGameWorld	{ nullptr }	;
 
-	std::wstring					m_strTag;
+	std::wstring					m_strTag					;
 };

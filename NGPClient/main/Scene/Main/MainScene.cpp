@@ -7,6 +7,7 @@
 #include "Object\Brick\Brick.h"
 #include "Object\Unit\Player\Player.h"
 #include "Object\Projectile\Grenade\Grenade.h"
+#include "Object\Unit\Agent\Agent.h"
 #include "Object\Effect\Effect.h"
 
 #include "Framework\Client\Client.h"
@@ -135,6 +136,8 @@ bool CMainScene::OnCreate(wstring && tag, CFramework * pFramework)
 		m_vecObjects.push_back(player);
 	}
 
+	
+
 	for (auto& p : m_vecObjects)
 		if (p->GetID() == m_pClient->GetClientID())
 			m_pPlayer = static_cast<CPlayer*>(p);
@@ -143,6 +146,13 @@ bool CMainScene::OnCreate(wstring && tag, CFramework * pFramework)
 	m_Camera.SetClientSize(Point2F(rcClient.right, rcClient.bottom));
 	m_Camera.SetPosition(m_pPlayer->GetPos());
 	m_Camera.SetAnchor(Point2F(0.0f, 0.0f));
+
+	for (int i = 0; i< 1; ++i)
+	{
+		CAgent* agent = new CAgent(Point2F(-100, 10));
+		agent->RegisterResourceManager(m_pResMng);
+		m_vecObjects.push_back(agent);
+	}
 
 	return true;
 }

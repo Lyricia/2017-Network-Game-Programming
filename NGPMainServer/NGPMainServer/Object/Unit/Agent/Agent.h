@@ -101,7 +101,7 @@ public:
 	void RayCastingToShoot(std::vector<CObject*>& pvecObjects);
 
 	void InterActionCheck(std::vector<CObject*>& pObjects);
-	virtual void SetObjectInfo(LPVOID info) override;
+
 	void SetHP(float hp) { m_fHP = hp; }
 
 	void SetDirection(D2D_POINT_2F pt) { m_ptDirection = pt; }
@@ -110,4 +110,7 @@ public:
 	D2D_POINT_2F GetTargetPos() const { return m_ptTargetPos; }
 	D2D_POINT_2F GetVelocity() const { return m_ptVelocity; }
 	D2D_POINT_2F GetDirection() const { return m_ptDirection; }
+
+	virtual void SetObjectInfo(LPVOID info) override;
+	virtual LPVOID GetObjectInfo() override;
 };

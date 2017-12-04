@@ -228,6 +228,9 @@ void CPlayer::Shoot(
 			//assert
 		}
 	}
+
+	send(pRoomInfo->AgentServer->sock, (char*)msg, sizeof(NGPMSG), NULL);
+
 	delete msg;
 
 	if (m_pTarget)
@@ -269,6 +272,10 @@ void CPlayer::Shoot(
 				//assert
 			}
 		}
+
+		send(pRoomInfo->AgentServer->sock, (char*)msg, sizeof(NGPMSG), NULL);
+
+
 		delete msg;
 		delete objdata;
 	}

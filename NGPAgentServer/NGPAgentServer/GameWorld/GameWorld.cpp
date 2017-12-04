@@ -59,6 +59,7 @@ void CGameWorld::Run()
 
 void CGameWorld::ProcessMsgs()
 {
+	//std::cout << "ProcessMsgs" << std::endl;
 	m_pMainScene->ProcessMsgs();
 }
 void CGameWorld::SendMsgs()
@@ -68,6 +69,8 @@ void CGameWorld::SendMsgs()
 
 void CGameWorld::CheckClients()
 {
+	//std::cout << "CheckClient" << std::endl;
+
 	//if (m_pRoomInfo) {
 	//	m_pRoomInfo->clientlist.remove_if([&](ConnectionInfo* client)->bool {
 	//		DWORD exitcode = 0;

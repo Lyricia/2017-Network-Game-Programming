@@ -58,7 +58,7 @@ public:
 
 private:
 	ComPtr<ID2D1Bitmap1>			m_bmpImage;
-
+	D2D_POINT_2F					m_ptCurrImg;
 	ComPtr<ID2D1Bitmap1>			m_bmpWeaponImage;
 	D2D_RECT_F						m_rcWeaponSize;
 

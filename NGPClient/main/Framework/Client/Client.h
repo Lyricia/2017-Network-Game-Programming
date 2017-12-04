@@ -1,6 +1,8 @@
 #pragma once
 #define SERVERPORT 9000
 #define BUFFER_SIZE 512
+//#define SERVERIP	"192.168.35.213"
+#define SERVERIP	"127.0.0.1"
 
 #define MESSAGE_PROCESSING_TIME 0.1
 
