@@ -18,7 +18,11 @@ struct ConnectionInfo {
 
 	ConnectionInfo()
 		: RecvThreadHandle(NULL)
-		, pMsgQueue(nullptr) {}
+		, pMsgQueue(nullptr) {
+
+		pMsgQueue = new std::list<NGPMSG*>();
+	
+	}
 	~ConnectionInfo() {
 		if (RecvThreadHandle)
 			TerminateThread(RecvThreadHandle, 0);
@@ -57,6 +61,10 @@ struct RoomInfo {
 		void EnterCriticalSection() { ::EnterCriticalSection(&roomCs); }
 		void LeaveCriticalSection() { ::LeaveCriticalSection(&roomCs); }
 
+		void SendMsgs(char* buf, UINT buf_size)
+		{
+			int retval = send(serverinfo->sock, buf, buf_size, 0);
+		}
 };
 
 
@@ -64,7 +72,7 @@ struct RoomInfo {
 class AgentServer : public Server
 {
 public:
-	ConnectionInfo				m_MainServer;
+	ConnectionInfo*				m_MainServer;
 	std::list<RoomInfo*>		m_RoomList;
 	std::list<NGPMSG*>			m_MsgQueue;
 	int							m_iRoomCounter;

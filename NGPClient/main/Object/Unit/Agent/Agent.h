@@ -54,6 +54,9 @@ private:
 	D2D_POINT_2F					m_ptDirection;
 	D2D_POINT_2F					m_ptVelocity;
 
+	bool							m_bMove;
+	bool							m_bShoot;
+
 	// 방향을 바꾸는 순간을 판정하기 위한 타이머다.
 	// 에이전트의 update 메서드 호출 시 m_changedir_timer값이 m_next_change_dir_timer 보다 크면
 	// 상태를 방향전환 상태로 변경한다. 이는 전역상태에서 판정한다.

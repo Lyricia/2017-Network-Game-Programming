@@ -40,11 +40,21 @@ bool CMainScene::OnCreate(std::wstring && tag, CGameWorld* pGameWorld)
 			}
 		}
 
+
+	for (int i = 0; i< 3; ++i)
+	{
+		CAgent* agent = new CAgent(Point2F(-100, 10 * i));
+		agent->RegisterRoomInfo(m_pRoomInfo);
+		m_vecObjects.push_back(agent);
+	}
+
 	for (int i = 0; i< 3; ++i)
 	{
 		CPlayer* player = new CPlayer(Point2F(-100, 10));
 		m_vecObjects.push_back(player);
 	}
+
+
 
 	return true;
 }
@@ -54,10 +64,17 @@ void CMainScene::Update(float fTimeElapsed)
 {
 
 	for (auto& p : m_vecObjects)
+	{
 		p->Update(fTimeElapsed);
 
-	// agent 들이 루프를 돌아야한다.
-	//if (m_pPlayer) m_pPlayer->RayCastingToShoot(m_vecObjects);
+		if (p->GetTag() == CObject::Type::Agent)
+		{
+			CAgent* agent = static_cast<CAgent*>(p);
+			agent->RayCastingToShoot(m_vecObjects);
+			agent->RunStateMachine(fTimeElapsed);
+		}
+		
+	}
 
 }
 

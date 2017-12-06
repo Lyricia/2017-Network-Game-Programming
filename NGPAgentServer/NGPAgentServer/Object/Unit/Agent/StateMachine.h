@@ -36,13 +36,13 @@ public:
 	void SetPreviousState(State<entity_type>* s) { m_pPreviousState = s; }
 
 	//상태기계를 업데이트하기 위해 호출한다.
-	void  Update(float fTimeElapsed )const
+	void  Update(float fTimeElapsed, RoomInfo*	pRoomInfo )const
 	{
 		// 만약 전역 상태를 정의했으면 전역 상태를 실행한다. 없으면 무시한다.
-		if (m_pGlobalState)   m_pGlobalState->Execute(m_pOwner, fTimeElapsed);
+		if (m_pGlobalState)   m_pGlobalState->Execute(m_pOwner, fTimeElapsed, pRoomInfo);
 
 		//same for the current state
-		if (m_pCurrentState) m_pCurrentState->Execute(m_pOwner, fTimeElapsed);
+		if (m_pCurrentState) m_pCurrentState->Execute(m_pOwner, fTimeElapsed, pRoomInfo);
 	}
 
 	//상태를 변경하기 위해 호출하는 메서드이다.

@@ -72,6 +72,65 @@ DWORD WINAPI RecvMessage(LPVOID arg)
 	return 0;
 }
 
+DWORD AgentServerMessageReceiver(LPVOID arg)
+{
+	MainServer* Server = (MainServer*)arg;
+	NGPMSG* msg = nullptr;
+
+	while (Server->GetConnectionAgentServerInfo()->sock) {
+
+		msg = new NGPMSG();
+
+		// 데이터 받기(고정 길이)
+		// 메세지의 헤더만큼 읽는다.
+		//std::cout << "ReceiveMsg" << std::endl;
+
+		int retval = recvn(Server->GetConnectionAgentServerInfo()->sock,
+			(char *)msg, sizeof(NGPMSG), 0);
+		if (retval == SOCKET_ERROR) {
+			break;
+		}
+
+		switch (msg->header.MSGTYPE)
+		{
+		case MSGTYPE::ROOMCREATION:
+		case MSGTYPE::CLIENTREADY:
+		case MSGTYPE::CLIENTGAMEOVER:
+		case MSGTYPE::AICREATTIONREQUEST:
+		case MSGTYPE::AIAGENTINFO:
+		{
+			delete msg;
+			break;
+		}
+		case MSGTYPE::MOVE:
+		case MSGTYPE::STOP:
+		case MSGTYPE::SHOOT:
+		case MSGTYPE::RELOAD:
+		case MSGTYPE::GRENADE:
+		case MSGTYPE::BUILDTURRET:
+		case MSGTYPE::ADJUSTPOS:
+		case MSGTYPE::CREATEOBJECT:
+		case MSGTYPE::DELETEOBJECT:
+		case MSGTYPE::UPDATEOBJECTSTATE:
+		case MSGTYPE::UPDATEMAPSTATE:
+		{
+			Server->TrySendMsgToRoom(msg);
+			break;
+		}
+		default:
+			delete msg;
+			break;
+
+		}
+	}
+
+
+
+
+	
+	return 0;
+}
+
 MainServer::MainServer()
 	: m_iRoomCounter(0)
 {
@@ -97,6 +156,8 @@ void MainServer::Run()
 	UINT clientcounter = 0;
 
 	ConnectAgentServer();
+	HANDLE AgentReceiver = 
+		CreateThread(NULL, 0, AgentServerMessageReceiver, this, 0, NULL);
 
 	while (1)
 	{
@@ -149,6 +210,8 @@ void MainServer::ConnectAgentServer()
 		//Assert
 		return;
 	}
+
+
 
 }
 

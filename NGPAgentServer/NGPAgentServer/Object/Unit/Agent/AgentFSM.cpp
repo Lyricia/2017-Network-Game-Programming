@@ -15,11 +15,8 @@ void AgentGlobalState::Enter(CAgent * agent)
 {
 }
 
-void AgentGlobalState::Execute(CAgent * agent, float fTimeElapsed)
+void AgentGlobalState::Execute(CAgent * agent, float fTimeElapsed, RoomInfo* pRoomInfo)
 {
-
-
-
 	// 현재 방향을 바꿀 수 있다면 방향을 바꾸는 상태로 전환한다.
 	// 지금은 자체적으로 변경
 
@@ -45,9 +42,22 @@ void Wandering::Enter(CAgent * agent)
 {
 }
 
-void Wandering::Execute(CAgent * agent, float fTimeElapsed)
+void Wandering::Execute(CAgent * agent, float fTimeElapsed, RoomInfo* pRoomInfo)
 {
-	agent->Move(agent->GetDirection(), fTimeElapsed);
+
+	UCHAR type = MSGTYPE::MSGACTION::MOVE;
+	UCHAR roomNo = pRoomInfo->RoomID;
+	UINT objNo = agent->GetID();
+	ActionInfo action_info;
+	action_info.LookDirection = agent->GetDirection();
+	action_info.MoveDirection = agent->GetDirection();
+
+	NGPMSG* msg = CreateMSG(type, roomNo, objNo, 0, 1, NULL, &action_info);
+		pRoomInfo->SendMsgs((char*)msg, sizeof(NGPMSG));
+	delete msg;
+
+	//std::cout << pRoomInfo->RoomID << "SendMessage Move" << std::endl;
+	//agent->Move(agent->GetDirection(), fTimeElapsed);
 	agent->LookAt(agent->GetDirection() + agent->GetPos());
 
 	if (agent->IsDirectionChangable())
@@ -72,13 +82,31 @@ void ChangeDirection::Enter(CAgent * agent)
 {
 }
 
-void ChangeDirection::Execute(CAgent * agent, float fTimeElapsed)
+void ChangeDirection::Execute(CAgent * agent, float fTimeElapsed, RoomInfo* pRoomInfo)
 {
 
 	// send message -> 서버에 방향을 바꿀 것이란 메세지를 보낼 것이다. 
 	// 지금은 자체적으로 상태 변경
 	D2D_POINT_2F dir{ -10 + rand() % 20,-10 + rand() % 20 };
 	agent->SetDirection(Normalize(dir));
+
+	UCHAR type = MSGTYPE::MSGACTION::MOVE;
+	UCHAR roomNo = pRoomInfo->RoomID;
+	UINT objNo = agent->GetID();
+	ActionInfo action_info;
+	action_info.LookDirection = agent->GetDirection();
+	action_info.MoveDirection = agent->GetDirection();
+
+	NGPMSG* msg = CreateMSG(type, roomNo, objNo, 0, 1, NULL, &action_info);
+	
+	std::cout <<"ROOM - " << pRoomInfo->RoomID 
+		<<"Agent No"<< objNo <<
+		"SendMessage Change Direction" << std::endl;
+
+	//pRoomInfo->SendMsgs((char*)msg, sizeof(NGPMSG));
+	delete msg;
+
+
 	agent->GetFSM()->ChangeState(Wandering::Instance());
 
 }
@@ -102,7 +130,7 @@ void Shooting::Enter(CAgent * agent)
 {
 }
 
-void Shooting::Execute(CAgent * agent, float fTimeElapsed)
+void Shooting::Execute(CAgent * agent, float fTimeElapsed, RoomInfo* pRoomInfo)
 {
 	agent->Stop();
 	agent->LookAt(agent->GetTargetPos());

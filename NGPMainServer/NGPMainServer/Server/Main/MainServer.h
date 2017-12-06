@@ -1,7 +1,6 @@
 #pragma once
 #include "Server\Server.h"
 #include "GameWorld\GameWorld.h"
-
 #define MESSAGE_PROCESSING_TIME 0.1
 
 #define AGENT_SERVER_IP		"127.0.0.1"
@@ -36,6 +35,8 @@ struct RoomInfo {
 	UCHAR					RoomID;
 	ConnectionInfo			*serverinfo;
 	list<ConnectionInfo*>	clientlist;
+	list<LPVOID>			agentlist;
+
 	ConnectionInfo*			AgentServer;
 	CGameWorld				GameWorld;
 	list<NGPMSG*>			MsgQueue;
@@ -88,9 +89,29 @@ public:
 	void RequestAddAgentServer(UCHAR room_id);
 	void CreateRoom();
 	void DeleteRoom();
+
+	ConnectionInfo* GetConnectionAgentServerInfo() { return m_AgentServer; }
+	void TrySendMsgToRoom(NGPMSG* msg)
+	{
+		for (auto&d : m_RoomList)
+		{
+			if (d->RoomID == msg->header.ROOMNO)
+			{
+				//if(msg->header.MSGTYPE == MSGTYPE::MSGACTION::MOVE)
+				//std::cout << "RECV AGENT MESSAGE" << msg->header.OBJECTNO << std::endl;
+				d->EnterCriticalSection();
+				d->MsgQueue.push_back(msg);
+				d->LeaveCriticalSection();
+				break;
+			}
+		}
+	
+	}
 };
 
 static int recvn(SOCKET s, char *buf, int len, int flags);
 static DWORD WINAPI RunGameWorld(LPVOID arg);
 static DWORD WINAPI RecvMessage(LPVOID arg);
 
+// Recv Agent Server
+static DWORD WINAPI AgentServerMessageReceiver(LPVOID arg);

@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include "Server\AgentServer.h"
 #include "State.h"
 #include "Agent.h"
 
@@ -19,7 +20,7 @@ public:
 
 	virtual void Enter(CAgent* agent);
 
-	virtual void Execute(CAgent* agent, float fTimeElapsed);
+	virtual void Execute(CAgent* agent, float fTimeElapsed ,RoomInfo* pRoomInfo);
 
 	virtual void Exit(CAgent* agent);
 };
@@ -41,7 +42,7 @@ public:
 
 	virtual void Enter(CAgent* agent);
 
-	virtual void Execute(CAgent* agent, float fTimeElapsed);
+	virtual void Execute(CAgent* agent, float fTimeElapsed, RoomInfo* pRoomInfo);
 
 	virtual void Exit(CAgent* agent);
 
@@ -65,7 +66,7 @@ public:
 
 	virtual void Enter(CAgent* agent);
 
-	virtual void Execute(CAgent* agent, float fTimeElapsed);
+	virtual void Execute(CAgent* agent, float fTimeElapsed, RoomInfo* pRoomInfo);
 
 	virtual void Exit(CAgent* agent);
 
@@ -89,7 +90,7 @@ public:
 
 	virtual void Enter(CAgent* agent);
 
-	virtual void Execute(CAgent* agent, float fTimeElapsed);
+	virtual void Execute(CAgent* agent, float fTimeElapsed, RoomInfo* pRoomInfo);
 
 	virtual void Exit(CAgent* agent);
 

@@ -129,6 +129,13 @@ bool CMainScene::OnCreate(wstring && tag, CFramework * pFramework)
 			
 		}
 
+	for (int i = 0; i< 3; ++i)
+	{
+		CAgent* agent = new CAgent(Point2F(-100, 10 * i));
+		agent->RegisterResourceManager(m_pResMng);
+		m_vecObjects.push_back(agent);
+	}
+
 	for (int i=0; i< 3; ++i)
 	{
 		CPlayer* player = new CPlayer(Point2F(-100, 10));
@@ -147,12 +154,7 @@ bool CMainScene::OnCreate(wstring && tag, CFramework * pFramework)
 	m_Camera.SetPosition(m_pPlayer->GetPos());
 	m_Camera.SetAnchor(Point2F(0.0f, 0.0f));
 
-	for (int i = 0; i< 1; ++i)
-	{
-		CAgent* agent = new CAgent(Point2F(-100, 10));
-		agent->RegisterResourceManager(m_pResMng);
-		m_vecObjects.push_back(agent);
-	}
+	
 
 	return true;
 }

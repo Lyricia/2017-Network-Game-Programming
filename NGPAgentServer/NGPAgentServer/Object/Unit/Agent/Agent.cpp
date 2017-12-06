@@ -10,13 +10,16 @@
 
 CAgent::CAgent(D2D_POINT_2F pt, D2D_RECT_F rc)
 	: CUnit(pt, rc)
+	, m_pTarget(nullptr)
 	, m_ptTargetPos({ 0,0 })
 	, m_fBlockStunTimer(0)
 	, m_bCollision(false)
-
+	, m_bShoot(true)
+	, m_ptVelocity(Point2F())
 {
 	m_Tag = CObject::Type::Agent;
 	m_next_change_dir_timer = rand() % 5 + 1;
+	m_fHP = PLAYER_MAX_HP;
 
 	m_pStateMachine = new StateMachine<CAgent>(this);
 	m_pStateMachine->SetGlobalState(AgentGlobalState::Instance());
@@ -33,10 +36,34 @@ CAgent::~CAgent()
 void CAgent::Update(float fTimeElapsed)
 {
 
-	m_changedir_timer += fTimeElapsed;
-	m_shoot_timer += fTimeElapsed;
+	m_ptPos += m_ptVelocity * fTimeElapsed;
 
-	m_pStateMachine->Update(fTimeElapsed);
+	m_ptVelocity -= m_ptVelocity * fTimeElapsed * FRICTIONAL_DRAG;
+	if (Length(m_ptVelocity) < FRICTIONAL_DRAG)
+		m_ptVelocity = Point2F();
+
+
+	else if (m_bShoot)
+	{
+		m_shoot_timer += fTimeElapsed;
+		if (m_shoot_timer > SHOOT_TIME)
+		{
+			m_bShoot = false;
+			m_shoot_timer = 0.f;
+		}
+	}
+
+	if (m_bCollision)
+	{
+		m_fBlockStunTimer += fTimeElapsed;
+		if (m_fBlockStunTimer > BLOCK_STUN_TIME)
+		{
+			m_bCollision = false;
+			m_fBlockStunTimer = 0.f;
+		}
+	}
+
+	m_changedir_timer += fTimeElapsed;
 
 	m_fClosestTargetDistance = 99999999;
 
@@ -101,6 +128,14 @@ void CAgent::Collide(float atk)
 	m_fHP -= atk;
 	if (m_fHP < 0)
 		m_fHP = 0;
+}
+
+void CAgent::Move(RoomInfo * pRoom, const D2D_POINT_2F & ptMoveDirection)
+{
+
+
+
+
 }
 
 void CAgent::Move(const D2D_POINT_2F & ptVelocity, float fTimeElapsed)
@@ -173,8 +208,6 @@ CEffect* CAgent::Shoot()
 
 void CAgent::RayCastingToShoot(std::vector<CObject*>& pvecObjects)
 {
-
-
 	for (float ratio = 0; ratio < 1; ratio += 0.01f)
 	{
 		D2D1_POINT_2F ptDevidedRay = m_ptPos + (m_ptDirection * AGENT_SHOOT_RANGE * ratio);
@@ -207,14 +240,6 @@ void CAgent::RayCastingToShoot(std::vector<CObject*>& pvecObjects)
 	}
 	m_pTarget = nullptr;
 	m_ptMuzzleEndPos = m_ptPos + (m_ptDirection * SHOOT_RANGE);
-
-
-
-
-
-
-
-
 
 }
 

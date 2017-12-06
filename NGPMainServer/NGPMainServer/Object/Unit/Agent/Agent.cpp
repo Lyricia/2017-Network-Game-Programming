@@ -12,10 +12,15 @@ CAgent::CAgent(D2D_POINT_2F pt, D2D_RECT_F rc)
 	, m_ptTargetPos({ 0,0 })
 	, m_fBlockStunTimer(0)
 	, m_bCollision(false)
+	, m_ptMoveDirection(Point2F())
+	, m_ptVelocity(Point2F())
+	, m_bMove(false)
 
 {
 	m_Tag = CObject::Type::Agent;
-	m_next_change_dir_timer = rand() % 5 + 1;
+	
+	m_fHP = PLAYER_MAX_HP;
+
 
 	m_pStateMachine = new StateMachine<CAgent>(this);
 	m_pStateMachine->SetGlobalState(AgentGlobalState::Instance());
@@ -32,12 +37,36 @@ CAgent::~CAgent()
 void CAgent::Update(float fTimeElapsed)
 {
 
-	m_changedir_timer += fTimeElapsed;
-	m_shoot_timer += fTimeElapsed;
+	Move(AGENT_VELOCITY * fTimeElapsed);
+	m_ptPos += m_ptVelocity * fTimeElapsed;
 
-	m_pStateMachine->Update(fTimeElapsed);
+	m_ptVelocity -= m_ptVelocity * fTimeElapsed * FRICTIONAL_DRAG;
+	if (Length(m_ptVelocity) < FRICTIONAL_DRAG)
+	{
+		m_ptVelocity = Point2F();
+		m_bMove = false;
+	}
 
-	m_fClosestTargetDistance = 99999999;
+
+	if (m_bShoot)
+	{
+		m_fShootTimer += fTimeElapsed;
+		if (m_fShootTimer > SHOOT_TIME)
+		{
+			m_bShoot = false;
+			m_fShootTimer = 0.f;
+		}
+	}
+
+	if (m_bCollision)
+	{
+		m_fBlockStunTimer += fTimeElapsed;
+		if (m_fBlockStunTimer > BLOCK_STUN_TIME)
+		{
+			m_bCollision = false;
+			m_fBlockStunTimer = 0.f;
+		}
+	}
 
 }
 #ifdef WITH_RENDER_AGENT
@@ -112,17 +141,32 @@ void CAgent::Move(const D2D_POINT_2F & ptVelocity, float fTimeElapsed)
 	m_ptPos += m_ptVelocity * fTimeElapsed;
 }
 
+void CAgent::Move(const D2D_POINT_2F & ptVelocity)
+{
+	m_ptVelocity += ptVelocity;
+	float len = Length(m_ptVelocity);
+	if (len > AGENT_MAX_VELOCITY)
+		m_ptVelocity -= Normalize(m_ptVelocity) * (len - AGENT_MAX_VELOCITY);
+}
+
+void CAgent::Move(float fSpeed)
+{
+	if (m_bMove) Move(m_ptMoveDirection * fSpeed);
+}
+
 void CAgent::Reflection(const D2D_POINT_2F & ptReflect)
 {
 	if (ptReflect == Point2F())
 		m_ptVelocity = m_ptVelocity * -AGENT_REFLACTION_FACTOR;
 	else
 		m_ptVelocity = ptReflect * Length(m_ptVelocity * AGENT_REFLACTION_FACTOR);
+	SetMoveDirection(Normalize(m_ptVelocity));
 }
 
 void CAgent::Stop()
 {
 	m_ptVelocity = Point2F();
+	SetMoveDirection(Point2F());
 }
 
 
@@ -131,7 +175,7 @@ CEffect* CAgent::Shoot()
 {
 	if (!m_bisShootable) return nullptr;
 
-	m_shoot_timer = 0;
+	m_fShootTimer = 0;
 	m_bisShootable = false;
 
 	m_ptMuzzleDirection = m_ptDirection;
@@ -273,6 +317,12 @@ void CAgent::InterActionCheck(std::vector<CObject*>& pObjects)
 
 
 
+}
+
+void CAgent::SetMoveDirection(const D2D_POINT_2F & ptMoveDirection)
+{
+	m_ptMoveDirection = ptMoveDirection;
+	m_bMove = true;
 }
 
 

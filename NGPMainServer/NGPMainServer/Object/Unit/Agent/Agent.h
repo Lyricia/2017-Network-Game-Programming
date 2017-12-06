@@ -9,7 +9,10 @@
 
 #define AGENT_BLOCK_STUN_TIME		0.2
 #define AGENT_REFLACTION_FACTOR		0.8f
-#define AGENT_MAX_VELOCITY			100.f
+
+#define AGENT_MAX_VELOCITY			200.f
+#define AGENT_VELOCITY				2000.f
+
 #define AGENT_SHOOT_TIME			0.7
 #define AGENT_SHOOT_RANGE			1000.f
 
@@ -51,8 +54,12 @@ protected:
 	float							m_fBlockStunTimer;
 	bool							m_bCollision;
 
+	D2D_POINT_2F					m_ptMoveDirection;
 	D2D_POINT_2F					m_ptDirection;
 	D2D_POINT_2F					m_ptVelocity;
+
+	bool							m_bMove;
+	bool							m_bShoot;
 
 	// 방향을 바꾸는 순간을 판정하기 위한 타이머다.
 	// 에이전트의 update 메서드 호출 시 m_changedir_timer값이 m_next_change_dir_timer 보다 크면
@@ -62,7 +69,7 @@ protected:
 	float	m_next_change_dir_timer = 0;
 
 	// 사격을 위한 타이머다.
-	float	m_shoot_timer = 0;
+	float	m_fShootTimer = 0;
 public:
 	CAgent(D2D_POINT_2F pt, D2D_RECT_F rc = RectF());
 
@@ -78,7 +85,7 @@ public:
 	bool IsDirectionChangable() const { return (m_changedir_timer > m_next_change_dir_timer); }
 
 	// 사격 스위치가 켜질 수 있는가.
-	bool IsCanbeShootable() const { return (m_shoot_timer > AGENT_SHOOT_TIME); }
+	bool IsCanbeShootable() const { return (m_fShootTimer > AGENT_SHOOT_TIME); }
 	// 사격 스위치가 켜졌는가
 	bool IsShootReady() const { return m_bisShootable; }
 
@@ -94,6 +101,9 @@ public:
 
 
 	void Move(const D2D_POINT_2F& ptVelocity, float fTimeElapsed);
+	void Move(const D2D_POINT_2F& ptVelocity);
+	void Move(float fSpeed);
+
 	void Reflection(const D2D_POINT_2F& ptReflect = Point2F());
 	void Stop();
 
@@ -106,6 +116,7 @@ public:
 
 	void SetDirection(D2D_POINT_2F pt) { m_ptDirection = pt; }
 
+	void SetMoveDirection(const D2D_POINT_2F& ptMoveDirection);
 	CObject*	GetTarget() { return m_pTarget; }
 	D2D_POINT_2F GetTargetPos() const { return m_ptTargetPos; }
 	D2D_POINT_2F GetVelocity() const { return m_ptVelocity; }

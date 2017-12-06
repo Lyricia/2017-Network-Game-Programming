@@ -141,7 +141,7 @@ void AgentServer::Run()
 	
 	HANDLE Dispatcher = CreateThread(NULL, 0, MessageDispatcher, this , 0, NULL);
 
-	while (m_MainServer.sock) {
+	while (m_MainServer->sock) {
 
 		msg = new NGPMSG();
 
@@ -149,7 +149,7 @@ void AgentServer::Run()
 		// 메세지의 헤더만큼 읽는다.
 		//std::cout << "ReceiveMsg" << std::endl;
 
-		retval = recvn(m_MainServer.sock,
+		retval = recvn(m_MainServer->sock,
 			(char *)msg, sizeof(NGPMSG), 0);
 		if (retval == SOCKET_ERROR) {
 			break;
@@ -196,7 +196,7 @@ void AgentServer::Run()
 
 		}
 	}
-	closesocket(m_MainServer.sock);
+	closesocket(m_MainServer->sock);
 	///////////////////////////////////////////////////////////////////////////////////////
 
 }
@@ -207,10 +207,11 @@ void AgentServer::AcceptMainServer()
 	int addrlen;
 	// 오류 시 결과 값을 저장한다.
 	int retval;
-	
-	addrlen = sizeof(m_MainServer.addr);
-	m_MainServer.sock = accept(m_ListenSock, (SOCKADDR *)&m_MainServer.addr, &addrlen);
-	if (m_MainServer.sock == INVALID_SOCKET)
+	m_MainServer = new ConnectionInfo();
+
+	addrlen = sizeof(m_MainServer->addr);
+	m_MainServer->sock = accept(m_ListenSock, (SOCKADDR *)&m_MainServer->addr, &addrlen);
+	if (m_MainServer->sock == INVALID_SOCKET)
 	{
 		std::cout << "client socket error" << std::endl;
 	}
@@ -222,7 +223,7 @@ void AgentServer::CreateAgentsToRoom(UINT room_id)
 
 	RoomInfo* newroom = new RoomInfo();
 	newroom->RoomID = room_id;
-
+	newroom->serverinfo = m_MainServer;
 	newroom->GameWorld.RegisterRoomInfo(newroom);
 	newroom->GameWorld.Initailize();
 
