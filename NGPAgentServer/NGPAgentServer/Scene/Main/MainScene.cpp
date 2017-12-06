@@ -36,6 +36,7 @@ bool CMainScene::OnCreate(std::wstring && tag, CGameWorld* pGameWorld)
 			{
 				CBrick* brick = new CBrick(Point2F((j - map_size_half)*g_iMapSize, 
 					(i - map_size_half)*g_iMapSize));
+				brick->SetID(ObjectID++);
 				m_vecObjects.push_back(brick);
 			}
 		}
@@ -45,6 +46,7 @@ bool CMainScene::OnCreate(std::wstring && tag, CGameWorld* pGameWorld)
 	{
 		CAgent* agent = new CAgent(Point2F(-100, 10 * i));
 		agent->RegisterRoomInfo(m_pRoomInfo);
+		agent->SetID(ObjectID++);
 		m_vecObjects.push_back(agent);
 	}
 
@@ -52,6 +54,7 @@ bool CMainScene::OnCreate(std::wstring && tag, CGameWorld* pGameWorld)
 	{
 		CPlayer* player = new CPlayer(Point2F(-100, 10));
 		m_vecObjects.push_back(player);
+		player->SetID(ObjectID++);
 	}
 
 
@@ -159,6 +162,7 @@ void CMainScene::ProcessMsgs()
 							break;
 						}
 					grenade->SetVelocity(arrObjInfo[i].Velocity);
+					grenade->SetID(ObjectID++);
 					m_vecObjects.push_back(grenade);
 					break;
 				}

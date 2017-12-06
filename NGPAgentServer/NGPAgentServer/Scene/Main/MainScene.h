@@ -36,5 +36,7 @@ private:
 	std::vector<CObject*>			m_vecObjects;
 
 	D2D_POINT_2F					m_ptCamera;
+
+	UINT							ObjectID = 0;
 };
 

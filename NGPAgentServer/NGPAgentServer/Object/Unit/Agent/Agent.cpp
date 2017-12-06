@@ -21,6 +21,9 @@ CAgent::CAgent(D2D_POINT_2F pt, D2D_RECT_F rc)
 	m_next_change_dir_timer = rand() % 5 + 1;
 	m_fHP = PLAYER_MAX_HP;
 
+	D2D_POINT_2F dir{ -10 + rand() % 20,-10 + rand() % 20 };
+	SetDirection(Normalize(dir));
+
 	m_pStateMachine = new StateMachine<CAgent>(this);
 	m_pStateMachine->SetGlobalState(AgentGlobalState::Instance());
 	m_pStateMachine->SetCurrentState(Wandering::Instance());
