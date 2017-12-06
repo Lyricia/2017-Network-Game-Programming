@@ -47,8 +47,8 @@ bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 		CAgent* agent = new CAgent(Point2F(-100, 10 * i));
 		agent->SetID(m_ObjectIDCounter++);
 		agent->SetSize(OBJECT_RECT);
-		m_pRoomInfo->agentlist.push_back(agent);
 		m_vecObjects.push_back(agent);
+		m_pRoomInfo->agentlist.push_back((LPVOID)agent);
 	}
 
 	for(auto& p: m_pRoomInfo->clientlist)
@@ -115,6 +115,48 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 					}
 				delete (*iter);
 				iter = m_vecObjects.erase(iter);
+			}
+			else
+				++iter;
+			break;
+		}
+		case CObject::Type::Agent:
+		{
+			CAgent* agent = static_cast<CAgent*>((*iter));
+			if (agent->IsDie())
+			{
+				NGPMSG* msg = CreateMSG(
+					MSGTYPE::MSGUPDATE::DELETEOBJECT
+					, m_pRoomInfo->RoomID
+					, (*iter)->GetID()
+					, 0, 0, nullptr, nullptr);
+
+				for (auto& client : m_pRoomInfo->clientlist)
+				{
+					int retval = send(client->sock, (char*)msg, sizeof(NGPMSG), NULL);
+					if (retval == SOCKET_ERROR) {
+						//assert
+					}
+				}
+
+				// 에이전트 서버에게 삭제될 오브젝트 전송
+				int retval = send(m_pRoomInfo->AgentServer->sock, (char*)msg, sizeof(NGPMSG), NULL);
+				if (retval == SOCKET_ERROR) {
+					//assert
+				}
+
+				delete msg;
+
+				for (auto& p : m_pRoomInfo->agentlist)
+					if (p)
+					{
+						CAgent* agnt = static_cast<CAgent*>(p);
+						if (agent->GetID() == agent->GetID())
+							p = nullptr;
+					}
+				delete (*iter);
+				iter = m_vecObjects.erase(iter);
+
 			}
 			else
 				++iter;
@@ -213,49 +255,7 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 				++iter;
 			break;
 		}
-		case CObject::Type::Agent:
-		{
-			CAgent* agent = static_cast<CAgent*>((*iter));
-			if (agent->IsDie())
-			{
-				NGPMSG* msg = CreateMSG(
-					MSGTYPE::MSGUPDATE::DELETEOBJECT
-					, m_pRoomInfo->RoomID
-					, (*iter)->GetID()
-					, 0, 0, nullptr, nullptr);
-				
-				for (auto& client : m_pRoomInfo->clientlist)
-				{
-					int retval = send(client->sock, (char*)msg, sizeof(NGPMSG), NULL);
-					if (retval == SOCKET_ERROR) {
-						//assert
-					}
-				}
-
-				// 에이전트 서버에게 삭제될 오브젝트 전송
-				int retval = send(m_pRoomInfo->AgentServer->sock, (char*)msg, sizeof(NGPMSG), NULL);
-				if (retval == SOCKET_ERROR) {
-					//assert
-				}
-
-				delete msg;
-
-
-				for (auto& it = m_pRoomInfo->agentlist.begin(); it != m_pRoomInfo->agentlist.end();)
-				{
-					CAgent* agnt = static_cast<CAgent*>((*it));
-					if ((*iter)->GetID() == agnt->GetID())
-						m_pRoomInfo->agentlist.erase(it++);
-				}
-
-
-				delete (*iter);
-				iter = m_vecObjects.erase(iter);
-			}
-			else
-				++iter;
-			break;
-		}
+		
 		default:
 			++iter;
 			break;
@@ -306,6 +306,32 @@ void CMainScene::PhysicsUpdate(float fTimeElapsed)
 			}
 			break;
 		}
+		case CObject::Type::Agent:
+		{
+			for (auto& q : m_vecObjects)
+			{
+				if (p == q) continue;
+				switch (q->GetTag())
+				{
+				case CObject::Type::Brick:
+				{
+					dir = Normalize(q->GetPos() - p->GetPos());
+					if (PtInRect(
+						&(q->GetSize() + q->GetPos())
+						, p->GetPos() + (dir * p->GetSize().right))
+						)
+					{
+						CAgent* agent = static_cast<CAgent*>(p);
+						agent->Reflection(-1.f * dir);
+						agent->SetDirection(-1.f * dir);
+						agent->Move(-PLAYER_VELOCITY * dir * fTimeElapsed);
+					}
+					break;
+				}
+				}
+			}
+			break;
+		}
 		case CObject::Type::Brick:
 		{
 			break;
@@ -334,31 +360,7 @@ void CMainScene::PhysicsUpdate(float fTimeElapsed)
 			}
 			break;
 		}
-		case CObject::Type::Agent:
-		{
-			for (auto& q : m_vecObjects)
-			{
-				if (p == q) continue;
-				switch (q->GetTag())
-				{
-				case CObject::Type::Brick:
-				{
-					dir = Normalize(q->GetPos() - p->GetPos());
-					if (PtInRect(
-						&(q->GetSize() + q->GetPos())
-						, p->GetPos() + (dir * p->GetSize().right))
-						)
-					{
-						CAgent* agent = static_cast<CAgent*>(p);
-						agent->Reflection(-1.f * dir);
-						agent->SetDirection(-1.f * dir);
-					}
-					break;
-				}
-				}
-			}
-			break;
-		}
+		
 		}
 		
 	}
@@ -417,8 +419,6 @@ void CMainScene::ProcessMsgs()
 				}
 			}
 
-
-
 			delete[] arrActionInfo;
 			arrActionInfo = nullptr;
 			break;
@@ -433,9 +433,6 @@ void CMainScene::ProcessMsgs()
 					if (player->GetID() == msg->header.OBJECTNO)
 						player->Stop();
 				}
-
-
-
 
 			break;
 		}
@@ -454,6 +451,7 @@ void CMainScene::ProcessMsgs()
 						target = p;
 						break;
 					}
+
 				for (auto& p : m_pRoomInfo->clientlist)
 					if (p->pUserdata)
 					{
@@ -464,6 +462,22 @@ void CMainScene::ProcessMsgs()
 							break;
 						}
 					}
+
+
+				for (auto& d : m_vecObjects)
+				{
+					if (d->GetTag() == CObject::Type::Agent)
+					{
+						CAgent* agent = static_cast<CAgent*>(d);
+						if (agent->GetID() == msg->header.OBJECTNO)
+						{
+							printf("Process Shoot Msg\n");
+							agent->Shoot(m_pRoomInfo, target, hit_pos);
+							break;
+						}
+					}
+				}
+
 			}
 			delete[] arrActionInfo;
 			arrActionInfo = nullptr;
@@ -586,6 +600,11 @@ void CMainScene::SendMsgs()
 	{
 		switch (obj->GetTag())
 		{
+		case CObject::Type::Agent:
+		{
+			++nAgent;
+			break;
+		}
 		case CObject::Type::Brick:
 		{
 			MapInfo* tmp = (MapInfo*)obj->GetObjectInfo();
@@ -598,11 +617,7 @@ void CMainScene::SendMsgs()
 			++nGrenade;
 			break;
 		}
-		case CObject::Type::Agent:
-		{
-			++nAgent;
-			break;
-		}
+		
 		}
 	}
 

@@ -23,6 +23,7 @@ CAgent::CAgent(D2D_POINT_2F pt, D2D_RECT_F rc)
 
 	D2D_POINT_2F dir{ -10 + rand() % 20,-10 + rand() % 20 };
 	SetDirection(Normalize(dir));
+	SetMoveDirection(Normalize(dir));
 
 	m_pStateMachine = new StateMachine<CAgent>(this);
 	m_pStateMachine->SetGlobalState(AgentGlobalState::Instance());
@@ -33,6 +34,7 @@ CAgent::CAgent(D2D_POINT_2F pt, D2D_RECT_F rc)
 
 CAgent::~CAgent()
 {
+	delete m_pStateMachine;
 }
 
 
@@ -45,16 +47,7 @@ void CAgent::Update(float fTimeElapsed)
 	if (Length(m_ptVelocity) < FRICTIONAL_DRAG)
 		m_ptVelocity = Point2F();
 
-
-	else if (m_bShoot)
-	{
-		m_shoot_timer += fTimeElapsed;
-		if (m_shoot_timer > SHOOT_TIME)
-		{
-			m_bShoot = false;
-			m_shoot_timer = 0.f;
-		}
-	}
+	m_shoot_timer += fTimeElapsed;
 
 	if (m_bCollision)
 	{
@@ -133,6 +126,15 @@ void CAgent::Collide(float atk)
 		m_fHP = 0;
 }
 
+void CAgent::Move(const D2D_POINT_2F& ptVelocity)
+{
+	m_ptVelocity += ptVelocity;
+	float len = Length(m_ptVelocity);
+	if (len > PLAYER_MAX_VELOCITY)
+		m_ptVelocity -= Normalize(m_ptVelocity) * (len - PLAYER_MAX_VELOCITY);
+}
+
+
 void CAgent::Move(RoomInfo * pRoom, const D2D_POINT_2F & ptMoveDirection)
 {
 
@@ -166,13 +168,8 @@ void CAgent::Stop()
 
 
 
-CEffect* CAgent::Shoot()
+void CAgent::Shoot()
 {
-	if (!m_bisShootable) return nullptr;
-
-	m_shoot_timer = 0;
-	m_bisShootable = false;
-
 	m_ptMuzzleDirection = m_ptDirection;
 	m_ptMuzzleStartPos = m_ptPos + m_ptMuzzleDirection * MUZZLE_OFFSET;
 
@@ -187,6 +184,13 @@ CEffect* CAgent::Shoot()
 			player->Move(m_ptMuzzleDirection * PLAYER_VELOCITY);
 			break;
 		}
+		case CObject::Type::Agent:
+		{
+			CAgent* agent = static_cast<CAgent*>(m_pTarget);
+			agent->Collide(SHOOT_DAMAGE);
+			agent->Move(m_ptMuzzleDirection * PLAYER_VELOCITY);
+			break;
+		}
 		case CObject::Type::Brick:
 		{
 			CBrick* brick = static_cast<CBrick*>(m_pTarget);
@@ -194,26 +198,23 @@ CEffect* CAgent::Shoot()
 			break;
 		}
 		}
-#ifdef WITH_RENDER_AGENT
-		auto& rc = SizeToRect(SizeF(m_rcSize.right, m_rcSize.bottom));
-		CEffect* effect = new CEffect(m_ptMuzzleEndPos, rc);
-		auto& img = m_pResMng->GetImageRef(ResImgName::MagicBlast);
-		auto& sz = m_pResMng->GetImgLength(ResImgName::MagicBlast);
-		effect->RegisterEffectSprite(img, sz);
-		return effect;
-#endif
 	}
-	return nullptr;
-
-
-
+	return;
 }
+
+void CAgent::Shoot(const D2D_POINT_2F & ptHitPos)
+{
+	m_ptMuzzleDirection = m_ptDirection;
+	m_ptMuzzleStartPos = m_ptPos + m_ptMuzzleDirection * MUZZLE_OFFSET;
+	m_ptMuzzleEndPos = ptHitPos;
+}
+
 
 void CAgent::RayCastingToShoot(std::vector<CObject*>& pvecObjects)
 {
 	for (float ratio = 0; ratio < 1; ratio += 0.01f)
 	{
-		D2D1_POINT_2F ptDevidedRay = m_ptPos + (m_ptDirection * AGENT_SHOOT_RANGE * ratio);
+		D2D1_POINT_2F ptDevidedRay = m_ptPos + (m_ptDirection * SHOOT_RANGE * ratio);
 		for (auto& p : pvecObjects)
 		{
 			switch (p->GetTag())
@@ -226,7 +227,17 @@ void CAgent::RayCastingToShoot(std::vector<CObject*>& pvecObjects)
 					m_pTarget = p;
 					return;
 				}
-				continue;
+				break;
+			}
+			case CObject::Type::Agent:
+			{
+				if (Length(p->GetPos() - ptDevidedRay) < p->GetSize().right)
+				{
+					m_ptMuzzleEndPos = ptDevidedRay;
+					m_pTarget = p;
+					return;
+				}
+				break;
 			}
 			case CObject::Type::Brick:
 			{
@@ -236,30 +247,27 @@ void CAgent::RayCastingToShoot(std::vector<CObject*>& pvecObjects)
 					m_pTarget = p;
 					return;
 				}
-				continue;
+				break;
 			}
 			}
 		}
 	}
-	m_pTarget = nullptr;
-	m_ptMuzzleEndPos = m_ptPos + (m_ptDirection * SHOOT_RANGE);
 
 }
 
 void CAgent::InterActionCheck(std::vector<CObject*>& pObjects)
 {
-
+	GetFSM()->ChangeState(Wandering::Instance());
+	m_fClosestTargetDistance = 99999;
+	
 	for (auto& p : pObjects)
 	{
-
 		if (this == p) continue;
 
 		D2D_POINT_2F dir = Point2F();
 
 
-		switch (p->GetTag())
-		{
-		case CObject::Type::Player:
+		if (p->GetTag() == CObject::Type::Player)
 		{
 			//if (m_pTarget == nullptr)
 			//{
@@ -272,28 +280,9 @@ void CAgent::InterActionCheck(std::vector<CObject*>& pObjects)
 			if (m_fClosestTargetDistance < AGENT_SHOOT_SIGHT)
 			{
 				m_ptTargetPos = p->GetPos();
-
 				GetFSM()->ChangeState(Shooting::Instance());
 			}
-			//}
-			continue;
 		}
-		case CObject::Type::Brick:
-		{
-			dir = Normalize(p->GetPos() - GetPos());
-			if (PtInRect(
-				&(p->GetSize() + p->GetPos())
-				, GetPos() + (dir * p->GetSize().right))
-				)
-			{
-				Reflection(-1.f * dir);
-				SetDirection(Normalize(-1.f *dir));
-			}
-
-			continue;
-		}
-		}
-
 
 	}
 
@@ -312,7 +301,9 @@ void CAgent::SetObjectInfo(LPVOID info)
 	//m_iGrenade = objinfo->Ammo.Granade;
 	//m_iAmmo = objinfo->Ammo.GunAmmo;
 	//m_iTurretKit = objinfo->Ammo.TurretKit;
+
 	m_ptDirection = objinfo->Direction;
+	m_ptMoveDirection = objinfo->Direction;
 	m_ptPos = objinfo->Position;
 
 	if (damage > 0) Collide(damage);

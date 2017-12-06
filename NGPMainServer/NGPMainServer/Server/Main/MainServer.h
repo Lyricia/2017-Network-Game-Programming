@@ -93,6 +93,7 @@ public:
 	ConnectionInfo* GetConnectionAgentServerInfo() { return m_AgentServer; }
 	void TrySendMsgToRoom(NGPMSG* msg)
 	{
+		bool success_Send_msg_to_room = false;
 		for (auto&d : m_RoomList)
 		{
 			if (d->RoomID == msg->header.ROOMNO)
@@ -102,9 +103,13 @@ public:
 				d->EnterCriticalSection();
 				d->MsgQueue.push_back(msg);
 				d->LeaveCriticalSection();
+				success_Send_msg_to_room = true;
 				break;
 			}
 		}
+
+		if (!success_Send_msg_to_room)
+			delete msg;
 	
 	}
 };

@@ -20,6 +20,7 @@
 
 class CEffect;
 class CResourceManager;
+struct RoomInfo;
 class CAgent : public CUnit {
 
 protected:
@@ -107,10 +108,10 @@ public:
 	void Reflection(const D2D_POINT_2F& ptReflect = Point2F());
 	void Stop();
 
-	CEffect* Shoot();
-	void RayCastingToShoot(std::vector<CObject*>& pvecObjects);
+	void Shoot();
+	void Shoot(RoomInfo* pRoomInfo, CObject* pTarget, const D2D_POINT_2F& ptHitPos);
 
-	void InterActionCheck(std::vector<CObject*>& pObjects);
+	void RayCastingToShoot(std::vector<CObject*>& pvecObjects);
 
 	void SetHP(float hp) { m_fHP = hp; }
 

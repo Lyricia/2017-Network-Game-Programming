@@ -22,9 +22,9 @@ CAgent::CAgent(D2D_POINT_2F pt, D2D_RECT_F rc)
 	m_next_change_dir_timer = rand() % 5 + 1;
 	m_fHP = PLAYER_MAX_HP;
 
-	m_pStateMachine = new StateMachine<CAgent>(this);
-	m_pStateMachine->SetGlobalState(AgentGlobalState::Instance());
-	m_pStateMachine->SetCurrentState(Wandering::Instance());
+	//m_pStateMachine = new StateMachine<CAgent>(this);
+	//m_pStateMachine->SetGlobalState(AgentGlobalState::Instance());
+	//m_pStateMachine->SetCurrentState(Wandering::Instance());
 
 }
 
@@ -44,7 +44,7 @@ void CAgent::Update(float fTimeElapsed)
 		m_ptVelocity = Point2F();
 
 	
-	else if (m_bShoot)
+	if (m_bShoot)
 	{
 		m_shoot_timer += fTimeElapsed;
 		if (m_shoot_timer > SHOOT_TIME)
@@ -67,8 +67,6 @@ void CAgent::Update(float fTimeElapsed)
 
 	m_changedir_timer += fTimeElapsed;
 	m_shoot_timer += fTimeElapsed;
-
-	//m_pStateMachine->Update(fTimeElapsed);
 
 	m_fClosestTargetDistance = 99999999;
 
@@ -100,6 +98,38 @@ void CAgent::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
 		, m_rcWeaponSize + m_ptPos);
 
 	pd2dRenderTarget->SetTransform(transform);
+
+	// 체력바
+	m_pResMng->brRed->SetOpacity(0.8f);
+	pd2dRenderTarget->FillRectangle(
+		RectF(m_rcSize.left
+			, m_rcSize.top - (m_rcSize.bottom - m_rcSize.top) * 0.1f
+			, m_rcSize.left + (m_rcSize.right - m_rcSize.left) * (m_fHP / PLAYER_MAX_HP)
+			, m_rcSize.top)
+		+ m_ptPos
+		, m_pResMng->brRed.Get());
+	m_pResMng->brRed->SetOpacity(1.0f);
+
+	// 체력바 테두리
+	pd2dRenderTarget->DrawRectangle(
+		RectF(m_rcSize.left
+			, m_rcSize.top - (m_rcSize.bottom - m_rcSize.top) * 0.1f
+			, m_rcSize.left + (m_rcSize.right - m_rcSize.left)
+			, m_rcSize.top)
+		+ m_ptPos
+		, m_pResMng->brWhite.Get());
+
+
+	if (m_bShoot)
+	{
+		m_pResMng->brLightYellow->SetOpacity(1 - (m_shoot_timer / SHOOT_TIME));
+		pd2dRenderTarget->DrawLine(
+			m_ptMuzzleStartPos
+			, m_ptMuzzleEndPos
+			, m_pResMng->brLightYellow.Get()
+			, SHOOT_STROKE);
+		m_pResMng->brLightYellow->SetOpacity(1.f);
+	}
 
 }
 
@@ -135,6 +165,14 @@ void CAgent::Collide(float atk)
 		m_fHP = 0;
 }
 
+void CAgent::Move(const D2D_POINT_2F& ptVelocity)
+{
+	m_ptVelocity += ptVelocity;
+	float len = Length(m_ptVelocity);
+	if (len > PLAYER_MAX_VELOCITY)
+		m_ptVelocity -= Normalize(m_ptVelocity) * (len - PLAYER_MAX_VELOCITY);
+}
+
 void CAgent::Move(const D2D_POINT_2F & ptVelocity, float fTimeElapsed)
 {
 	m_ptVelocity += ptVelocity;
@@ -166,7 +204,7 @@ CEffect* CAgent::Shoot()
 
 	m_shoot_timer = 0;
 	m_bisShootable = false;
-
+	m_bShoot = true;
 	m_ptMuzzleDirection = m_ptDirection;
 	m_ptMuzzleStartPos = m_ptPos + m_ptMuzzleDirection * MUZZLE_OFFSET;
 
@@ -202,6 +240,15 @@ CEffect* CAgent::Shoot()
 
 
 }
+
+
+void CAgent::Shoot(const D2D_POINT_2F & ptHitPos)
+{
+	m_ptMuzzleDirection = m_ptDirection;
+	m_ptMuzzleStartPos = m_ptPos + m_ptMuzzleDirection * MUZZLE_OFFSET;
+	m_ptMuzzleEndPos = ptHitPos;
+}
+
 
 void CAgent::RayCastingToShoot(std::vector<CObject*>& pvecObjects)
 {
@@ -261,9 +308,7 @@ void CAgent::InterActionCheck(std::vector<CObject*>& pObjects)
 		D2D_POINT_2F dir = Point2F();
 
 
-		switch (p->GetTag())
-		{
-		case CObject::Type::Player:
+		if (p->GetTag() == CObject::Type::Player)
 		{
 			//if (m_pTarget == nullptr)
 			//{
@@ -279,25 +324,7 @@ void CAgent::InterActionCheck(std::vector<CObject*>& pObjects)
 
 				GetFSM()->ChangeState(Shooting::Instance());
 			}
-			//}
-			continue;
 		}
-		case CObject::Type::Brick:
-		{
-			dir = Normalize(p->GetPos() - GetPos());
-			if (PtInRect(
-				&(p->GetSize() + p->GetPos())
-				, GetPos() + (dir * p->GetSize().right))
-				)
-			{
-				Reflection(-1.f * dir);
-				SetDirection(Normalize(-1.f *dir));
-			}
-
-			continue;
-		}
-		}
-
 
 	}
 

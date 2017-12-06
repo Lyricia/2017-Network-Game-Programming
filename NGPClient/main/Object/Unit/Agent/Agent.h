@@ -21,7 +21,7 @@ class CAgent : public CUnit {
 
 private:
 	//상태기계
-	StateMachine<CAgent>*	m_pStateMachine;
+	StateMachine<CAgent>*			m_pStateMachine;
 
 #ifdef WITH_RENDER_AGENT
 	ComPtr<ID2D1Bitmap1>			m_bmpImage;
@@ -74,6 +74,8 @@ public:
 	virtual void Update(float fTimeElapsed) override;
 #ifdef WITH_RENDER_AGENT
 	virtual void Draw(ID2D1HwndRenderTarget* pd2dRenderTarget) override;
+
+
 	virtual void RegisterResourceManager(std::shared_ptr<CResourceManager> resMng);
 #endif
 	StateMachine<CAgent>*  GetFSM()const { return m_pStateMachine; }
@@ -95,12 +97,13 @@ public:
 
 	void SetShootSwitch(bool shoot_switch) { m_bisShootable = shoot_switch; }
 
-
+	void Move(const D2D_POINT_2F& ptVelocity);
 	void Move(const D2D_POINT_2F& ptVelocity, float fTimeElapsed);
 	void Reflection(const D2D_POINT_2F& ptReflect = Point2F());
 	void Stop();
 
 	CEffect* Shoot();
+	void Shoot(const D2D_POINT_2F & ptHitPos);
 	void RayCastingToShoot(std::vector<CObject*>& pvecObjects);
 
 	void InterActionCheck(std::vector<CObject*>& pObjects);

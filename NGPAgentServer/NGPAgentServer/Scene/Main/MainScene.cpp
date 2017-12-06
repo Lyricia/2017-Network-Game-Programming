@@ -73,7 +73,7 @@ void CMainScene::Update(float fTimeElapsed)
 		if (p->GetTag() == CObject::Type::Agent)
 		{
 			CAgent* agent = static_cast<CAgent*>(p);
-			agent->RayCastingToShoot(m_vecObjects);
+			agent->InterActionCheck(m_vecObjects);
 			agent->RunStateMachine(fTimeElapsed);
 		}
 		
@@ -105,7 +105,7 @@ void CMainScene::ProcessMsgs()
 		{
 		case MSGTYPE::MSGACTION::SHOOT:
 		{
-			std::cout << "Room" << m_pRoomInfo->RoomID << "Shoot!" << std::endl;
+			//std::cout << "Room" << m_pRoomInfo->RoomID << "Shoot!" << std::endl;
 			D2D_POINT_2F hit_pos = Point2F();
 			arrActionInfo = new ActionInfo[msg->header.NUM_ACTIONINFO];
 			DispatchMSG(msg, arrActionInfo, arrObjInfo);
@@ -116,9 +116,21 @@ void CMainScene::ProcessMsgs()
 				{
 					if (msg->header.OBJECTNO == (*iter)->GetID())
 					{
-						CPlayer* player = static_cast<CPlayer*>(*iter);
-						player->Shoot(arrActionInfo[i].TargetHitPos);
-						break;
+						switch ((*iter)->GetTag())
+						{
+						case CObject::Type::Player:
+						{
+							CPlayer* player = static_cast<CPlayer*>(*iter);
+							player->Shoot(arrActionInfo[i].TargetHitPos);
+							break;
+						}
+						case CObject::Type::Agent:
+						{
+							CAgent* agent = static_cast<CAgent*>(*iter);
+							agent->Shoot(arrActionInfo[i].TargetHitPos);
+							break;
+						}
+						}
 					}
 				}
 			}

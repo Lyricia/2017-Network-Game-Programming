@@ -28,8 +28,8 @@ void CUnit::Update(float fTimeElapsed)
 
 void CUnit::LookAt(const D2D1_POINT_2F& target_pos)
 {
-	//if(m_ptPos == target_pos) return;
-	//m_ptDirection = Normalize(target_pos - m_ptPos);
+	if(m_ptPos == target_pos) return;
+	m_ptDirection = Normalize(target_pos - m_ptPos);
 	//float angle = -acosf(m_ptDirection*Point2F(1, 0)); 
 	//if (m_ptDirection.y > 0)
 	//	angle = -angle;

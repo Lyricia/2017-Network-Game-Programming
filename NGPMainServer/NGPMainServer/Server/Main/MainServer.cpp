@@ -232,6 +232,7 @@ void MainServer::RequestAddAgentServer(UCHAR room_id)
 		//assert
 	}
 
+	delete msg;
 }
 
 void MainServer::CreateRoom()
@@ -263,7 +264,8 @@ void MainServer::CreateRoom()
 
 void MainServer::DeleteRoom()
 {
-	m_RoomList.remove_if([](RoomInfo* pRoom)->bool {
+
+	m_RoomList.remove_if([ &, this ](RoomInfo* pRoom )->bool {
 		if (pRoom->clientlist.empty())
 		{
 			delete pRoom;

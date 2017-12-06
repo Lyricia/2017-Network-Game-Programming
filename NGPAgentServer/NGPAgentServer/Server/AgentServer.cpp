@@ -63,6 +63,12 @@ DWORD WINAPI MessageDispatcher(LPVOID arg)
 
 			switch (msg->header.MSGTYPE)
 			{
+			case MSGTYPE::CLIENTGAMEOVER:
+			{
+				printf("Delete Room %d \n", msg->header.ROOMNO);
+				Server->DeleteAgentsFromRoom(msg->header.ROOMNO);
+				break;
+			}
 			case MSGTYPE::AICREATTIONREQUEST:
 			{
 				Server->CreateAgentsToRoom(msg->header.ROOMNO);
@@ -118,7 +124,7 @@ DWORD WINAPI RunGameWorld(LPVOID arg)
 		}
 	}
 
-	while (1)
+	while (room)
 	{
 		std::cout << "Running Room" << room->RoomID << std::endl;
 		room->GameWorld.Run();

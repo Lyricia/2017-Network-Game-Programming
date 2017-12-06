@@ -3,6 +3,7 @@
 #include "Framework\Client\Client.h"
 #include "Player.h"
 #include "Object\Brick\Brick.h"
+#include "Object\Unit\Agent\Agent.h"
 #include "Object\Projectile\Grenade\Grenade.h"
 #include "Object\Effect\Effect.h"
 
@@ -332,6 +333,13 @@ CEffect* CPlayer::Shoot()
 			player->Move(m_ptMuzzleDirection * PLAYER_VELOCITY);
 			break;
 		}
+		case CObject::Type::Agent:
+		{
+			CAgent* agent = static_cast<CAgent*>(m_pTarget);
+			agent->Collide(SHOOT_DAMAGE);
+			agent->Move(m_ptMuzzleDirection * PLAYER_VELOCITY);
+			break;
+		}
 		case CObject::Type::Brick:
 		{
 			CBrick* brick = static_cast<CBrick*>(m_pTarget);
@@ -417,6 +425,17 @@ void CPlayer::RayCastingToShoot(std::vector<CObject*>& pvecObjects)
 			switch (p->GetTag())
 			{
 			case CObject::Type::Player:
+			{
+				if (p == this) break;
+				if (Length(p->GetPos() - ptDevidedRay) < p->GetSize().right)
+				{
+					m_ptMuzzleEndPos = ptDevidedRay;
+					m_pTarget = p;
+					return;
+				}
+				break;
+			}
+			case CObject::Type::Agent:
 			{
 				if (p == this) break;
 				if (Length(p->GetPos() - ptDevidedRay) < p->GetSize().right)

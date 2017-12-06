@@ -193,9 +193,22 @@ void CMainScene::ProcessMsgs()
 				{
 					if (msg->header.OBJECTNO == (*iter)->GetID())
 					{
-						CPlayer* player = static_cast<CPlayer*>(*iter);
-						player->Shoot(arrActionInfo[i].TargetHitPos);
-						break;
+
+						switch ((*iter)->GetTag())
+						{
+						case CObject::Type::Player:
+						{
+							CPlayer* player = static_cast<CPlayer*>(*iter);
+							player->Shoot(arrActionInfo[i].TargetHitPos);
+							break;
+						}
+						case CObject::Type::Agent:
+						{
+							CAgent* agent = static_cast<CAgent*>(*iter);
+							agent->Shoot(arrActionInfo[i].TargetHitPos);
+							break;
+						}
+						}
 					}
 				}
 			}

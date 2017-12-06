@@ -82,6 +82,22 @@ bool CGameWorld::CheckClients()
 		if (m_pRoomInfo->clientlist.empty())
 		{
 			cout << "Terminate Room " << m_pRoomInfo->RoomID << endl;
+
+			NGPMSG* msg = CreateMSG(
+				MSGTYPE::CLIENTGAMEOVER
+				, m_pRoomInfo->RoomID
+				, 0
+				, 0
+				, 0
+				, nullptr
+				, nullptr
+			);
+
+			int retval = send(m_pRoomInfo->AgentServer->sock, (char*)msg, sizeof(NGPMSG), NULL);
+			if (retval == SOCKET_ERROR) {
+				//assert
+			}
+
 			return false;
 		}
 	}

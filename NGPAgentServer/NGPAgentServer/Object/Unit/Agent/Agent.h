@@ -10,10 +10,10 @@
 #define AGENT_BLOCK_STUN_TIME		0.2
 #define AGENT_REFLACTION_FACTOR		0.8f
 #define AGENT_MAX_VELOCITY			100.f
-#define AGENT_SHOOT_TIME			0.7
+#define AGENT_SHOOT_TIME			2.f
 #define AGENT_SHOOT_RANGE			1000.f
-
-#define AGENT_SHOOT_SIGHT			500.f
+#define AGENT_MUZZLE_OFFSET			64.f
+#define AGENT_SHOOT_SIGHT			1000.f
 
 class CEffect;
 class CResourceManager;
@@ -52,6 +52,8 @@ protected:
 	bool							m_bCollision;
 
 	D2D_POINT_2F					m_ptDirection;
+	D2D_POINT_2F					m_ptMoveDirection;
+
 	D2D_POINT_2F					m_ptVelocity;
 
 	bool							m_bMove;
@@ -93,18 +95,23 @@ public:
 		m_changedir_timer = 0;
 		m_next_change_dir_timer = rand() % 5 + 1;
 	} // 1 ~ 5 초 이내에 방향이 새로 갱신된다.
-
+	void ResetShootTimer() {
+		m_shoot_timer = 0;
+	} 
 
 	virtual void Collide(float atk) override;
 
 	void SetShootSwitch(bool shoot_switch) { m_bisShootable = shoot_switch; }
 
+	void Move(const D2D_POINT_2F& ptVelocity);
 	void Move(RoomInfo* pRoom, const D2D_POINT_2F& ptMoveDirection);
 	void Move(const D2D_POINT_2F& ptVelocity, float fTimeElapsed);
 	void Reflection(const D2D_POINT_2F& ptReflect = Point2F());
 	void Stop();
 
-	CEffect* Shoot();
+	void Shoot();
+	void Shoot(const D2D_POINT_2F & ptHitPos);
+
 	void RayCastingToShoot(std::vector<CObject*>& pvecObjects);
 	void RunStateMachine(float fTimeElapsed) {
 		m_pStateMachine->Update(fTimeElapsed, m_pRoomInfo); 
@@ -114,10 +121,18 @@ public:
 	virtual void SetObjectInfo(LPVOID info) override;
 	void SetHP(float hp) { m_fHP = hp; }
 
+	void SetMoveDirection(D2D_POINT_2F pt) { m_ptMoveDirection = pt; }
 	void SetDirection(D2D_POINT_2F pt) { m_ptDirection = pt; }
 
 	CObject*	GetTarget() { return m_pTarget; }
 	D2D_POINT_2F GetTargetPos() const { return m_ptTargetPos; }
 	D2D_POINT_2F GetVelocity() const { return m_ptVelocity; }
+	D2D_POINT_2F GetMoveDirection() const { return m_ptMoveDirection; }
 	D2D_POINT_2F GetDirection() const { return m_ptDirection; }
+
+
+
+	D2D_POINT_2F GetMuzzleDirection() const { return m_ptMuzzleDirection; }
+	D2D_POINT_2F GetMuzzleStartPos()const { return m_ptMuzzleStartPos; }
+	D2D_POINT_2F GetMuzzleEndPos()	const { return m_ptMuzzleEndPos; }
 };

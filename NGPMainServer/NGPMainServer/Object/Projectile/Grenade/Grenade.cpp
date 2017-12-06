@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Grenade.h"
 #include "Object\Unit\Player\Player.h"
+#include "Object\Unit\Agent\Agent.h"
 #include "Object\Brick\Brick.h"
 
 CGrenade::CGrenade(D2D_POINT_2F pt, D2D_RECT_F rc)
@@ -76,6 +77,16 @@ void CGrenade::Explosion(std::vector<CObject*>& pvecObjects)
 				CPlayer* player = static_cast<CPlayer*>(p);
 				player->Collide(GRENADE_EXPLOSION_ATK);
 				player->Move(Normalize(p->GetPos() - m_ptPos) * GRENADE_EXPLOSION_FORCE);
+			}
+			break;
+		}
+		case CObject::Type::Agent:
+		{
+			if (Length(p->GetPos() - m_ptPos) < GRENADE_EXPLOSION_RANGE)
+			{
+				CAgent* agent = static_cast<CAgent*>(p);
+				agent->Collide(GRENADE_EXPLOSION_ATK);
+				agent->Move(Normalize(p->GetPos() - m_ptPos) * GRENADE_EXPLOSION_FORCE);
 			}
 			break;
 		}

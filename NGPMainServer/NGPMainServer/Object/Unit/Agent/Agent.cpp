@@ -1,5 +1,5 @@
 #include "stdafx.h"
-
+#include "Server\Main\MainServer.h"
 #include "Object\Brick\Brick.h"
 #include "Object\Unit\Player\Player.h"
 
@@ -170,14 +170,8 @@ void CAgent::Stop()
 }
 
 
-
-CEffect* CAgent::Shoot()
+void CAgent::Shoot()
 {
-	if (!m_bisShootable) return nullptr;
-
-	m_fShootTimer = 0;
-	m_bisShootable = false;
-
 	m_ptMuzzleDirection = m_ptDirection;
 	m_ptMuzzleStartPos = m_ptPos + m_ptMuzzleDirection * MUZZLE_OFFSET;
 
@@ -192,6 +186,13 @@ CEffect* CAgent::Shoot()
 			player->Move(m_ptMuzzleDirection * PLAYER_VELOCITY);
 			break;
 		}
+		case CObject::Type::Agent:
+		{
+			CAgent* agent = static_cast<CAgent*>(m_pTarget);
+			agent->Collide(SHOOT_DAMAGE);
+			agent->Move(m_ptMuzzleDirection * PLAYER_VELOCITY);
+			break;
+		}
 		case CObject::Type::Brick:
 		{
 			CBrick* brick = static_cast<CBrick*>(m_pTarget);
@@ -199,19 +200,96 @@ CEffect* CAgent::Shoot()
 			break;
 		}
 		}
-#ifdef WITH_RENDER_AGENT
-		auto& rc = SizeToRect(SizeF(m_rcSize.right, m_rcSize.bottom));
-		CEffect* effect = new CEffect(m_ptMuzzleEndPos, rc);
-		auto& img = m_pResMng->GetImageRef(ResImgName::MagicBlast);
-		auto& sz = m_pResMng->GetImgLength(ResImgName::MagicBlast);
-		effect->RegisterEffectSprite(img, sz);
-		return effect;
-#endif
 	}
-	return nullptr;
+	return;
+}
+
+void CAgent::Shoot(
+	RoomInfo*				pRoomInfo
+	, CObject*				pTarget
+	, const D2D_POINT_2F&	ptHitPos)
+{
+	m_pTarget = pTarget;
+	m_ptMuzzleDirection = m_ptDirection;
+	m_ptMuzzleStartPos = m_ptPos + m_ptMuzzleDirection * MUZZLE_OFFSET;
+	m_ptMuzzleEndPos = ptHitPos;
+
+	NGPMSG* msg = nullptr;
+
+	UCHAR type = MSGTYPE::MSGACTION::SHOOT;
+	UCHAR roomNo = pRoomInfo->RoomID;
+	UINT objNo = GetID();
+	ActionInfo action_info;
+	action_info.TargetHitPos = m_ptMuzzleEndPos;
+	action_info.TargetID = INVALID_OBJECT_ID;
+
+	msg = CreateMSG(type, roomNo, objNo, 0, 1, NULL, &action_info);
+	for (auto& client : pRoomInfo->clientlist)
+	{
+		int retval = send(client->sock, (char*)msg, sizeof(NGPMSG), NULL);
+		if (retval == SOCKET_ERROR) {
+			//assert
+		}
+	}
+
+	send(pRoomInfo->AgentServer->sock, (char*)msg, sizeof(NGPMSG), NULL);
+
+	delete msg;
+
+	if (m_pTarget)
+	{
+		switch (m_pTarget->GetTag())
+		{
+		case CObject::Type::Player:
+		{
+			CPlayer* player = static_cast<CPlayer*>(m_pTarget);
+			player->Collide(SHOOT_DAMAGE);
+			player->Move(m_ptMuzzleDirection * PLAYER_VELOCITY);
+			break;
+		}
+		case CObject::Type::Agent:
+		{
+			CAgent* agent = static_cast<CAgent*>(m_pTarget);
+			agent->Collide(SHOOT_DAMAGE);
+			agent->Move(m_ptMuzzleDirection * PLAYER_VELOCITY);
+			break;
+		}
+		case CObject::Type::Brick:
+		{
+			CBrick* brick = static_cast<CBrick*>(m_pTarget);
+			brick->Collide(SHOOT_DAMAGE);
+			break;
+		}
+		}
+
+		ObjInfo* objdata = new ObjInfo();
+		objdata->ObjectID = INVALID_OBJECT_ID;
+		objdata->ObjectType = OBJECTTYPE::Effect_ShootingHit;
+		objdata->Position = ptHitPos;
+
+		msg = CreateMSG(
+			MSGTYPE::MSGUPDATE::CREATEOBJECT
+			, pRoomInfo->RoomID
+			, 0
+			, 1
+			, 0
+			, objdata
+			, nullptr
+		);
+		for (auto& client : pRoomInfo->clientlist)
+		{
+			int retval = send(client->sock, (char*)msg, sizeof(NGPMSG), NULL);
+			if (retval == SOCKET_ERROR) {
+				//assert
+			}
+		}
+
+		send(pRoomInfo->AgentServer->sock, (char*)msg, sizeof(NGPMSG), NULL);
 
 
-
+		delete msg;
+		delete objdata;
+	}
 }
 
 void CAgent::RayCastingToShoot(std::vector<CObject*>& pvecObjects)
@@ -226,6 +304,16 @@ void CAgent::RayCastingToShoot(std::vector<CObject*>& pvecObjects)
 			switch (p->GetTag())
 			{
 			case CObject::Type::Player:
+			{
+				if (Length(p->GetPos() - ptDevidedRay) < p->GetSize().right)
+				{
+					m_ptMuzzleEndPos = ptDevidedRay;
+					m_pTarget = p;
+					return;
+				}
+				continue;
+			}
+			case CObject::Type::Agent:
 			{
 				if (Length(p->GetPos() - ptDevidedRay) < p->GetSize().right)
 				{
@@ -251,73 +339,8 @@ void CAgent::RayCastingToShoot(std::vector<CObject*>& pvecObjects)
 	m_pTarget = nullptr;
 	m_ptMuzzleEndPos = m_ptPos + (m_ptDirection * SHOOT_RANGE);
 
-
-
-
-
-
-
-
-
 }
 
-void CAgent::InterActionCheck(std::vector<CObject*>& pObjects)
-{
-
-	for (auto& p : pObjects)
-	{
-
-		if (this == p) continue;
-
-		D2D_POINT_2F dir = Point2F();
-
-
-		switch (p->GetTag())
-		{
-		case CObject::Type::Player:
-		{
-			//if (m_pTarget == nullptr)
-			//{
-			float distance = Length(GetPos() - p->GetPos());
-
-			if (m_fClosestTargetDistance > distance)
-			{
-				m_fClosestTargetDistance = distance;
-			}
-			if (m_fClosestTargetDistance < AGENT_SHOOT_SIGHT)
-			{
-				m_ptTargetPos = p->GetPos();
-
-				GetFSM()->ChangeState(Shooting::Instance());
-			}
-			//}
-			continue;
-		}
-		case CObject::Type::Brick:
-		{
-			dir = Normalize(p->GetPos() - GetPos());
-			if (PtInRect(
-				&(p->GetSize() + p->GetPos())
-				, GetPos() + (dir * p->GetSize().right))
-				)
-			{
-				Reflection(-1.f * dir);
-				SetDirection(Normalize(-1.f *dir));
-			}
-
-			continue;
-		}
-		}
-
-
-	}
-
-	RayCastingToShoot(pObjects);
-
-
-
-
-}
 
 void CAgent::SetMoveDirection(const D2D_POINT_2F & ptMoveDirection)
 {
