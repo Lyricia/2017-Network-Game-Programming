@@ -411,8 +411,6 @@ void CMainScene::ProcessMsgs()
 					if (agent->GetID() == msg->header.OBJECTNO)
 						for (int i = 0; i < msg->header.NUM_ACTIONINFO; ++i)
 						{
-							cout << "Agent" << agent->GetID() << "Move" << endl;
-
 							agent->SetMoveDirection(arrActionInfo[i].MoveDirection);
 							agent->SetDirection(arrActionInfo[i].LookDirection);
 						}
