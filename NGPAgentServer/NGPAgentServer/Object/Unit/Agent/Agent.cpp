@@ -60,9 +60,6 @@ void CAgent::Update(float fTimeElapsed)
 	}
 
 	m_changedir_timer += fTimeElapsed;
-
-	m_fClosestTargetDistance = 99999999;
-
 }
 #ifdef WITH_RENDER_AGENT
 void CAgent::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Client.h"
 
-
+//#define DISAGLE_NAGLE_ALGORITHM
 
 void err_quit(char* msg)
 {
@@ -68,6 +68,16 @@ void CClient::Initialize()
 	m_MainServer.sock = socket(AF_INET, SOCK_STREAM, 0);
 	if (m_MainServer.sock == INVALID_SOCKET)
 		err_quit("socket()");
+
+#ifdef DISAGLE_NAGLE_ALGORITHM
+	// Nagle 알고리즘 해제 코드
+	int flag = 1;
+	int retval = setsockopt(m_MainServer.sock, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(flag));
+	if (retval == -1) {
+		std::cout << "네이글 알고리즘 해제 실패!" << std::endl;
+		exit(EXIT_FAILURE);
+	}
+#endif
 
 	::InitializeCriticalSection(&m_CS);
 }

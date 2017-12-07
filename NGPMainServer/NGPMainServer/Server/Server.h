@@ -1,4 +1,7 @@
 #pragma once
+
+//#define DISAGLE_NAGLE_ALGORITHM
+
 class Server
 {
 protected:

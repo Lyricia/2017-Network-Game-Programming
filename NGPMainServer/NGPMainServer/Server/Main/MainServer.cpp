@@ -187,6 +187,7 @@ void MainServer::Run()
 
 void MainServer::ConnectAgentServer()
 {
+	int retval;
 	m_AgentServer = new ConnectionInfo();
 
 	m_AgentServer->sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -197,13 +198,24 @@ void MainServer::ConnectAgentServer()
 		return;
 
 	}
+
+#ifdef DISAGLE_NAGLE_ALGORITHM
+	// Nagle 알고리즘 해제 코드
+	int flag = 1;
+	retval = setsockopt(m_AgentServer->sock, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(flag));
+	if (retval == -1) {
+		std::cout << "네이글 알고리즘 해제 실패!" << std::endl;
+		exit(EXIT_FAILURE);
+	}
+#endif
+
 	// connect()
 	m_AgentServer->addr.sin_family = AF_INET;
 	m_AgentServer->addr.sin_addr.s_addr = inet_addr(std::string(AGENT_SERVER_IP).c_str());
 	m_AgentServer->addr.sin_port = htons(AGENT_SERVER_PORT);
 
 
-	int retval = connect(m_AgentServer->sock, (SOCKADDR *)&m_AgentServer->addr, sizeof(m_AgentServer->addr));
+	retval = connect(m_AgentServer->sock, (SOCKADDR *)&m_AgentServer->addr, sizeof(m_AgentServer->addr));
 	if (retval == SOCKET_ERROR)
 	{
 		cout << "Connection failed" << endl;

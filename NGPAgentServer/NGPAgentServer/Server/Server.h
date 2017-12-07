@@ -3,6 +3,8 @@
 // 네트워크 게임 프로그래밍 메세지 구조체
 #include "NGPmsg.h"
 
+//#define DISAGLE_NAGLE_ALGORITHM
+
 void err_quit(char *msg);
 void err_display(char *msg);
 

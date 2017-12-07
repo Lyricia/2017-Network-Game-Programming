@@ -24,6 +24,18 @@ void Server::Initialize()
 	}
 	cout << "Listen Socket Initialized" << endl;
 	
+
+
+#ifdef DISAGLE_NAGLE_ALGORITHM
+	// Nagle 알고리즘 해제 코드
+	int flag = 1;
+	retval = setsockopt(m_ListenSock, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(flag));
+	if (retval == -1) {
+		std::cout << "네이글 알고리즘 해제 실패!" << std::endl;
+		exit(EXIT_FAILURE);
+	}
+#endif
+
 	ZeroMemory(&m_ServerAddr, sizeof(m_ServerAddr));
 	m_ServerAddr.sin_family = AF_INET;
 	m_ServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);
