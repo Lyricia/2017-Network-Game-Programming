@@ -1,8 +1,5 @@
 #pragma once
 #include "stdafx.h"
-#include "State.h"
-#include "StateMachine.h"
-#include "AgentFSM.h"
 #include "Object\Unit\Unit.h"
 
 //#define WITH_RENDER_AGENT
@@ -24,8 +21,6 @@ struct RoomInfo;
 class CAgent : public CUnit {
 
 protected:
-	//상태기계
-	StateMachine<CAgent>*	m_pStateMachine;
 
 #ifdef WITH_RENDER_AGENT
 	ComPtr<ID2D1Bitmap1>			m_bmpImage;
@@ -81,7 +76,6 @@ public:
 	virtual void Draw(ID2D1HwndRenderTarget* pd2dRenderTarget) override;
 	virtual void RegisterResourceManager(std::shared_ptr<CResourceManager> resMng);
 #endif
-	StateMachine<CAgent>*  GetFSM()const { return m_pStateMachine; }
 
 	bool IsDirectionChangable() const { return (m_changedir_timer > m_next_change_dir_timer); }
 

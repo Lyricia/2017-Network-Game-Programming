@@ -20,12 +20,6 @@ CAgent::CAgent(D2D_POINT_2F pt, D2D_RECT_F rc)
 	m_Tag = CObject::Type::Agent;
 	
 	m_fHP = PLAYER_MAX_HP;
-
-
-	m_pStateMachine = new StateMachine<CAgent>(this);
-	m_pStateMachine->SetGlobalState(AgentGlobalState::Instance());
-	m_pStateMachine->SetCurrentState(Wandering::Instance());
-
 }
 
 
