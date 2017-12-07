@@ -1,0 +1,121 @@
+#include "stdafx.h"
+#include "Turret.h"
+#include "Framework\ResourceManager\ResourceManager.h"
+#include "Object\Brick\Brick.h"
+#include "Object\Unit\Player\Player.h"
+#include "Object\Effect\Effect.h"
+
+CTurret::CTurret(D2D_POINT_2F pt, D2D_RECT_F rc)
+	: CAgent(pt, rc)
+{
+
+	m_pTarget = nullptr;
+	m_ptTargetPos = { 0,0 };
+	m_fBlockStunTimer = 0;
+	m_bCollision = false;
+	m_bShoot = true;
+	m_ptVelocity = Point2F();
+
+	m_Tag = CObject::Type::Agent;
+	m_next_change_dir_timer = rand() % 5 + 1;
+	m_fHP = TURRET_MAX_HP;
+
+	m_pParent = nullptr;
+}
+
+CTurret::~CTurret()
+{
+}
+
+void CTurret::Shoot()
+{
+
+	m_shoot_effect_timer = 0;
+	m_bisShootable = false;
+	m_bShoot = true;
+	m_ptMuzzleDirection = m_ptDirection;
+	m_ptMuzzleStartPos = m_ptPos + m_ptMuzzleDirection * MUZZLE_OFFSET;
+
+	if (m_pTarget)
+	{
+		switch (m_pTarget->GetTag())
+		{
+		case CObject::Type::Player:
+		{
+			CPlayer* player = static_cast<CPlayer*>(m_pTarget);
+			player->Collide(SHOOT_DAMAGE);
+			player->Move(m_ptMuzzleDirection * PLAYER_VELOCITY);
+			break;
+		}
+		case CObject::Type::Agent:
+		{
+			CAgent* agent = static_cast<CAgent*>(m_pTarget);
+			agent->Collide(SHOOT_DAMAGE);
+			agent->Move(m_ptMuzzleDirection * PLAYER_VELOCITY);
+			break;
+		}
+		case CObject::Type::Brick:
+		{
+			CBrick* brick = static_cast<CBrick*>(m_pTarget);
+			brick->Collide(SHOOT_DAMAGE);
+			break;
+		}
+		}
+
+	}
+	return;
+
+}
+
+void CTurret::Shoot(const D2D_POINT_2F & ptHitPos)
+{
+	m_bShoot = true;
+	m_ptMuzzleDirection = m_ptDirection;
+	m_ptMuzzleStartPos = m_ptPos + m_ptMuzzleDirection * MUZZLE_OFFSET;
+	m_ptMuzzleEndPos = ptHitPos;
+}
+
+void CTurret::Update(float fTimeElapsed)
+{
+
+	if (m_bShoot)
+	{
+		m_shoot_effect_timer += fTimeElapsed;
+		if (m_shoot_effect_timer > TURRET_SHOOT_TIME)
+		{
+			m_bShoot = false;
+			m_shoot_effect_timer = 0.f;
+		}
+	}
+
+
+}
+
+void CTurret::Move(const D2D_POINT_2F& ptVelocity)
+{
+	
+}
+
+void CTurret::Move(const D2D_POINT_2F & ptVelocity, float fTimeElapsed)
+{
+	
+}
+
+void CTurret::RegisterResourceManager(std::shared_ptr<CResourceManager> resMng)
+{
+	m_pResMng = resMng;
+	m_bmpImage = m_pResMng->GetImageRef(ResImgName::turret_base_sheet);
+	m_szImg = m_pResMng->GetImgLength(ResImgName::turret_base_sheet);
+
+	if (IsRectInvalid(m_rcSize))
+	{
+		auto sz = m_bmpImage->GetSize();
+		sz.width /= m_szImg.width;
+		sz.height /= m_szImg.height;
+		m_rcSize = SizeToRect(sz);
+	}
+
+	m_bmpWeaponImage = m_pResMng->GetImage(ResImgName::turret_barrel);
+	if (IsRectInvalid(m_rcWeaponSize))
+		m_rcWeaponSize = SizeToRect(m_bmpWeaponImage->GetSize());
+}

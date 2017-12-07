@@ -52,6 +52,9 @@
     <Filter Include="소스 파일\Object\Unit\Player">
       <UniqueIdentifier>{c5f0cbef-272d-47ad-bd93-87810f3ffe2e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Object\Unit\Agent\Turret">
+      <UniqueIdentifier>{fc639d0b-4616-4180-a743-9a47c0e0271d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -117,6 +120,9 @@
     <ClInclude Include="Object\Unit\Player\Player.h">
       <Filter>소스 파일\Object\Unit\Player</Filter>
     </ClInclude>
+    <ClInclude Include="Object\Unit\Agent\Turret\Turret.h">
+      <Filter>소스 파일\Object\Unit\Agent\Turret</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="NGPAgentServer.cpp">
@@ -166,6 +172,9 @@
     </ClCompile>
     <ClCompile Include="Object\Unit\Player\Player.cpp">
       <Filter>소스 파일\Object\Unit\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Unit\Agent\Turret\Turret.cpp">
+      <Filter>소스 파일\Object\Unit\Agent\Turret</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

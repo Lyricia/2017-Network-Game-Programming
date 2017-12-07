@@ -46,6 +46,7 @@ public:
 	void Reload() { m_bReload = true; }
 	void RayCastingToShoot(std::vector<CObject*>& pvecObjects);
 	void GrenadeOut();
+	void DeployTurret();
 
 private:
 	float							m_fBlockStunTimer;

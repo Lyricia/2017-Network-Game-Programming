@@ -4,7 +4,7 @@
 #include "Object\Unit\Player\Player.h"
 #include "Object\Projectile\Grenade\Grenade.h"
 #include "Object\Unit\Agent\Agent.h"
-
+#include "Object\Unit\Agent\Turret\Turret.h"
 #include "Server\AgentServer.h"
 
 #include "MainScene.h"
@@ -173,7 +173,7 @@ void CMainScene::ProcessMsgs()
 					CGrenade* grenade = new CGrenade(arrObjInfo[i].Position);
 					for (auto iter = m_vecObjects.rbegin();
 						iter != m_vecObjects.rend(); ++iter)
-						if (arrObjInfo[i].ObjectID == (*iter)->GetID())
+						if (arrObjInfo[i].ParentID == (*iter)->GetID())
 						{
 							grenade->SetParent(*iter);
 							break;
@@ -181,6 +181,22 @@ void CMainScene::ProcessMsgs()
 					grenade->SetVelocity(arrObjInfo[i].Velocity);
 					grenade->SetID(ObjectID++);
 					m_vecObjects.push_back(grenade);
+					break;
+				}
+				case OBJECTTYPE::Turret:
+				{
+					std::cout << "Room" << m_pRoomInfo->RoomID << "Deploy Turret!" << std::endl;
+					CTurret* turret = new CTurret(arrObjInfo[i].Position);
+					for (auto iter = m_vecObjects.rbegin();
+						iter != m_vecObjects.rend(); ++iter)
+						if (arrObjInfo[i].ParentID == (*iter)->GetID())
+						{
+							turret->SetParent(*iter);
+							break;
+						}
+					turret->SetID(ObjectID++);
+					turret->RegisterRoomInfo(m_pRoomInfo);
+					m_vecObjects.push_back(turret);
 					break;
 				}
 				}

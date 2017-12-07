@@ -18,6 +18,7 @@ CAgent::CAgent(D2D_POINT_2F pt, D2D_RECT_F rc)
 	, m_ptVelocity(Point2F())
 {
 	m_Tag = CObject::Type::Agent;
+	m_AgentType = CAgent::AgentType::Bot;
 	m_next_change_dir_timer = rand() % 5 + 1;
 	m_fHP = PLAYER_MAX_HP;
 
@@ -230,13 +231,17 @@ void CAgent::RayCastingToShoot(std::vector<CObject*>& pvecObjects)
 			}
 			case CObject::Type::Agent:
 			{
-				//if (p == this) break;
-				//if (Length(p->GetPos() - ptDevidedRay) < p->GetSize().right)
-				//{
-				//	m_ptMuzzleEndPos = ptDevidedRay;
-				//	m_pTarget = p;
-				//	return;
-				//}
+				if (p == this) break;
+
+				CAgent* agent = static_cast<CAgent*>(p);
+				
+				if(agent->GetAgentType() == CAgent::AgentType::Turret)
+				if (Length(p->GetPos() - ptDevidedRay) < p->GetSize().right)
+				{
+					m_ptMuzzleEndPos = ptDevidedRay;
+					m_pTarget = p;
+					return;
+				}
 				break;
 			}
 			case CObject::Type::Brick:
@@ -267,10 +272,19 @@ void CAgent::InterActionCheck(std::vector<CObject*>& pObjects)
 	{
 		if (this == p) continue;
 
-		if (p->GetTag() == CObject::Type::Player)
+		if (p->GetTag() == CObject::Type::Player || p->GetTag() == CObject::Type::Agent)
 		{
-			//if (m_pTarget == nullptr)
-			//{
+			
+			if (p->GetTag() == CObject::Type::Agent)
+			{
+				CAgent* agent = static_cast<CAgent*>(p);
+
+				if (agent->GetAgentType() == CAgent::AgentType::Bot) continue;
+
+			}
+
+
+
 			float distance = Length(GetPos() - p->GetPos());
 
 			if (m_fClosestTargetDistance > distance)

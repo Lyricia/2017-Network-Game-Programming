@@ -9,6 +9,7 @@
 #include "Object\Projectile\Grenade\Grenade.h"
 #include "Object\Unit\Agent\Agent.h"
 #include "Object\Effect\Effect.h"
+#include "Object\Unit\Agent\Turret\Turret.h"
 
 #include "Framework\Client\Client.h"
 #include "MainScene.h"
@@ -258,13 +259,27 @@ void CMainScene::ProcessMsgs()
 					grenade->RegisterResourceManager(m_pResMng);
 					for (auto iter = m_vecObjects.rbegin();
 						iter != m_vecObjects.rend(); ++iter)
-						if (arrObjInfo[i].ObjectID == (*iter)->GetID())
+						if (arrObjInfo[i].ParentID == (*iter)->GetID())
 						{
 							grenade->SetParent(*iter);
 							break;
 						}
 					grenade->SetVelocity(arrObjInfo[i].Velocity);
 					m_vecObjects.push_back(grenade);
+					break;
+				}
+				case OBJECTTYPE::Turret:
+				{
+					CTurret* turret = new CTurret(arrObjInfo[i].Position);
+					turret->RegisterResourceManager(m_pResMng);
+					for (auto iter = m_vecObjects.rbegin();
+						iter != m_vecObjects.rend(); ++iter)
+						if (arrObjInfo[i].ParentID == (*iter)->GetID())
+						{
+							turret->SetParent(*iter);
+							break;
+						}
+					m_vecObjects.push_back(turret);
 					break;
 				}
 				}
@@ -390,6 +405,7 @@ void CMainScene::ProcessInput(float fTimeElapsed)
 		if (pKeyBuffer['A'] & 0xF0) dwDirection |= DIR_LEFT;
 		if (pKeyBuffer['D'] & 0xF0) dwDirection |= DIR_RIGHT;
 		if (pKeyBuffer['G'] & 0xF0) m_pPlayer->GrenadeOut(m_pClient.get());
+		if (pKeyBuffer['E'] & 0xF0) m_pPlayer->DeployTurret(m_pClient.get());
 
 		if (pKeyBuffer[VK_LBUTTON] & 0xF0) m_pPlayer->Shoot(m_pClient.get());
 		if (pKeyBuffer[VK_SPACE] & 0xF0) m_pPlayer->Stop(m_pClient.get());

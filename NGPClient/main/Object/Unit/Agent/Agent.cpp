@@ -22,10 +22,6 @@ CAgent::CAgent(D2D_POINT_2F pt, D2D_RECT_F rc)
 	m_next_change_dir_timer = rand() % 5 + 1;
 	m_fHP = PLAYER_MAX_HP;
 
-	//m_pStateMachine = new StateMachine<CAgent>(this);
-	//m_pStateMachine->SetGlobalState(AgentGlobalState::Instance());
-	//m_pStateMachine->SetCurrentState(Wandering::Instance());
-
 }
 
 
@@ -221,6 +217,13 @@ void CAgent::Shoot()
 			CPlayer* player = static_cast<CPlayer*>(m_pTarget);
 			player->Collide(SHOOT_DAMAGE);
 			player->Move(m_ptMuzzleDirection * PLAYER_VELOCITY);
+			break;
+		}
+		case CObject::Type::Agent:
+		{
+			CAgent* agent = static_cast<CAgent*>(m_pTarget);
+			agent->Collide(SHOOT_DAMAGE);
+			agent->Move(m_ptMuzzleDirection * PLAYER_VELOCITY);
 			break;
 		}
 		case CObject::Type::Brick:

@@ -64,6 +64,9 @@
     <Filter Include="Object\Unit\Agent">
       <UniqueIdentifier>{69d4a93e-3b45-4f5c-a75a-03d930fe469a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object\Unit\Agent\Turret">
+      <UniqueIdentifier>{3a2ce24f-3bbc-4894-a2cf-e15d1bce3c52}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -141,6 +144,9 @@
     <ClInclude Include="Object\Unit\Agent\Agent.h">
       <Filter>Object\Unit\Agent</Filter>
     </ClInclude>
+    <ClInclude Include="Object\Unit\Agent\Turret\Turret.h">
+      <Filter>Object\Unit\Agent\Turret</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -196,6 +202,9 @@
     </ClCompile>
     <ClCompile Include="Object\Unit\Agent\Agent.cpp">
       <Filter>Object\Unit\Agent</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Unit\Agent\Turret\Turret.cpp">
+      <Filter>Object\Unit\Agent\Turret</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

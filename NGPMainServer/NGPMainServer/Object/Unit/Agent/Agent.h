@@ -19,7 +19,8 @@ class CEffect;
 class CResourceManager;
 struct RoomInfo;
 class CAgent : public CUnit {
-
+public:
+	enum class AgentType : UCHAR { Bot = 0, Turret = 1 };
 protected:
 
 #ifdef WITH_RENDER_AGENT
@@ -38,7 +39,7 @@ protected:
 	D2D_POINT_2F					m_ptMuzzleStartPos;
 	D2D_POINT_2F					m_ptMuzzleEndPos;
 
-	int								m_iTeamTag;
+	AgentType						m_AgentType;
 
 	// Å¸°Ù
 	CObject*						m_pTarget;
@@ -95,9 +96,9 @@ public:
 	void SetShootSwitch(bool shoot_switch) { m_bisShootable = shoot_switch; }
 
 
-	void Move(const D2D_POINT_2F& ptVelocity, float fTimeElapsed);
-	void Move(const D2D_POINT_2F& ptVelocity);
-	void Move(float fSpeed);
+	virtual void Move(const D2D_POINT_2F& ptVelocity, float fTimeElapsed);
+	virtual void Move(const D2D_POINT_2F& ptVelocity);
+	virtual void Move(float fSpeed);
 
 	void Reflection(const D2D_POINT_2F& ptReflect = Point2F());
 	void Stop();
@@ -116,6 +117,8 @@ public:
 	D2D_POINT_2F GetTargetPos() const { return m_ptTargetPos; }
 	D2D_POINT_2F GetVelocity() const { return m_ptVelocity; }
 	D2D_POINT_2F GetDirection() const { return m_ptDirection; }
+
+	AgentType GetAgentType() const { return m_AgentType; }
 
 	virtual void SetObjectInfo(LPVOID info) override;
 	virtual LPVOID GetObjectInfo() override;

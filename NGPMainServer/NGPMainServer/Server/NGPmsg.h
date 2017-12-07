@@ -68,6 +68,7 @@ enum class OBJECTTYPE : UCHAR {
 	, Grenade
 	, Effect_ShootingHit
 	, Effect_Explosion
+	, Turret
 };
 
 struct AMMUNITION {

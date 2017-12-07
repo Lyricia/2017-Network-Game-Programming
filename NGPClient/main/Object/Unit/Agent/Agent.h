@@ -15,8 +15,9 @@
 class CEffect;
 class CResourceManager;
 class CAgent : public CUnit {
-
-private:
+public:
+	enum class AgentType : UCHAR { Bot = 0, Turret = 1 };
+protected:
 	//상태기계
 
 #ifdef WITH_RENDER_AGENT
@@ -35,7 +36,7 @@ private:
 	D2D_POINT_2F					m_ptMuzzleStartPos;
 	D2D_POINT_2F					m_ptMuzzleEndPos;
 
-	int								m_iTeamTag;
+	AgentType						m_AgentType;
 
 	// 타겟
 	CObject*						m_pTarget;
@@ -90,13 +91,13 @@ public:
 
 	void SetShootSwitch(bool shoot_switch) { m_bisShootable = shoot_switch; }
 
-	void Move(const D2D_POINT_2F& ptVelocity);
-	void Move(const D2D_POINT_2F& ptVelocity, float fTimeElapsed);
+	virtual void Move(const D2D_POINT_2F& ptVelocity);
+	virtual void Move(const D2D_POINT_2F& ptVelocity, float fTimeElapsed);
 	void Reflection(const D2D_POINT_2F& ptReflect = Point2F());
 	void Stop();
 
-	void Shoot();
-	void Shoot(const D2D_POINT_2F & ptHitPos);
+	virtual void Shoot();
+	virtual void Shoot(const D2D_POINT_2F & ptHitPos);
 	void RayCastingToShoot(std::vector<CObject*>& pvecObjects);
 
 	void InterActionCheck(std::vector<CObject*>& pObjects);

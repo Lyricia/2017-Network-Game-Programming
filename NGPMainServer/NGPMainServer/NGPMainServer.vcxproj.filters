@@ -55,6 +55,9 @@
     <Filter Include="Object\Unit\Agent">
       <UniqueIdentifier>{33b98af0-b056-4a0c-869d-162f890560a5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object\Unit\Agent\Turret">
+      <UniqueIdentifier>{887769f3-19d3-4a56-9c7c-000ebbf7101d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Object\Object.cpp">
@@ -101,6 +104,9 @@
     </ClCompile>
     <ClCompile Include="Object\Unit\Agent\Agent.cpp">
       <Filter>Object\Unit\Agent</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Unit\Agent\Turret\Turret.cpp">
+      <Filter>Object\Unit\Agent\Turret</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -163,6 +169,9 @@
     </ClInclude>
     <ClInclude Include="Object\Unit\Agent\Agent.h">
       <Filter>Object\Unit\Agent</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Unit\Agent\Turret\Turret.h">
+      <Filter>Object\Unit\Agent\Turret</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

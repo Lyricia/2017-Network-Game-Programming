@@ -55,6 +55,7 @@ public:
 
 	CObject* GrenadeOut();
 	void GrenadeOut(CClient* pClient);
+	void DeployTurret(CClient* pClient);
 
 private:
 	ComPtr<ID2D1Bitmap1>			m_bmpImage;

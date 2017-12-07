@@ -19,6 +19,9 @@ class CEffect;
 class CResourceManager;
 class CAgent : public CUnit {
 
+public:
+		enum class AgentType : UCHAR { Bot = 0, Turret = 1 };
+
 protected:
 	//상태기계
 	StateMachine<CAgent>*			m_pStateMachine;
@@ -39,7 +42,7 @@ protected:
 	D2D_POINT_2F					m_ptMuzzleStartPos;
 	D2D_POINT_2F					m_ptMuzzleEndPos;
 
-	int								m_iTeamTag;
+	AgentType						m_AgentType;
 
 	// 타겟
 	CObject*						m_pTarget;
@@ -87,7 +90,7 @@ public:
 	bool IsDirectionChangable() const { return (m_changedir_timer > m_next_change_dir_timer); }
 
 	// 사격 스위치가 켜질 수 있는가.
-	bool IsCanbeShootable() const { return (m_shoot_timer > AGENT_SHOOT_TIME); }
+	virtual bool IsCanbeShootable() const { return (m_shoot_timer > AGENT_SHOOT_TIME); }
 	// 사격 스위치가 켜졌는가
 	bool IsShootReady() const { return m_bisShootable; }
 
@@ -103,9 +106,9 @@ public:
 
 	void SetShootSwitch(bool shoot_switch) { m_bisShootable = shoot_switch; }
 
-	void Move(const D2D_POINT_2F& ptVelocity);
-	void Move(RoomInfo* pRoom, const D2D_POINT_2F& ptMoveDirection);
-	void Move(const D2D_POINT_2F& ptVelocity, float fTimeElapsed);
+	virtual void Move(const D2D_POINT_2F& ptVelocity);
+	virtual void Move(const D2D_POINT_2F& ptVelocity, float fTimeElapsed);
+	virtual void Move(RoomInfo* pRoom, const D2D_POINT_2F& ptMoveDirection);
 	void Reflection(const D2D_POINT_2F& ptReflect = Point2F());
 	void Stop();
 
@@ -117,7 +120,7 @@ public:
 		m_pStateMachine->Update(fTimeElapsed, m_pRoomInfo); 
 	}
 
-	void InterActionCheck(std::vector<CObject*>& pObjects);
+	virtual void InterActionCheck(std::vector<CObject*>& pObjects);
 	virtual void SetObjectInfo(LPVOID info) override;
 	void SetHP(float hp) { m_fHP = hp; }
 
@@ -126,7 +129,7 @@ public:
 
 	CObject*	GetTarget() { return m_pTarget; }
 	D2D_POINT_2F GetTargetPos() const { return m_ptTargetPos; }
-
+	AgentType	GetAgentType() const { return m_AgentType; }
 	D2D_POINT_2F GetVelocity() const { return m_ptVelocity; }
 	D2D_POINT_2F GetMoveDirection() const { return m_ptMoveDirection; }
 	D2D_POINT_2F GetDirection() const { return m_ptDirection; }

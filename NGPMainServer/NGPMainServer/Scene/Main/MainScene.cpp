@@ -4,7 +4,7 @@
 #include "Object\Unit\Player\Player.h"
 #include "Object\Projectile\Grenade\Grenade.h"
 #include "Object\Unit\Agent\Agent.h"
-
+#include "Object\Unit\Agent\Turret\Turret.h"
 #include "Server\Main\MainServer.h"
 
 #include "MainScene.h"
@@ -475,7 +475,17 @@ void CMainScene::ProcessMsgs()
 							
 							if(target) printf("Target :: %d", target->GetID());
 
-							agent->Shoot(m_pRoomInfo, target, hit_pos);
+							if (agent->GetAgentType() == CAgent::AgentType::Bot)
+							{
+								agent->Shoot(m_pRoomInfo, target, hit_pos);
+							}
+							else
+							{
+								CTurret* turret = static_cast<CTurret*>(d);
+								turret->Shoot(m_pRoomInfo, target, hit_pos);
+							}
+
+
 							break;
 						}
 					}
@@ -557,7 +567,63 @@ void CMainScene::ProcessMsgs()
 			break;
 		}
 		case MSGTYPE::MSGACTION::BUILDTURRET:
+		{
+			arrActionInfo = new ActionInfo[msg->header.NUM_ACTIONINFO];
+			DispatchMSG(msg, arrActionInfo, arrObjInfo);
+			for (int i = 0; i < msg->header.NUM_ACTIONINFO; ++i)
+			{
+				CTurret* turret = new CTurret(arrActionInfo[i].TargetPos, OBJECT_RECT);
+				turret->SetID(m_ObjectIDCounter++);
+
+				for (auto& p : m_pRoomInfo->clientlist)
+					if (p->pUserdata)
+					{
+						CPlayer* player = static_cast<CPlayer*>(p->pUserdata);
+						if (player->GetID() == msg->header.OBJECTNO)
+						{
+							player->DeployTurret();
+							turret->SetParent(player);
+							break;
+						}
+					}
+				m_vecObjects.push_back(turret);
+
+				ObjInfo* objdata = new ObjInfo();
+				objdata->ObjectID = turret->GetID();
+				objdata->ObjectType = OBJECTTYPE::Turret;
+				objdata->Position = arrActionInfo[i].TargetPos;
+				objdata->Velocity = arrActionInfo[i].SetVelocity;
+				objdata->ParentID = msg->header.OBJECTNO;
+
+				NGPMSG* turret_msg = CreateMSG(
+					MSGTYPE::MSGUPDATE::CREATEOBJECT
+					, m_pRoomInfo->RoomID
+					, 0
+					, 1
+					, 0
+					, objdata
+					, nullptr
+				);
+				for (auto& client : m_pRoomInfo->clientlist)
+				{
+					int retval = send(client->sock, (char*)turret_msg, sizeof(NGPMSG), NULL);
+					if (retval == SOCKET_ERROR) {
+						//assert
+					}
+				}
+
+				// 에이전트 서버에게 터렛 생성 정보를 보낸다.
+				int retval = send(m_pRoomInfo->AgentServer->sock, (char*)turret_msg, sizeof(NGPMSG), NULL);
+				if (retval == SOCKET_ERROR) {
+					//assert
+				}
+				delete turret_msg;
+				delete objdata;
+			}
+			delete[] arrActionInfo;
+			arrActionInfo = nullptr;
 			break;
+		}
 		case MSGTYPE::MSGSTATE::AIAGENTINFO:
 			break;
 		case MSGTYPE::MSGSTATE::AICREATTIONREQUEST:
@@ -595,6 +661,7 @@ void CMainScene::SendMsgs()
 	int idx = 0;
 	int retval = 0;
 	int nGrenade = 0;
+	int nTurret = 0;
 
 	MapInfo* mapdata = new MapInfo[g_nBrick];
 
@@ -614,6 +681,14 @@ void CMainScene::SendMsgs()
 			++nGrenade;
 			break;
 		}
+		case CObject::Type::Agent:
+		{
+			CAgent* agent = static_cast<CAgent*>(obj);
+			if(agent->GetAgentType() == CAgent::AgentType::Turret)
+				++nTurret;
+			break;
+		}
+
 		
 		}
 	}
@@ -662,6 +737,33 @@ void CMainScene::SendMsgs()
 		, nullptr
 	);
 	delete[] Grenadedata;
+
+	ObjInfo* TurretData = new ObjInfo[nTurret];
+	idx = 0;
+	for (auto iter = m_vecObjects.rbegin();
+		iter != m_vecObjects.rend(); ++iter)
+	{
+		if ((*iter)->GetTag() == CObject::Type::Agent)
+		{
+			CAgent* agent = static_cast<CAgent*>(*iter);
+			if (agent->GetAgentType() == CAgent::AgentType::Turret )
+			{
+			ObjInfo* tmp = (ObjInfo*)(*iter)->GetObjectInfo();
+			TurretData[idx++] = *tmp;
+			delete tmp;
+			}
+		}
+	}
+	NGPMSG* turretmsg = CreateMSG(
+		MSGTYPE::MSGUPDATE::UPDATEOBJECTSTATE
+		, m_pRoomInfo->RoomID
+		, 0
+		, nTurret
+		, 0
+		, TurretData
+		, nullptr
+	);
+	delete[] TurretData;
 
 	int nMapmsg = g_nBrick / MAPINFOBUFSIZE + 1;
 	NGPMSG** mapmsg = new NGPMSG*[nMapmsg];
@@ -717,6 +819,11 @@ void CMainScene::SendMsgs()
 			//assert
 		}
 
+		retval = send(client->sock, (char*)turretmsg, sizeof(NGPMSG), NULL);
+		if (retval == SOCKET_ERROR) {
+			//assert
+		}
+
 		for (int i = 0; i < nMapmsg; ++i) {
 			mapmsg[i]->header.OBJECTNO = client->ID;
 			retval = send(client->sock, (char*)mapmsg[i], sizeof(NGPMSG), NULL);
@@ -744,6 +851,11 @@ void CMainScene::SendMsgs()
 			//assert
 		}
 
+		retval = send(m_pRoomInfo->AgentServer->sock, (char*)turretmsg, sizeof(NGPMSG), NULL);
+		if (retval == SOCKET_ERROR) {
+			//assert
+		}
+
 		for (int i = 0; i < nMapmsg; ++i) {
 			mapmsg[i]->header.OBJECTNO = m_pRoomInfo->AgentServer->ID;
 			retval = send(m_pRoomInfo->AgentServer->sock, (char*)mapmsg[i], sizeof(NGPMSG), NULL);
@@ -764,4 +876,5 @@ void CMainScene::SendMsgs()
 	for (int i = 0; i < nMapmsg; ++i)
 		delete mapmsg[i];
 	delete[] mapmsg;
+	delete turretmsg;
 }

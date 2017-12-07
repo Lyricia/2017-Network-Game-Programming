@@ -500,3 +500,23 @@ void CPlayer::GrenadeOut(CClient * pClient)
 	pClient->SendMsgs((char*)msg, sizeof(NGPMSG));
 	delete msg;
 }
+
+void CPlayer::DeployTurret(CClient * pClient)
+{
+	if (m_iTurretKit == 0) return;
+	--m_iTurretKit;
+
+	NGPMSG* msg = nullptr;
+	UCHAR type = MSGTYPE::MSGACTION::BUILDTURRET;
+	UCHAR roomNo = pClient->GetRoomID();
+	UINT objNo = GetID();
+	ActionInfo action_info;
+	action_info.TargetPos = m_ptPos;
+	action_info.SetVelocity = m_ptDirection
+		* Length(m_ptTargetPos - m_ptPos)
+		* PROJECTILE_FRICTIONAL_DRAG;
+
+	msg = CreateMSG(type, roomNo, objNo, 0, 1, NULL, &action_info);
+	pClient->SendMsgs((char*)msg, sizeof(NGPMSG));
+	delete msg;
+}

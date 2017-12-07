@@ -351,5 +351,10 @@ void CPlayer::GrenadeOut()
 	m_bGrenade = true;
 }
 
+void CPlayer::DeployTurret()
+{
+	if (m_iTurretKit == 0) return;
+	--m_iTurretKit;
+}
 
 
