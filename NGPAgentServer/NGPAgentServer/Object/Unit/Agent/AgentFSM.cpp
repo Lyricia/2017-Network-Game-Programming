@@ -162,7 +162,6 @@ void Shooting::Execute(CAgent * agent, float fTimeElapsed, RoomInfo* pRoomInfo)
 		UINT objNo = agent->GetID();
 		ActionInfo action_info;
 		action_info.TargetHitPos = agent->GetMuzzleEndPos();
-
 		if (agent->GetTarget())	action_info.TargetID = agent->GetTarget()->GetID();
 		else					action_info.TargetID = INVALID_OBJECT_ID;
 

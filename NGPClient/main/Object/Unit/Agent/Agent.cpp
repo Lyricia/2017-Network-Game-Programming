@@ -129,7 +129,13 @@ void CAgent::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
 			, SHOOT_STROKE);
 		m_pResMng->brLightYellow->SetOpacity(1.f);
 	}
-
+	
+	pd2dRenderTarget->DrawTextW(
+		std::to_wstring(m_Id).c_str()
+		, static_cast<UINT>(std::to_wstring(m_Id).length())
+		, m_pResMng->dwUITextFormat.Get()
+		, m_rcSize + m_ptPos
+		, m_pResMng->brDarkGray.Get());
 }
 
 

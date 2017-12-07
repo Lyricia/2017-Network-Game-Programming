@@ -21,7 +21,7 @@ class CAgent : public CUnit {
 
 protected:
 	//상태기계
-	StateMachine<CAgent>*	m_pStateMachine;
+	StateMachine<CAgent>*			m_pStateMachine;
 
 #ifdef WITH_RENDER_AGENT
 	ComPtr<ID2D1Bitmap1>			m_bmpImage;

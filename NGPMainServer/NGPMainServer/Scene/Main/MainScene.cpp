@@ -150,8 +150,8 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 				for (auto& p : m_pRoomInfo->agentlist)
 					if (p)
 					{
-						CAgent* agnt = static_cast<CAgent*>(p);
-						if (agent->GetID() == agent->GetID())
+						CAgent* a = static_cast<CAgent*>(p);
+						if (a->GetID() == agent->GetID())
 							p = nullptr;
 					}
 				delete (*iter);
@@ -595,7 +595,6 @@ void CMainScene::SendMsgs()
 	int idx = 0;
 	int retval = 0;
 	int nGrenade = 0;
-	int nAgent = 0;
 
 	MapInfo* mapdata = new MapInfo[g_nBrick];
 
@@ -603,11 +602,6 @@ void CMainScene::SendMsgs()
 	{
 		switch (obj->GetTag())
 		{
-		case CObject::Type::Agent:
-		{
-			++nAgent;
-			break;
-		}
 		case CObject::Type::Brick:
 		{
 			MapInfo* tmp = (MapInfo*)obj->GetObjectInfo();
@@ -685,18 +679,16 @@ void CMainScene::SendMsgs()
 	}
 	delete[] mapdata;
 
-
+	int nAgent = m_pRoomInfo->agentlist.size();
 	ObjInfo* agentdata = new ObjInfo[nAgent];
 	idx = 0;
-	for (auto iter = m_vecObjects.rbegin();
-		iter != m_vecObjects.rend(); ++iter)
+	for(auto& agent : m_pRoomInfo->agentlist)
 	{
-		if ((*iter)->GetTag() == CObject::Type::Agent)
-		{
-			ObjInfo* tmp = (ObjInfo*)(*iter)->GetObjectInfo();
-			agentdata[idx++] = *tmp;
-			delete tmp;
-		}
+		if (!agent) continue;
+		CAgent* a = static_cast<CAgent*>(agent);
+		ObjInfo* tmp = (ObjInfo*)(a)->GetObjectInfo();
+		agentdata[idx++] = *tmp;
+		delete tmp;
 	}
 
 	NGPMSG* agentmsg = CreateMSG(

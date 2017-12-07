@@ -132,6 +132,7 @@ void CMainScene::ProcessMsgs()
 						{
 							CAgent* agent = static_cast<CAgent*>(*iter);
 							agent->Shoot(arrActionInfo[i].TargetHitPos);
+							
 							break;
 						}
 						}
@@ -216,6 +217,8 @@ void CMainScene::ProcessMsgs()
 						iter != m_vecObjects.rend(); ++iter)
 						if (arrObjInfo[i].ObjectID == (*iter)->GetID())
 						{
+							if (arrObjInfo[i].ObjectID == 710)
+								cout << endl;
 							(*iter)->SetObjectInfo(&arrObjInfo[i]);
 							break;
 						}
