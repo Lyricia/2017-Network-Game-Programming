@@ -212,6 +212,7 @@ void CAgent::Shoot(const D2D_POINT_2F & ptHitPos)
 
 void CAgent::RayCastingToShoot(std::vector<CObject*>& pvecObjects)
 {
+
 	for (float ratio = 0; ratio < 1; ratio += 0.01f)
 	{
 		D2D1_POINT_2F ptDevidedRay = m_ptPos + (m_ptDirection * SHOOT_RANGE * ratio);
@@ -221,6 +222,7 @@ void CAgent::RayCastingToShoot(std::vector<CObject*>& pvecObjects)
 			{
 			case CObject::Type::Player:
 			{
+				if (p == this) break;
 				if (Length(p->GetPos() - ptDevidedRay) < p->GetSize().right)
 				{
 					m_ptMuzzleEndPos = ptDevidedRay;
@@ -231,16 +233,18 @@ void CAgent::RayCastingToShoot(std::vector<CObject*>& pvecObjects)
 			}
 			case CObject::Type::Agent:
 			{
-				if (Length(p->GetPos() - ptDevidedRay) < p->GetSize().right)
-				{
-					m_ptMuzzleEndPos = ptDevidedRay;
-					m_pTarget = p;
-					return;
-				}
+				//if (p == this) break;
+				//if (Length(p->GetPos() - ptDevidedRay) < p->GetSize().right)
+				//{
+				//	m_ptMuzzleEndPos = ptDevidedRay;
+				//	m_pTarget = p;
+				//	return;
+				//}
 				break;
 			}
 			case CObject::Type::Brick:
 			{
+				if (p == this) break;
 				if (PtInRect(&(p->GetPos() + p->GetSize()), ptDevidedRay))
 				{
 					m_ptMuzzleEndPos = ptDevidedRay;
@@ -252,20 +256,19 @@ void CAgent::RayCastingToShoot(std::vector<CObject*>& pvecObjects)
 			}
 		}
 	}
+	m_pTarget = nullptr;
+	m_ptMuzzleEndPos = m_ptPos + (m_ptDirection * SHOOT_RANGE);
 
 }
 
 void CAgent::InterActionCheck(std::vector<CObject*>& pObjects)
 {
 	GetFSM()->ChangeState(Wandering::Instance());
-	m_fClosestTargetDistance = 99999;
-	
+	m_fClosestTargetDistance = 9999999;
+
 	for (auto& p : pObjects)
 	{
 		if (this == p) continue;
-
-		D2D_POINT_2F dir = Point2F();
-
 
 		if (p->GetTag() == CObject::Type::Player)
 		{
@@ -276,20 +279,19 @@ void CAgent::InterActionCheck(std::vector<CObject*>& pObjects)
 			if (m_fClosestTargetDistance > distance)
 			{
 				m_fClosestTargetDistance = distance;
+				if (m_fClosestTargetDistance < AGENT_SHOOT_SIGHT)
+				{
+					m_ptTargetPos = p->GetPos();
+					D2D_POINT_2F dir = m_ptTargetPos - m_ptPos;
+					m_ptDirection = Normalize(dir);
+					GetFSM()->ChangeState(Shooting::Instance());
+				}
+
 			}
-			if (m_fClosestTargetDistance < AGENT_SHOOT_SIGHT)
-			{
-				m_ptTargetPos = p->GetPos();
-				GetFSM()->ChangeState(Shooting::Instance());
-			}
+			
 		}
 
 	}
-
-	RayCastingToShoot(pObjects);
-
-
-
 
 }
 

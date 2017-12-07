@@ -172,6 +172,8 @@ void CAgent::Stop()
 
 void CAgent::Shoot()
 {
+
+
 	m_ptMuzzleDirection = m_ptDirection;
 	m_ptMuzzleStartPos = m_ptPos + m_ptMuzzleDirection * MUZZLE_OFFSET;
 

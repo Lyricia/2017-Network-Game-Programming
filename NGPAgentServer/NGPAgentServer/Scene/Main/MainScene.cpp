@@ -37,6 +37,7 @@ bool CMainScene::OnCreate(std::wstring && tag, CGameWorld* pGameWorld)
 				CBrick* brick = new CBrick(Point2F((j - map_size_half)*g_iMapSize, 
 					(i - map_size_half)*g_iMapSize));
 				brick->SetID(ObjectID++);
+				brick->SetSize(OBJECT_RECT);
 				m_vecObjects.push_back(brick);
 			}
 		}
@@ -44,9 +45,10 @@ bool CMainScene::OnCreate(std::wstring && tag, CGameWorld* pGameWorld)
 
 	for (int i = 0; i< 3; ++i)
 	{
-		CAgent* agent = new CAgent(Point2F(-100, 10 * i));
+		CAgent* agent = new CAgent(Point2F(-100, 100 * i));
 		agent->RegisterRoomInfo(m_pRoomInfo);
 		agent->SetID(ObjectID++);
+		agent->SetSize(OBJECT_RECT);
 		m_vecObjects.push_back(agent);
 	}
 
@@ -54,6 +56,7 @@ bool CMainScene::OnCreate(std::wstring && tag, CGameWorld* pGameWorld)
 	{
 		CPlayer* player = new CPlayer(Point2F(-100, 10));
 		m_vecObjects.push_back(player);
+		player->SetSize(OBJECT_RECT);
 		player->SetID(ObjectID++);
 	}
 
@@ -74,6 +77,7 @@ void CMainScene::Update(float fTimeElapsed)
 		{
 			CAgent* agent = static_cast<CAgent*>(p);
 			agent->InterActionCheck(m_vecObjects);
+			agent->RayCastingToShoot(m_vecObjects);
 			agent->RunStateMachine(fTimeElapsed);
 		}
 		

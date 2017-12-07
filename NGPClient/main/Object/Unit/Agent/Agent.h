@@ -1,8 +1,5 @@
 #pragma once
 #include "stdafx.h"
-#include "State.h"
-#include "StateMachine.h"
-#include "AgentFSM.h"
 #include "Object\Unit\Unit.h"
 
 #define WITH_RENDER_AGENT
@@ -21,7 +18,6 @@ class CAgent : public CUnit {
 
 private:
 	//상태기계
-	StateMachine<CAgent>*			m_pStateMachine;
 
 #ifdef WITH_RENDER_AGENT
 	ComPtr<ID2D1Bitmap1>			m_bmpImage;
@@ -64,8 +60,8 @@ private:
 	// 다음번 방향을 얼마나 시간이 지난 후 바꾸는지 딜레이를 저장한다.
 	float	m_next_change_dir_timer = 0;
 
-	// 사격을 위한 타이머다.
-	float	m_shoot_timer = 0;
+	// 사격 이펙트를 위한 타이머
+	float	m_shoot_effect_timer = 0;
 public:
 	CAgent(D2D_POINT_2F pt, D2D_RECT_F rc = RectF());
 
@@ -78,12 +74,9 @@ public:
 
 	virtual void RegisterResourceManager(std::shared_ptr<CResourceManager> resMng);
 #endif
-	StateMachine<CAgent>*  GetFSM()const { return m_pStateMachine; }
 
 	bool IsDirectionChangable() const { return (m_changedir_timer > m_next_change_dir_timer); }
 
-	// 사격 스위치가 켜질 수 있는가.
-	bool IsCanbeShootable() const { return (m_shoot_timer > AGENT_SHOOT_TIME); }
 	// 사격 스위치가 켜졌는가
 	bool IsShootReady() const { return m_bisShootable; }
 
@@ -102,7 +95,7 @@ public:
 	void Reflection(const D2D_POINT_2F& ptReflect = Point2F());
 	void Stop();
 
-	CEffect* Shoot();
+	void Shoot();
 	void Shoot(const D2D_POINT_2F & ptHitPos);
 	void RayCastingToShoot(std::vector<CObject*>& pvecObjects);
 

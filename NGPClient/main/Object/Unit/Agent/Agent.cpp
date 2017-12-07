@@ -46,11 +46,11 @@ void CAgent::Update(float fTimeElapsed)
 	
 	if (m_bShoot)
 	{
-		m_shoot_timer += fTimeElapsed;
-		if (m_shoot_timer > SHOOT_TIME)
+		m_shoot_effect_timer += fTimeElapsed;
+		if (m_shoot_effect_timer > SHOOT_TIME)
 		{
 			m_bShoot = false;
-			m_shoot_timer = 0.f;
+			m_shoot_effect_timer = 0.f;
 		}
 	}
 
@@ -66,7 +66,6 @@ void CAgent::Update(float fTimeElapsed)
 
 
 	m_changedir_timer += fTimeElapsed;
-	m_shoot_timer += fTimeElapsed;
 
 	m_fClosestTargetDistance = 99999999;
 
@@ -122,7 +121,7 @@ void CAgent::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
 
 	if (m_bShoot)
 	{
-		m_pResMng->brLightYellow->SetOpacity(1 - (m_shoot_timer / SHOOT_TIME));
+		m_pResMng->brLightYellow->SetOpacity(1 - (m_shoot_effect_timer / SHOOT_TIME));
 		pd2dRenderTarget->DrawLine(
 			m_ptMuzzleStartPos
 			, m_ptMuzzleEndPos
@@ -198,11 +197,10 @@ void CAgent::Stop()
 
 
 
-CEffect* CAgent::Shoot()
+void CAgent::Shoot()
 {
-	if (!m_bisShootable) return nullptr;
 
-	m_shoot_timer = 0;
+	m_shoot_effect_timer = 0;
 	m_bisShootable = false;
 	m_bShoot = true;
 	m_ptMuzzleDirection = m_ptDirection;
@@ -226,16 +224,9 @@ CEffect* CAgent::Shoot()
 			break;
 		}
 		}
-#ifdef WITH_RENDER_AGENT
-		auto& rc = SizeToRect(SizeF(m_rcSize.right, m_rcSize.bottom));
-		CEffect* effect = new CEffect(m_ptMuzzleEndPos, rc);
-		auto& img = m_pResMng->GetImageRef(ResImgName::MagicBlast);
-		auto& sz = m_pResMng->GetImgLength(ResImgName::MagicBlast);
-		effect->RegisterEffectSprite(img, sz);
-		return effect;
-#endif
+
 	}
-	return nullptr;
+	return;
 
 
 
@@ -244,6 +235,7 @@ CEffect* CAgent::Shoot()
 
 void CAgent::Shoot(const D2D_POINT_2F & ptHitPos)
 {
+	m_bShoot = true;
 	m_ptMuzzleDirection = m_ptDirection;
 	m_ptMuzzleStartPos = m_ptPos + m_ptMuzzleDirection * MUZZLE_OFFSET;
 	m_ptMuzzleEndPos = ptHitPos;
@@ -322,7 +314,6 @@ void CAgent::InterActionCheck(std::vector<CObject*>& pObjects)
 			{
 				m_ptTargetPos = p->GetPos();
 
-				GetFSM()->ChangeState(Shooting::Instance());
 			}
 		}
 

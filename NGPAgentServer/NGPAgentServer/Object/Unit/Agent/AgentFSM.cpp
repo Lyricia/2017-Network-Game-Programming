@@ -134,6 +134,22 @@ void Shooting::Execute(CAgent * agent, float fTimeElapsed, RoomInfo* pRoomInfo)
 	D2D_POINT_2F dir{ agent->GetTargetPos() - agent->GetPos() };
 	agent->SetDirection(Normalize(dir));
 
+	{
+		UCHAR type = MSGTYPE::MSGACTION::MOVE;
+		UCHAR roomNo = pRoomInfo->RoomID;
+		UINT objNo = agent->GetID();
+		ActionInfo action_info;
+		action_info.LookDirection = agent->GetDirection();
+		action_info.MoveDirection = agent->GetMoveDirection();
+
+		NGPMSG* msg = CreateMSG(type, roomNo, objNo, 0, 1, NULL, &action_info);
+
+		pRoomInfo->SendMsgs((char*)msg, sizeof(NGPMSG));
+		delete msg;
+	}
+
+
+
 	if (agent->IsCanbeShootable())
 	{
 		agent->ResetShootTimer();
@@ -158,35 +174,22 @@ void Shooting::Execute(CAgent * agent, float fTimeElapsed, RoomInfo* pRoomInfo)
 		std::cout << "ROOM - " << pRoomInfo->RoomID
 			<< "Agent No" << objNo <<
 			"SendMessage Shoot " << std::endl;
-
+		if (agent->GetTarget()) std::cout << "Target No :: " << agent->GetTarget()->GetID() << std::endl;
 	}
 
+	
+	agent->LookAt(agent->GetDirection() + agent->GetPos());
+	D2D_POINT_2F dist = Point2F();
+	float distance = 999999;
+
+	if (agent->GetTarget())
 	{
-
-		UCHAR type = MSGTYPE::MSGACTION::MOVE;
-		UCHAR roomNo = pRoomInfo->RoomID;
-		UINT objNo = agent->GetID();
-		ActionInfo action_info;
-		action_info.LookDirection = agent->GetDirection();
-		action_info.MoveDirection = agent->GetMoveDirection();
-	
-		NGPMSG* msg = CreateMSG(type, roomNo, objNo, 0, 1, NULL, &action_info);
-	
-		pRoomInfo->SendMsgs((char*)msg, sizeof(NGPMSG));
-		delete msg;
-	
+		dist = agent->GetTarget()->GetPos() - agent->GetPos();
+		distance = Length(dist);
 	}
-
-	//D2D_POINT_2F dist = agent->GetTarget()->GetPos() - agent->GetPos();
-	//float distance = sqrt(dist.x*dist.x + dist.y*dist.y);
-	//if (distance > AGENT_SHOOT_RANGE) {
-	//	agent->SetTarget(nullptr);
-	//	agent->GetFSM()->ChangeState(Wandering::Instance());
-	//}
-
-	if (agent->IsDirectionChangable())
-		agent->GetFSM()->ChangeState(ChangeDirection::Instance());
-
+	if (distance > AGENT_SHOOT_RANGE) {
+		agent->GetFSM()->ChangeState(Wandering::Instance());
+	}
 }
 
 void Shooting::Exit(CAgent * agent)

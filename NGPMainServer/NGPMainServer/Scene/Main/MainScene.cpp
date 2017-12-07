@@ -44,7 +44,7 @@ bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 
 	for (int i = 0; i< 3; ++i)
 	{
-		CAgent* agent = new CAgent(Point2F(-100, 10 * i));
+		CAgent* agent = new CAgent(Point2F(-100, 100 * i));
 		agent->SetID(m_ObjectIDCounter++);
 		agent->SetSize(OBJECT_RECT);
 		m_vecObjects.push_back(agent);
@@ -472,6 +472,9 @@ void CMainScene::ProcessMsgs()
 						if (agent->GetID() == msg->header.OBJECTNO)
 						{
 							printf("Process Shoot Msg\n");
+							
+							if(target) printf("Target :: %d", target->GetID());
+
 							agent->Shoot(m_pRoomInfo, target, hit_pos);
 							break;
 						}

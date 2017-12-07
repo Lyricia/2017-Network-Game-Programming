@@ -131,7 +131,7 @@ bool CMainScene::OnCreate(wstring && tag, CFramework * pFramework)
 
 	for (int i = 0; i< 3; ++i)
 	{
-		CAgent* agent = new CAgent(Point2F(-100, 10 * i));
+		CAgent* agent = new CAgent(Point2F(-100, 100 * i));
 		agent->RegisterResourceManager(m_pResMng);
 		m_vecObjects.push_back(agent);
 	}

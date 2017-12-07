@@ -141,15 +141,6 @@
     <ClInclude Include="Object\Unit\Agent\Agent.h">
       <Filter>Object\Unit\Agent</Filter>
     </ClInclude>
-    <ClInclude Include="Object\Unit\Agent\AgentFSM.h">
-      <Filter>Object\Unit\Agent</Filter>
-    </ClInclude>
-    <ClInclude Include="Object\Unit\Agent\State.h">
-      <Filter>Object\Unit\Agent</Filter>
-    </ClInclude>
-    <ClInclude Include="Object\Unit\Agent\StateMachine.h">
-      <Filter>Object\Unit\Agent</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -204,9 +195,6 @@
       <Filter>Object\Effect</Filter>
     </ClCompile>
     <ClCompile Include="Object\Unit\Agent\Agent.cpp">
-      <Filter>Object\Unit\Agent</Filter>
-    </ClCompile>
-    <ClCompile Include="Object\Unit\Agent\AgentFSM.cpp">
       <Filter>Object\Unit\Agent</Filter>
     </ClCompile>
   </ItemGroup>

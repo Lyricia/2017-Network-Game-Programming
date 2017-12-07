@@ -126,6 +126,7 @@ public:
 
 	CObject*	GetTarget() { return m_pTarget; }
 	D2D_POINT_2F GetTargetPos() const { return m_ptTargetPos; }
+
 	D2D_POINT_2F GetVelocity() const { return m_ptVelocity; }
 	D2D_POINT_2F GetMoveDirection() const { return m_ptMoveDirection; }
 	D2D_POINT_2F GetDirection() const { return m_ptDirection; }
