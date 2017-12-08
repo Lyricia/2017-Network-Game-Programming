@@ -880,4 +880,5 @@ void CMainScene::SendMsgs()
 		delete mapmsg[i];
 	delete[] mapmsg;
 	delete turretmsg;
+	delete agentmsg;
 }
