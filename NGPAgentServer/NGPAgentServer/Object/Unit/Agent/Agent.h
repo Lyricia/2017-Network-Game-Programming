@@ -127,6 +127,8 @@ public:
 	void SetMoveDirection(D2D_POINT_2F pt) { m_ptMoveDirection = pt; }
 	void SetDirection(D2D_POINT_2F pt) { m_ptDirection = pt; }
 
+	void SetAgentType(CAgent::AgentType type) { m_AgentType = type; }
+
 	CObject*	GetTarget() { return m_pTarget; }
 	D2D_POINT_2F GetTargetPos() const { return m_ptTargetPos; }
 	AgentType	GetAgentType() const { return m_AgentType; }

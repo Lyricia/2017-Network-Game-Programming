@@ -235,8 +235,7 @@ void CAgent::RayCastingToShoot(std::vector<CObject*>& pvecObjects)
 
 				CAgent* agent = static_cast<CAgent*>(p);
 				
-				if (agent->GetAgentType() == CAgent::AgentType::Bot)
-					break;
+				if (agent->GetAgentType() == CAgent::AgentType::Bot) break;
 
 				if (Length(p->GetPos() - ptDevidedRay) < p->GetSize().right)
 				{

@@ -49,6 +49,7 @@ bool CMainScene::OnCreate(std::wstring && tag, CGameWorld* pGameWorld)
 		agent->RegisterRoomInfo(m_pRoomInfo);
 		agent->SetID(ObjectID++);
 		agent->SetSize(OBJECT_RECT);
+		agent->SetAgentType(CAgent::AgentType::Bot);
 		m_vecObjects.push_back(agent);
 	}
 
@@ -196,6 +197,7 @@ void CMainScene::ProcessMsgs()
 						}
 					turret->SetID(ObjectID++);
 					turret->SetSize(OBJECT_RECT);
+					turret->SetAgentType(CAgent::AgentType::Turret);
 					turret->RegisterRoomInfo(m_pRoomInfo);
 					m_vecObjects.push_back(turret);
 					break;
