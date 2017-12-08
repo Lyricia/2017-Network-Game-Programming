@@ -69,6 +69,9 @@ private:
 	float							m_fGrenadeTimer;
 	bool							m_bGrenade;
 
+	float							m_fTurretTimer;
+	bool							m_bTurret;
+
 	UCHAR							m_iAmmo;
 	UCHAR							m_iGrenade;
 	UCHAR							m_iTurretKit;

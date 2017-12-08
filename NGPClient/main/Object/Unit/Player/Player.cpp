@@ -70,6 +70,16 @@ void CPlayer::Update(float fTimeElapsed)
 		}
 	}
 
+	if (m_bTurret)
+	{
+		m_fTurretTimer += fTimeElapsed;
+		if (m_fTurretTimer > GRENADE_DELAY)
+		{
+			m_bTurret = false;
+			m_fTurretTimer = 0.f;
+		}
+	}
+
 	if (m_bCollision)
 	{
 		m_fBlockStunTimer += fTimeElapsed;
@@ -503,8 +513,10 @@ void CPlayer::GrenadeOut(CClient * pClient)
 
 void CPlayer::DeployTurret(CClient * pClient)
 {
+	if (m_bTurret) return;
 	if (m_iTurretKit == 0) return;
 	--m_iTurretKit;
+	m_bTurret = true;
 
 	NGPMSG* msg = nullptr;
 	UCHAR type = MSGTYPE::MSGACTION::BUILDTURRET;

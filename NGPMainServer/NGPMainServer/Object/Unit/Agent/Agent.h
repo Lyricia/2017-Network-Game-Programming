@@ -33,7 +33,7 @@ protected:
 	D2D_RECT_F						m_rcWeaponSize;
 
 	ComPtr<ID2D1SolidColorBrush>	m_pd2dLineBrush;
-	
+
 #endif
 	D2D_POINT_2F					m_ptMuzzleDirection;
 	D2D_POINT_2F					m_ptMuzzleStartPos;
@@ -113,12 +113,14 @@ public:
 	void SetDirection(D2D_POINT_2F pt) { m_ptDirection = pt; }
 
 	void SetMoveDirection(const D2D_POINT_2F& ptMoveDirection);
-	CObject*	GetTarget() { return m_pTarget; }
+	CObject*	GetTarget()  { return m_pTarget; }
 	D2D_POINT_2F GetTargetPos() const { return m_ptTargetPos; }
 	D2D_POINT_2F GetVelocity() const { return m_ptVelocity; }
 	D2D_POINT_2F GetDirection() const { return m_ptDirection; }
 
+
 	AgentType GetAgentType() const { return m_AgentType; }
+	void SetAgentType(CAgent::AgentType type) { m_AgentType = type; }
 
 	virtual void SetObjectInfo(LPVOID info) override;
 	virtual LPVOID GetObjectInfo() override;

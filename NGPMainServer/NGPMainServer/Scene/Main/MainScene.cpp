@@ -47,6 +47,7 @@ bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 		CAgent* agent = new CAgent(Point2F(-100, 100 * i));
 		agent->SetID(m_ObjectIDCounter++);
 		agent->SetSize(OBJECT_RECT);
+		agent->SetAgentType(CAgent::AgentType::Bot);
 		m_vecObjects.push_back(agent);
 		m_pRoomInfo->agentlist.push_back((LPVOID)agent);
 	}
@@ -575,6 +576,7 @@ void CMainScene::ProcessMsgs()
 				CTurret* turret = new CTurret(arrActionInfo[i].TargetPos, OBJECT_RECT);
 				turret->SetID(m_ObjectIDCounter++);
 				turret->SetSize(OBJECT_RECT);
+				turret->SetAgentType(CAgent::AgentType::Turret);
 
 				for (auto& p : m_pRoomInfo->clientlist)
 					if (p->pUserdata)

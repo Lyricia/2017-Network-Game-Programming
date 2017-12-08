@@ -10,10 +10,12 @@ CPlayer::CPlayer(D2D_POINT_2F pt, D2D_RECT_F rc)
 	, m_fBlockStunTimer(0)
 	, m_fShootTimer(0)
 	, m_fGrenadeTimer(0)
+	, m_fTurretTimer(0)
 	, m_bCollision(false)
 	, m_bShoot(true)
 	, m_bReload(false)
 	, m_bGrenade(false)
+	, m_bTurret(false)
 	, m_ptMoveDirection(Point2F())
 	, m_ptVelocity(Point2F())
 	, m_bMove(false)
@@ -68,6 +70,16 @@ void CPlayer::Update(float fTimeElapsed)
 		{
 			m_bGrenade = false;
 			m_fGrenadeTimer = 0.f;
+		}
+	}
+
+	if (m_bTurret)
+	{
+		m_fTurretTimer += fTimeElapsed;
+		if (m_fTurretTimer > GRENADE_DELAY)
+		{
+			m_bTurret = false;
+			m_fTurretTimer = 0.f;
 		}
 	}
 
@@ -353,8 +365,10 @@ void CPlayer::GrenadeOut()
 
 void CPlayer::DeployTurret()
 {
+	if (m_bTurret) return;
 	if (m_iTurretKit == 0) return;
 	--m_iTurretKit;
+	m_bTurret = true;
 }
 
 
