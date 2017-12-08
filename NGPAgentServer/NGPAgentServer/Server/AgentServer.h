@@ -8,10 +8,10 @@
 
 
 struct ConnectionInfo {
-	int				ID;
-	SOCKET			sock;
-	SOCKADDR_IN		addr;
-	HANDLE			RecvThreadHandle;
+	int					ID;
+	SOCKET				sock;
+	SOCKADDR_IN			addr;
+	HANDLE				RecvThreadHandle;
 	std::list<NGPMSG*>*	pMsgQueue;
 	LPVOID				pUserdata;
 	LPCRITICAL_SECTION	pCs;

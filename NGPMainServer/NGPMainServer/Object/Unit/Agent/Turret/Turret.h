@@ -7,6 +7,8 @@
 
 #define TURRET_MAX_HP			100.0
 #define TURRET_SHOOT_TIME		0.4
+#define TURRET_SHOOT_DAMAGE		4.0
+
 class CTurret : public CAgent
 {
 protected:
@@ -17,4 +19,8 @@ public:
 
 	virtual void Update(float fTimeElapsed) override;
 	void SetParent(CObject* pParent) { m_pParent = pParent; }
+
+	virtual void Shoot();
+	virtual void Shoot(RoomInfo* pRoomInfo, CObject* pTarget, const D2D_POINT_2F& ptHitPos);
+
 };

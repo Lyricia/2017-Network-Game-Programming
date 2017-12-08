@@ -44,21 +44,21 @@ void CTurret::Shoot()
 		case CObject::Type::Player:
 		{
 			CPlayer* player = static_cast<CPlayer*>(m_pTarget);
-			player->Collide(SHOOT_DAMAGE);
+			player->Collide(TURRET_SHOOT_DAMAGE);
 			player->Move(m_ptMuzzleDirection * PLAYER_VELOCITY);
 			break;
 		}
 		case CObject::Type::Agent:
 		{
 			CAgent* agent = static_cast<CAgent*>(m_pTarget);
-			agent->Collide(SHOOT_DAMAGE);
+			agent->Collide(TURRET_SHOOT_DAMAGE);
 			agent->Move(m_ptMuzzleDirection * PLAYER_VELOCITY);
 			break;
 		}
 		case CObject::Type::Brick:
 		{
 			CBrick* brick = static_cast<CBrick*>(m_pTarget);
-			brick->Collide(SHOOT_DAMAGE);
+			brick->Collide(TURRET_SHOOT_DAMAGE);
 			break;
 		}
 		}

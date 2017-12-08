@@ -103,8 +103,8 @@ public:
 	void Reflection(const D2D_POINT_2F& ptReflect = Point2F());
 	void Stop();
 
-	void Shoot();
-	void Shoot(RoomInfo* pRoomInfo, CObject* pTarget, const D2D_POINT_2F& ptHitPos);
+	virtual void Shoot();
+	virtual void Shoot(RoomInfo* pRoomInfo, CObject* pTarget, const D2D_POINT_2F& ptHitPos);
 
 	void RayCastingToShoot(std::vector<CObject*>& pvecObjects);
 

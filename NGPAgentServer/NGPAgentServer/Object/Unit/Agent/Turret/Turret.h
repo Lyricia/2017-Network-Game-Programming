@@ -8,6 +8,7 @@
 
 #define TURRET_MAX_HP			100.0
 #define TURRET_SHOOT_TIME		0.4f
+#define TURRET_SHOOT_DAMAGE		4.0
 
 class CTurret : public CAgent
 {
