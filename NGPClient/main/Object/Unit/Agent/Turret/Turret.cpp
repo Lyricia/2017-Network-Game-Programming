@@ -17,6 +17,7 @@ CTurret::CTurret(D2D_POINT_2F pt, D2D_RECT_F rc)
 	m_ptVelocity = Point2F();
 
 	m_Tag = CObject::Type::Agent;
+	m_AgentType = CAgent::AgentType::Turret;
 	m_next_change_dir_timer = rand() % 5 + 1;
 	m_fHP = TURRET_MAX_HP;
 

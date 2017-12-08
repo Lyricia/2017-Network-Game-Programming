@@ -19,6 +19,7 @@ CAgent::CAgent(D2D_POINT_2F pt, D2D_RECT_F rc)
 
 {
 	m_Tag = CObject::Type::Agent;
+	m_AgentType = CAgent::AgentType::Bot;
 	m_next_change_dir_timer = rand() % 5 + 1;
 	m_fHP = PLAYER_MAX_HP;
 
