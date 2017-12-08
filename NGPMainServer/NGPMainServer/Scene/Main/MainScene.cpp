@@ -472,9 +472,8 @@ void CMainScene::ProcessMsgs()
 						CAgent* agent = static_cast<CAgent*>(d);
 						if (agent->GetID() == msg->header.OBJECTNO)
 						{
-							printf("Process Shoot Msg\n");
-							
-							if(target) printf("Target :: %d", target->GetID());
+							//printf("Process Shoot Msg\n");
+							//if(target) printf("Target :: %d", target->GetID());
 
 							if (agent->GetAgentType() == CAgent::AgentType::Bot)
 							{
