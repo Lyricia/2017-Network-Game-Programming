@@ -18,8 +18,7 @@ public:
 	virtual void Shoot(const D2D_POINT_2F & ptHitPos);
 
 	virtual void Update(float fTimeElapsed) override;
-	virtual void Move(const D2D_POINT_2F& ptVelocity) override;
-	virtual void Move(const D2D_POINT_2F& ptVelocity, float fTimeElapsed) override;
+	virtual void Draw(ID2D1HwndRenderTarget* pd2dRenderTarget) override;
 	void SetParent(CObject* pParent) { m_pParent = pParent; }
 	virtual void RegisterResourceManager(std::shared_ptr<CResourceManager> resMng) override;
 };

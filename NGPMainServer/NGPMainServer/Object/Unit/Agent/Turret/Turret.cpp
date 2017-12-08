@@ -27,16 +27,34 @@ CTurret::~CTurret()
 
 void CTurret::Update(float fTimeElapsed)
 {
+	Move(AGENT_VELOCITY * fTimeElapsed);
+
+	m_ptVelocity -= m_ptVelocity * fTimeElapsed * FRICTIONAL_DRAG;
+	if (Length(m_ptVelocity) < FRICTIONAL_DRAG)
+	{
+		m_ptVelocity = Point2F();
+		m_bMove = false;
+	}
 
 
-}
+	if (m_bShoot)
+	{
+		m_fShootTimer += fTimeElapsed;
+		if (m_fShootTimer > SHOOT_TIME)
+		{
+			m_bShoot = false;
+			m_fShootTimer = 0.f;
+		}
+	}
 
-void CTurret::Move(const D2D_POINT_2F& ptVelocity)
-{
-	
-}
+	if (m_bCollision)
+	{
+		m_fBlockStunTimer += fTimeElapsed;
+		if (m_fBlockStunTimer > BLOCK_STUN_TIME)
+		{
+			m_bCollision = false;
+			m_fBlockStunTimer = 0.f;
+		}
+	}
 
-void CTurret::Move(const D2D_POINT_2F & ptVelocity, float fTimeElapsed)
-{
-	
 }

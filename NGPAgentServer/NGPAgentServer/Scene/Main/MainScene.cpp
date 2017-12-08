@@ -195,6 +195,7 @@ void CMainScene::ProcessMsgs()
 							break;
 						}
 					turret->SetID(ObjectID++);
+					turret->SetSize(OBJECT_RECT);
 					turret->RegisterRoomInfo(m_pRoomInfo);
 					m_vecObjects.push_back(turret);
 					break;

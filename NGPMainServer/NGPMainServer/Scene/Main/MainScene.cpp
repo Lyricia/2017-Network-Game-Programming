@@ -574,6 +574,7 @@ void CMainScene::ProcessMsgs()
 			{
 				CTurret* turret = new CTurret(arrActionInfo[i].TargetPos, OBJECT_RECT);
 				turret->SetID(m_ObjectIDCounter++);
+				turret->SetSize(OBJECT_RECT);
 
 				for (auto& p : m_pRoomInfo->clientlist)
 					if (p->pUserdata)

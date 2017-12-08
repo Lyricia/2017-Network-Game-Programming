@@ -2,6 +2,7 @@
 
 #include "stdafx.h"
 #include "Object\Unit\Agent\Agent.h"
+#include "Object\Unit\Player\Player.h"
 #include "Object\Unit\Unit.h"
 
 #define TURRET_MAX_HP			100.0
@@ -15,7 +16,5 @@ public:
 	virtual ~CTurret();
 
 	virtual void Update(float fTimeElapsed) override;
-	virtual void Move(const D2D_POINT_2F& ptVelocity) override;
-	virtual void Move(const D2D_POINT_2F& ptVelocity, float fTimeElapsed) override;
 	void SetParent(CObject* pParent) { m_pParent = pParent; }
 };

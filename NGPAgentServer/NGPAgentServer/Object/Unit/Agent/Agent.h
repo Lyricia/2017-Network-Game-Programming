@@ -115,7 +115,7 @@ public:
 	void Shoot();
 	void Shoot(const D2D_POINT_2F & ptHitPos);
 
-	void RayCastingToShoot(std::vector<CObject*>& pvecObjects);
+	virtual void RayCastingToShoot(std::vector<CObject*>& pvecObjects);
 	void RunStateMachine(float fTimeElapsed) {
 		m_pStateMachine->Update(fTimeElapsed, m_pRoomInfo); 
 	}

@@ -88,18 +88,87 @@ void CTurret::Update(float fTimeElapsed)
 		}
 	}
 
+	if (m_bCollision)
+	{
+		m_fBlockStunTimer += fTimeElapsed;
+		if (m_fBlockStunTimer > BLOCK_STUN_TIME)
+		{
+			m_bCollision = false;
+			m_fBlockStunTimer = 0.f;
+		}
+	}
+
 
 }
 
-void CTurret::Move(const D2D_POINT_2F& ptVelocity)
+void CTurret::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
 {
+	D2D_MATRIX_3X2_F transform;
+	pd2dRenderTarget->GetTransform(&transform);
 	
+
+	auto bmpSize = m_bmpImage->GetSize();
+	float aniWidthFactor = bmpSize.width / (float)m_szImg.width;
+	float aniHeightFactor = bmpSize.height / (float)m_szImg.height;
+	pd2dRenderTarget->DrawBitmap(
+		m_bmpImage.Get()
+		, m_rcSize + m_ptPos
+		, 1.f
+		, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR
+		, RectF(
+			aniWidthFactor * (int)m_ptCurrImg.x
+			, aniHeightFactor * (int)m_ptCurrImg.y
+			, aniWidthFactor * ((int)m_ptCurrImg.x + 1)
+			, aniHeightFactor * ((int)m_ptCurrImg.y + 1)));
+
+	pd2dRenderTarget->SetTransform(m_mtxRotate*transform);
+
+	pd2dRenderTarget->DrawBitmap(
+		m_bmpWeaponImage.Get()
+		, m_rcWeaponSize + m_ptPos);
+
+	pd2dRenderTarget->SetTransform(transform);
+
+	// 체력바
+	m_pResMng->brRed->SetOpacity(0.8f);
+	pd2dRenderTarget->FillRectangle(
+		RectF(m_rcSize.left
+			, m_rcSize.top - (m_rcSize.bottom - m_rcSize.top) * 0.1f
+			, m_rcSize.left + (m_rcSize.right - m_rcSize.left) * (m_fHP / PLAYER_MAX_HP)
+			, m_rcSize.top)
+		+ m_ptPos
+		, m_pResMng->brRed.Get());
+	m_pResMng->brRed->SetOpacity(1.0f);
+
+	// 체력바 테두리
+	pd2dRenderTarget->DrawRectangle(
+		RectF(m_rcSize.left
+			, m_rcSize.top - (m_rcSize.bottom - m_rcSize.top) * 0.1f
+			, m_rcSize.left + (m_rcSize.right - m_rcSize.left)
+			, m_rcSize.top)
+		+ m_ptPos
+		, m_pResMng->brWhite.Get());
+
+
+	if (m_bShoot)
+	{
+		m_pResMng->brLightYellow->SetOpacity(1 - (m_shoot_effect_timer / TURRET_SHOOT_TIME));
+		pd2dRenderTarget->DrawLine(
+			m_ptMuzzleStartPos
+			, m_ptMuzzleEndPos
+			, m_pResMng->brLightYellow.Get()
+			, SHOOT_STROKE);
+		m_pResMng->brLightYellow->SetOpacity(1.f);
+	}
+
+	pd2dRenderTarget->DrawTextW(
+		std::to_wstring(m_Id).c_str()
+		, static_cast<UINT>(std::to_wstring(m_Id).length())
+		, m_pResMng->dwUITextFormat.Get()
+		, m_rcSize + m_ptPos
+		, m_pResMng->brDarkGray.Get());
 }
 
-void CTurret::Move(const D2D_POINT_2F & ptVelocity, float fTimeElapsed)
-{
-	
-}
 
 void CTurret::RegisterResourceManager(std::shared_ptr<CResourceManager> resMng)
 {
