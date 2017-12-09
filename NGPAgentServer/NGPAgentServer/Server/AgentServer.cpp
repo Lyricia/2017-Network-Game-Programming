@@ -124,12 +124,17 @@ DWORD WINAPI RunGameWorld(LPVOID arg)
 		}
 	}
 
-	while (room)
-	{
-		std::cout << "Running Room" << room->RoomID << std::endl;
-		room->GameWorld.Run();
-	}
-
+	std::cout << "Running Room" << room->RoomID << std::endl;
+	room->GameWorld.Run();
+	Server->m_RoomList.remove_if([room](RoomInfo* pRoom)->bool {
+		if (pRoom->RoomID == room->RoomID)
+		{
+			delete pRoom;
+			return true;
+		}
+		return false;
+	});
+	std::cout << "Delete Room " << std::endl;
 	return 0;
 }
 
@@ -252,14 +257,7 @@ void AgentServer::CreateAgentsToRoom(UINT room_id)
 
 void AgentServer::DeleteAgentsFromRoom(UINT room_id)
 {
-	m_RoomList.remove_if([room_id](RoomInfo* pRoom)->bool {
+	for(auto& pRoom : m_RoomList)
 		if (pRoom->RoomID == room_id)
-		{
-			delete pRoom;
-			return true;
-		}
-		return false;
-	});
-	std::cout << "Delete Room "  << std::endl;
-
+			pRoom->GameWorld.Stop();
 }

@@ -12,12 +12,11 @@
 CFramework::CFramework() 
 {
 }
-
 CFramework::~CFramework()
 {
 }
 
-void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst, shared_ptr<CIndRes> indres, shared_ptr<CTimer> timer)
+bool CFramework::OnCreate(HWND hWnd, HINSTANCE hInst, shared_ptr<CIndRes> indres, shared_ptr<CTimer> timer)
 {
 	RegisterIndRes(indres);
 	RegisterTimer(timer);
@@ -32,12 +31,13 @@ void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst, shared_ptr<CIndRes> indres
 
 	m_pClient = make_shared<CClient>();
 	m_pClient->Initialize();
-	m_pClient->ConnectServer();
+	if (!m_pClient->ConnectServer()) return false;
 
 	m_pIndRes->CreateHwndRenderTarget(hWnd, &m_pd2dRenderTarget);
-	m_pResourceManager = make_shared<CResourceManager>(
-		m_pIndRes.get(), m_pd2dRenderTarget.Get());
+	m_pResourceManager = 
+		make_shared<CResourceManager>(m_pIndRes.get(), m_pd2dRenderTarget.Get());
 	BuildScene<CMainScene>(L"Main"s);
+	return true;
 }
 
 void CFramework::BuildScene(wstring Tag, const unique_ptr<CScene>& scene)
@@ -172,6 +172,21 @@ LRESULT CFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM
 	}
 
 	return DefWindowProc(hWnd, nMessageID, wParam, lParam);
+}
+
+void CFramework::RestartCurrScene()
+{
+	auto DestroyTag = m_pCurrentScene->Tag();
+	m_pCurrentScene = nullptr;
+	m_lstScenes.remove_if([&](const unique_ptr<CScene>& s){ 
+		return s->FindByTag(DestroyTag); });
+
+	if (DestroyTag == L"Main"s)
+	{
+		m_pClient->DisconnectServer();
+		m_pClient->ConnectServer();
+	}
+	BuildScene<CMainScene>(DestroyTag);
 }
 
 void CFramework::ChangeScene(wstring Tag, bool bDestroyPostScene)

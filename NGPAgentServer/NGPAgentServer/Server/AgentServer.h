@@ -53,9 +53,6 @@ struct RoomInfo {
 			//for (auto& p : clientlist) delete p;
 			MsgQueue.clear();
 			//clientlist.clear();
-			if (hGameWorld) {
-				TerminateThread(hGameWorld, 0);
-			}
 		}
 
 		void EnterCriticalSection() { ::EnterCriticalSection(&roomCs); }

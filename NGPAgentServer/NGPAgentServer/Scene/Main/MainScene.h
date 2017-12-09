@@ -24,6 +24,8 @@ public:
 	bool OnCreate(std::wstring&& tag, CGameWorld* pGameWorld) override;
 	void Update(float fTimeElapsed) override;
 
+	void Release();
+
 	void ProcessMsgs();
 	void SendMsgs();
 

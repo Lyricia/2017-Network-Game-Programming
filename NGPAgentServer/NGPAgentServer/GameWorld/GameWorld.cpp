@@ -31,22 +31,21 @@ bool CGameWorld::Initailize()
 	return true;
 }
 
+void CGameWorld::Stop()
+{
+	m_bRun = false;
+}
+
 void CGameWorld::Run()
 {
 	MSG msg;
 
 	// 기본 메시지 루프입니다.
-	while (true)
+	while (m_bRun)
 	{
 		CheckClients();
 		ProcessMsgs();
-		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
-		{
-			if (msg.message == WM_QUIT) break;
 
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
 		if (!m_pTimer->Update()) continue;
 
 		// 1초에 30번

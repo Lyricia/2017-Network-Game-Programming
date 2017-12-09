@@ -44,10 +44,13 @@ int APIENTRY wWinMain(
 
 #ifdef USE_CONSOLE_WINDOW
 	if (!AllocConsole())
-		MessageBox(NULL, L"The console window was not created"
-			, NULL, MB_ICONEXCLAMATION);
-	FILE* fp;
-	freopen_s(&fp, "CONOUT$", "w", stdout);
+		MessageBox(NULL, L"The console window was not created", NULL, MB_ICONEXCLAMATION);
+	FILE* fp_in;
+	FILE* fp_out;
+	FILE* fp_err;
+	freopen_s(&fp_in, "CONIN$", "r", stdin);
+	freopen_s(&fp_out, "CONOUT$", "w", stdout);
+	freopen_s(&fp_err, "CONOUT$", "w", stderr);
 #endif
     // TODO: 여기에 코드를 입력합니다.
 	if (!ind->Initialize()) return FALSE;
@@ -60,17 +63,22 @@ int APIENTRY wWinMain(
     // 응용 프로그램 초기화를 수행합니다.
     if (!InitInstance (hInstance, nCmdShow))
     {
+#ifdef USE_CONSOLE_WINDOW
+		fclose(fp_in);
+		fclose(fp_out);
+		fclose(fp_err);
+		if (!FreeConsole())
+			MessageBox(NULL, L"Failed to free the console!", NULL, MB_ICONEXCLAMATION);
+#endif
         return FALSE;
     }
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MAIN));
 
     MSG msg;
-
     // 기본 메시지 루프입니다.
-
-    while (true)
-    {
+	while (framework.IsRun())
+	{
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 		{
 			if (msg.message == WM_QUIT) break;
@@ -79,15 +87,16 @@ int APIENTRY wWinMain(
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		framework.ProcessMsgs();
 		if (!timer->Update()) continue;
+		framework.ProcessMsgs();
 		framework.FrameAdvance();
-    }
+	}
 #ifdef USE_CONSOLE_WINDOW
-	fclose(fp);
+	fclose(fp_in);
+	fclose(fp_out);
+	fclose(fp_err);
 	if (!FreeConsole())
-		MessageBox(NULL, L"Failed to free the console!"
-			, NULL, MB_ICONEXCLAMATION);
+		MessageBox(NULL, L"Failed to free the console!", NULL, MB_ICONEXCLAMATION);
 #endif
     return (int) msg.wParam;
 }
@@ -200,7 +209,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	}
 
 	timer->SetUpdateCaptionHwnd(hWnd);
-	framework.OnCreate(hWnd, hInst, ind, timer);
+	if (!framework.OnCreate(hWnd, hInst, ind, timer)) return FALSE;
 
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);

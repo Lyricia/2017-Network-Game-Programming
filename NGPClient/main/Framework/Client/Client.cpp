@@ -49,6 +49,7 @@ int recvn(SOCKET s, char * buf, int len, int flags)
 
 CClient::CClient()
 	: m_Local_id(-1)
+	, m_ServerIP()
 {
 	ZeroMemory(&m_MainServer, sizeof(m_MainServer));
 }
@@ -63,11 +64,6 @@ void CClient::Initialize()
 	WSADATA wsa;
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
 		return;
-
-	// socket()
-	m_MainServer.sock = socket(AF_INET, SOCK_STREAM, 0);
-	if (m_MainServer.sock == INVALID_SOCKET)
-		err_quit("socket()");
 
 #ifdef DISAGLE_NAGLE_ALGORITHM
 	// Nagle 알고리즘 해제 코드
@@ -84,27 +80,47 @@ void CClient::Initialize()
 
 void CClient::Release()
 {
-	// closesocket()
-	closesocket(m_MainServer.sock);
+	DisconnectServer();
+	
+	::DeleteCriticalSection(&m_CS);
+
 	// 윈속 종료
 	WSACleanup();
-
-	for (auto& p : m_MsgQueue)
-		delete p;
-	m_MsgQueue.clear();
-
-	::DeleteCriticalSection(&m_CS);
 }
 
-void CClient::ConnectServer()
+bool CClient::ConnectServer()
 {
-	// connect()
-	m_MainServer.addr.sin_family = AF_INET;
-	m_MainServer.addr.sin_addr.s_addr = inet_addr(std::string(SERVERIP).c_str());
-	m_MainServer.addr.sin_port = htons(SERVERPORT);
-	int retval = connect(m_MainServer.sock, (SOCKADDR *)&m_MainServer.addr, sizeof(m_MainServer.addr));
-	if (retval == SOCKET_ERROR) err_quit("connect()");
+	int retval;
+	char ip[BUFFER_SIZE];
 
+	// socket()
+	m_MainServer.sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (m_MainServer.sock == INVALID_SOCKET) err_quit("socket()");
+
+	while (true)
+	{
+		if (!m_ServerIP.size())
+		{
+			printf("\nInput server ip (Exit - q): ");
+			fgets(ip, sizeof(ip), stdin);
+			ip[strlen(ip) - 1] = '\0';
+			if (strcmp(ip, "q") == 0) return false;
+			m_ServerIP = std::string(ip);
+		}
+		// connect()
+		m_MainServer.addr.sin_family = AF_INET;
+		m_MainServer.addr.sin_addr.s_addr = inet_addr(m_ServerIP.c_str());
+		m_MainServer.addr.sin_port = htons(SERVERPORT);
+		retval = connect(m_MainServer.sock, (SOCKADDR *)&m_MainServer.addr, sizeof(m_MainServer.addr));
+		if (retval == SOCKET_ERROR)
+		{
+			m_ServerIP = std::string();
+			printf("Invalid IP\n");
+			continue;
+		}
+		else break;
+	}
+	
 	NGPMSG msg;
 	retval = recvn(m_MainServer.sock, (char*)&msg, sizeof(NGPMSG), 0);
 	if (retval == SOCKET_ERROR) err_quit("Connect recvn()");
@@ -114,6 +130,17 @@ void CClient::ConnectServer()
 	m_MainServer.pMsgQueue = &m_MsgQueue;
 	m_MainServer.pCS = &m_CS;
 	m_MainServer.hReceiver = CreateThread(NULL, 0, RecvMessage, (LPVOID)&m_MainServer, 0, NULL);
+	return true;
+}
+
+void CClient::DisconnectServer()
+{	
+	//m_ServerIP = std::string();
+	for (auto& p : m_MsgQueue)
+		delete p;
+	m_MsgQueue.clear();
+	closesocket(m_MainServer.sock);
+	m_MainServer.sock = NULL;
 }
 
 void CClient::SendMsgs(char* buf, UINT buf_size)
@@ -142,10 +169,9 @@ DWORD RecvMessage(LPVOID arg)
 		main_server->EnterCriticalSection();
 		main_server->pMsgQueue->push_back(msg);
 		main_server->LeaveCriticalSection();
-		Sleep(1);
 	}
-
-	closesocket(main_server->sock);
+	if(main_server->sock)
+		closesocket(main_server->sock);
 	printf("[TCP 클라이언트] 서버연결 종료: IP 주소=%s, 포트 번호=%d\n",
 		inet_ntoa(main_server->addr.sin_addr), ntohs(main_server->addr.sin_port));
 

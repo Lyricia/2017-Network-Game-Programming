@@ -107,6 +107,7 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 
 				delete msg;
 
+				int alive = 0;
 				for (auto& p : m_pRoomInfo->clientlist)
 					if (p->pUserdata)
 					{
@@ -114,6 +115,25 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 						if (client->GetID() == player->GetID())
 							p->pUserdata = nullptr;
 					}
+				for (auto& p : m_pRoomInfo->clientlist)
+					if (p->pUserdata) alive++;
+				if (alive == 1)
+				{
+					for (auto& client : m_pRoomInfo->clientlist)
+						if (client->pUserdata)
+						{
+							msg = CreateMSG(
+								MSGTYPE::MSGSTATE::CLIENTGAMEOVER
+								, m_pRoomInfo->RoomID
+								, client->ID
+								, 0, 0, nullptr, nullptr);
+							int retval = send(client->sock, (char*)msg, sizeof(NGPMSG), NULL);
+							if (retval == SOCKET_ERROR) {
+								//assert
+							}
+							delete msg;
+						}
+				}
 				delete (*iter);
 				iter = m_vecObjects.erase(iter);
 			}

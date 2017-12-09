@@ -117,6 +117,8 @@ bool CMainScene::OnCreate(wstring && tag, CFramework * pFramework)
 	m_bmpBackGround = m_pResMng->GetImageRef(ResImgName::map_image);
 	m_bmpCrossHair = m_pResMng->GetImageRef(ResImgName::aim);
 
+	CObject::ResetIDCount();
+
 	int map_size_half = g_iMapSize / 2;
 	for(int i = 0; i < g_iMapSize; ++i)
 		for (int j = 0; j < g_iMapSize; ++j)
@@ -144,8 +146,6 @@ bool CMainScene::OnCreate(wstring && tag, CFramework * pFramework)
 		m_vecObjects.push_back(player);
 	}
 
-	
-
 	for (auto& p : m_vecObjects)
 		if (p->GetID() == m_pClient->GetClientID())
 			m_pPlayer = static_cast<CPlayer*>(p);
@@ -154,8 +154,6 @@ bool CMainScene::OnCreate(wstring && tag, CFramework * pFramework)
 	m_Camera.SetClientSize(Point2F(rcClient.right, rcClient.bottom));
 	m_Camera.SetPosition(m_pPlayer->GetPos());
 	m_Camera.SetAnchor(Point2F(0.0f, 0.0f));
-
-	
 
 	return true;
 }
@@ -218,7 +216,36 @@ void CMainScene::ProcessMsgs()
 			break;
 		}
 		case MSGTYPE::MSGSTATE::CLIENTGAMEOVER:
+		{
+			MessageBox(NULL, L"½Â¸®!", L"GAME OVER!", MB_ICONEXCLAMATION);
+			char input_c[10];
+			while (true)
+			{
+				HWND consoleWindowHandle = GetConsoleWindow();
+				SetWindowPos(
+					consoleWindowHandle,
+					HWND_TOPMOST,
+					0, 0,
+					0, 0,
+					SWP_DRAWFRAME | SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+				ShowWindow(consoleWindowHandle, SW_NORMAL);
+				printf("Restart? ( y or n ) :");
+				fgets(input_c, sizeof(input_c), stdin);
+				input_c[strlen(input_c) - 1] = '\0';
+				if (strcmp(input_c, "y") == 0)
+				{
+					m_pFramework->RestartCurrScene();
+					return;
+				}
+				else if (strcmp(input_c, "n") == 0)
+				{
+					m_pFramework->Stop();
+					return;
+				}
+			}
+			return;
 			break;
+		}
 		case MSGTYPE::MSGSTATE::CLIENTREADY:
 			break;
 		case MSGTYPE::MSGSTATE::ROOMCREATION:
@@ -296,7 +323,37 @@ void CMainScene::ProcessMsgs()
 			{
 				if (msg->header.OBJECTNO == (*iter)->GetID())
 				{
-					if ((*iter) == m_pPlayer) m_pPlayer = nullptr;
+					if ((*iter) == m_pPlayer)
+					{
+						m_pPlayer = nullptr;
+						MessageBox(NULL, L"ÆÐ¹è!", L"GAME OVER!", MB_ICONEXCLAMATION);
+						char input_c[10];
+						while (true)
+						{
+							HWND consoleWindowHandle = GetConsoleWindow();
+							SetWindowPos(
+								consoleWindowHandle,
+								HWND_TOPMOST,
+								0, 0,
+								0, 0,
+								SWP_DRAWFRAME | SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+							ShowWindow(consoleWindowHandle, SW_NORMAL);
+							printf("Restart? ( y or n ) :");
+							fgets(input_c, sizeof(input_c), stdin);
+							input_c[strlen(input_c) - 1] = '\0';
+							if (strcmp(input_c, "y") == 0) 
+							{
+								m_pFramework->RestartCurrScene();
+								return;
+							}
+							else if (strcmp(input_c, "n") == 0)
+							{
+								m_pFramework->Stop();
+								return;
+							}
+						}
+						return;
+					}
 					delete (*iter);
 					iter = m_vecObjects.erase(iter);
 				}

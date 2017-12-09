@@ -18,6 +18,7 @@ public:
 	~CGameWorld();
 
 	bool Initailize();
+	void Stop();
 	void Run();
 	void ProcessMsgs();
 	void SendMsgs();
@@ -33,4 +34,6 @@ private:
 	std::unique_ptr<CTimer>				m_pTimer;
 
 	std::unique_ptr<CMainScene>			m_pMainScene;
+
+	bool								m_bRun = true;
 };

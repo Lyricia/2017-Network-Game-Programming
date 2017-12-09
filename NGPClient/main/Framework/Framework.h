@@ -18,7 +18,7 @@ public:
 	void RegisterTimer(shared_ptr<CTimer> timer) { m_pTimer = timer; }
 
 	// Framework 만들 때
-	void OnCreate(HWND hWnd, HINSTANCE hInst, shared_ptr<CIndRes> indres, shared_ptr<CTimer> timer);
+	bool OnCreate(HWND hWnd, HINSTANCE hInst, shared_ptr<CIndRes> indres, shared_ptr<CTimer> timer);
 
 	// Scene 만들 때
 	template<typename Scene>
@@ -49,8 +49,12 @@ public:
 
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
+	void RestartCurrScene();
 	void ChangeScene(std::wstring Tag, bool bDestroyPostScene = false);
 	CScene* FindScene(std::wstring Tag);
+
+	bool IsRun() const { return m_bRun; }
+	void Stop() { m_bRun = false; }
 
 	// Getter
 public:
@@ -77,5 +81,7 @@ private:
 
 	list<unique_ptr<CScene>>		m_lstScenes;
 	CScene*							m_pCurrentScene		{ nullptr };
+
+	bool							m_bRun				{ true };
 
 };

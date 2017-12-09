@@ -1,7 +1,7 @@
 #pragma once
 #define SERVERPORT 9000
 #define BUFFER_SIZE 512
-//#define SERVERIP	"192.168.35.213"
+//#define SERVERIP	"192.168.180.180"
 #define SERVERIP	"127.0.0.1"
 
 #define MESSAGE_PROCESSING_TIME 0.1
@@ -34,6 +34,8 @@ private:
 	list<NGPMSG*>			m_MsgQueue;
 	ConnectedServerInfo 	m_MainServer;
 	CRITICAL_SECTION		m_CS;
+
+	std::string				m_ServerIP;
 	
 public:
 	CClient();
@@ -41,7 +43,8 @@ public:
 
 	void Initialize();
 	void Release();
-	void ConnectServer();
+	bool ConnectServer();
+	void DisconnectServer();
 	void SendMsgs(char* buf, UINT buf_size);
 
 	void EnterCriticalSection() { ::EnterCriticalSection(&m_CS); }

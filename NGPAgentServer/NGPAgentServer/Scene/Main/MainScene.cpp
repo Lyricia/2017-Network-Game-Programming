@@ -18,10 +18,7 @@ CMainScene::CMainScene()
 }
 CMainScene::~CMainScene()
 {
-	for (auto& p : m_vecObjects)
-		delete p;
-	m_vecObjects.clear();
-
+	Release();
 }
 
 bool CMainScene::OnCreate(std::wstring && tag, CGameWorld* pGameWorld)
@@ -84,6 +81,13 @@ void CMainScene::Update(float fTimeElapsed)
 		
 	}
 
+}
+
+void CMainScene::Release()
+{
+	for (auto& p : m_vecObjects)
+		delete p;
+	m_vecObjects.clear();
 }
 
 void CMainScene::ProcessMsgs()
