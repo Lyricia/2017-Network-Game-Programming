@@ -227,6 +227,8 @@ void CPlayer::RegisterResourceManager(shared_ptr<CResourceManager> resMng)
 	m_bmpImage = m_pResMng->GetImageRef(ResImgName::character_sheet);
 	m_szImg = m_pResMng->GetImgLength(ResImgName::character_sheet);
 
+	m_ptCurrImg.x = m_Id % m_szImg.width;
+
 	if (IsRectInvalid(m_rcSize))
 	{
 		auto sz = m_bmpImage->GetSize();

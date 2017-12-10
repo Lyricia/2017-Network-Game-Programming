@@ -111,6 +111,7 @@ bool CClient::ConnectServer()
 		m_MainServer.addr.sin_family = AF_INET;
 		m_MainServer.addr.sin_addr.s_addr = inet_addr(m_ServerIP.c_str());
 		m_MainServer.addr.sin_port = htons(SERVERPORT);
+		printf("Client try connect to the main server..\n");
 		retval = connect(m_MainServer.sock, (SOCKADDR *)&m_MainServer.addr, sizeof(m_MainServer.addr));
 		if (retval == SOCKET_ERROR)
 		{
@@ -120,7 +121,9 @@ bool CClient::ConnectServer()
 		}
 		else break;
 	}
-	
+	printf("Connected the main server.\n");
+	printf("Waiting for start game.\n");
+
 	NGPMSG msg;
 	retval = recvn(m_MainServer.sock, (char*)&msg, sizeof(NGPMSG), 0);
 	if (retval == SOCKET_ERROR) err_quit("Connect recvn()");

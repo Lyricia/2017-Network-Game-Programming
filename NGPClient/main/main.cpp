@@ -51,6 +51,11 @@ int APIENTRY wWinMain(
 	freopen_s(&fp_in, "CONIN$", "r", stdin);
 	freopen_s(&fp_out, "CONOUT$", "w", stdout);
 	freopen_s(&fp_err, "CONOUT$", "w", stderr);
+	HWND consoleWindow = GetConsoleWindow();
+	LONG style = GetWindowLong(consoleWindow, GWL_STYLE);
+	style = style & ~(WS_SYSMENU);
+	SetWindowLong(consoleWindow, GWL_STYLE, style);
+	SetWindowTextA(consoleWindow, "NGPClient");
 #endif
     // TODO: 여기에 코드를 입력합니다.
 	if (!ind->Initialize()) return FALSE;
@@ -143,12 +148,12 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
 	//	윈도우 스타일
 	DWORD dwStyle = 0
-		| WS_OVERLAPPED 	// 디폴트 윈도우. 타이틀 바와 크기 조절이 안되는 경계선을 가진다. 아무런 스타일도 주지 않으면 이 스타일이 적용된다.
 		| WS_CAPTION 		// 타이틀 바를 가진 윈도우를 만들며 WS_BORDER 스타일을 포함한다.
-		| WS_SYSMENU		// 시스템 메뉴를 가진 윈도우를 만든다.
 		| WS_MINIMIZEBOX	// 최소화 버튼을 만든다.
-		| WS_BORDER			// 단선으로 된 경계선을 만들며 크기 조정은 할 수 없다.
-		| WS_THICKFRAME		// 크기 조정이 가능한 두꺼운 경계선을 가진다. WS_BORDER와 같이 사용할 수 없다.
+		//| WS_OVERLAPPED 	// 디폴트 윈도우. 타이틀 바와 크기 조절이 안되는 경계선을 가진다. 아무런 스타일도 주지 않으면 이 스타일이 적용된다.
+		//| WS_SYSMENU		// 시스템 메뉴를 가진 윈도우를 만든다.
+		//| WS_BORDER			// 단선으로 된 경계선을 만들며 크기 조정은 할 수 없다.
+		//| WS_THICKFRAME		// 크기 조정이 가능한 두꺼운 경계선을 가진다. WS_BORDER와 같이 사용할 수 없다.
 		;					// 추가로 필요한 윈도우 스타일은 http://www.soen.kr/lecture/win32api/reference/Function/CreateWindow.htm 참고.
 
 	//	인스턴스 핸들을 전역 변수에 저장
