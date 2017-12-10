@@ -161,13 +161,13 @@ void CTurret::Draw(ID2D1HwndRenderTarget * pd2dRenderTarget)
 			, SHOOT_STROKE);
 		m_pResMng->brLightYellow->SetOpacity(1.f);
 	}
-
-	//pd2dRenderTarget->DrawTextW(
-	//	std::to_wstring(m_Id).c_str()
-	//	, static_cast<UINT>(std::to_wstring(m_Id).length())
-	//	, m_pResMng->dwUITextFormat.Get()
-	//	, m_rcSize + m_ptPos
-	//	, m_pResMng->brDarkGray.Get());
+	std::wstring strTag(L"T");
+	pd2dRenderTarget->DrawTextW(
+		  strTag.c_str()
+		, static_cast<UINT>(strTag.length())
+		, m_pResMng->dwUITextFormat.Get()
+		, m_rcSize + m_ptPos
+		, m_pResMng->brDarkGray.Get());
 }
 
 
@@ -176,6 +176,8 @@ void CTurret::RegisterResourceManager(std::shared_ptr<CResourceManager> resMng)
 	m_pResMng = resMng;
 	m_bmpImage = m_pResMng->GetImageRef(ResImgName::turret_base_sheet);
 	m_szImg = m_pResMng->GetImgLength(ResImgName::turret_base_sheet);
+
+	m_ptCurrImg.x = m_Id % m_szImg.width;
 
 	if (IsRectInvalid(m_rcSize))
 	{

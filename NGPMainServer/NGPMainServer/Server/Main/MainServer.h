@@ -73,12 +73,13 @@ struct RoomInfo {
 class MainServer : public Server
 {
 	ConnectionInfo*				m_AgentServer;
+	std::string					m_AgentServerIP;
+
 	list<RoomInfo*>				m_RoomList;
 	list<ConnectionInfo*>		m_WaitingClientList;
 	list<NGPMSG*>				m_MsgQueue;
 
 	UCHAR						m_iRoomCounter;
-
 public:
 	MainServer();
 	~MainServer();

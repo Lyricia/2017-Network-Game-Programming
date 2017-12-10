@@ -31,8 +31,9 @@ bool CMainScene::OnCreate(std::wstring && tag, CGameWorld* pGameWorld)
 		{
 			if (g_iMap[j + i * g_iMapSize] == 1)
 			{
-				CBrick* brick = new CBrick(Point2F((j - map_size_half)*g_iMapSize, 
-					(i - map_size_half)*g_iMapSize));
+				CBrick* brick = new CBrick(Point2F(
+					  map_size_half + (j - map_size_half)*g_iMapSize
+					, map_size_half + (i - map_size_half)*g_iMapSize));
 				brick->SetID(ObjectID++);
 				brick->SetSize(OBJECT_RECT);
 				m_vecObjects.push_back(brick);
@@ -240,8 +241,6 @@ void CMainScene::ProcessMsgs()
 						iter != m_vecObjects.rend(); ++iter)
 						if (arrObjInfo[i].ObjectID == (*iter)->GetID())
 						{
-							if (arrObjInfo[i].ObjectID == 710)
-								cout << endl;
 							(*iter)->SetObjectInfo(&arrObjInfo[i]);
 							break;
 						}

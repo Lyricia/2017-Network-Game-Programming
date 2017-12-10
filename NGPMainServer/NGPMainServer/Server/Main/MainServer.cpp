@@ -133,6 +133,7 @@ DWORD AgentServerMessageReceiver(LPVOID arg)
 
 MainServer::MainServer()
 	: m_iRoomCounter(0)
+	, m_AgentServerIP(std::string())
 {
 
 }
@@ -208,23 +209,31 @@ void MainServer::ConnectAgentServer()
 		exit(EXIT_FAILURE);
 	}
 #endif
-
-	// connect()
-	m_AgentServer->addr.sin_family = AF_INET;
-	m_AgentServer->addr.sin_addr.s_addr = inet_addr(std::string(AGENT_SERVER_IP).c_str());
-	m_AgentServer->addr.sin_port = htons(AGENT_SERVER_PORT);
-
-
-	retval = connect(m_AgentServer->sock, (SOCKADDR *)&m_AgentServer->addr, sizeof(m_AgentServer->addr));
-	if (retval == SOCKET_ERROR)
+	char ip[512];
+	while (true)
 	{
-		cout << "Connection failed" << endl;
-		//Assert
-		return;
+		if (!m_AgentServerIP.size())
+		{
+			printf("\nInput agent server ip: ");
+			fgets(ip, sizeof(ip), stdin);
+			ip[strlen(ip) - 1] = '\0';
+			m_AgentServerIP = std::string(ip);
+		}
+		// connect()
+		m_AgentServer->addr.sin_family = AF_INET;
+		m_AgentServer->addr.sin_addr.s_addr = inet_addr(m_AgentServerIP.c_str());
+		m_AgentServer->addr.sin_port = htons(AGENT_SERVER_PORT);
+		printf("Server try connect to the agent server..\n");
+		retval = connect(m_AgentServer->sock, (SOCKADDR *)&m_AgentServer->addr, sizeof(m_AgentServer->addr));
+		if (retval == SOCKET_ERROR)
+		{
+			m_AgentServerIP = std::string();
+			printf("Invalid IP\n");
+			continue;
+		}
+		else break;
 	}
-
-
-
+	printf("Connected the agent server.\n");
 }
 
 void MainServer::RequestAddAgentServer(UCHAR room_id)

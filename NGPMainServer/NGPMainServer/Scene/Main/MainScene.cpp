@@ -33,7 +33,9 @@ bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 		{
 			if (g_iMap[j + i * g_iMapSize] == 1)
 			{
-				CBrick* brick = new CBrick(Point2F((j - map_size_half)*g_iMapSize, (i - map_size_half)*g_iMapSize));
+				CBrick* brick = new CBrick(Point2F(
+					  map_size_half + (j - map_size_half)*g_iMapSize
+					, map_size_half + (i - map_size_half)*g_iMapSize));
 				m_vecObjects.push_back(brick);
 				brick->SetID(m_ObjectIDCounter++);
 				brick->SetSize(OBJECT_RECT);
@@ -44,7 +46,7 @@ bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 
 	for (int i = 0; i< 3; ++i)
 	{
-		CAgent* agent = new CAgent(Point2F(-100, 100 * i));
+		CAgent* agent = new CAgent(Point2F(rand()%4000 -2000, rand() % 4000 - 2000));
 		agent->SetID(m_ObjectIDCounter++);
 		agent->SetSize(OBJECT_RECT);
 		agent->SetAgentType(CAgent::AgentType::Bot);
@@ -54,7 +56,7 @@ bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 
 	for(auto& p: m_pRoomInfo->clientlist)
 	{
-		CPlayer* player = new CPlayer(Point2F(-100, 10));
+		CPlayer* player = new CPlayer(Point2F(rand() % 4000 - 2000, rand() % 4000 - 2000));
 		player->SetID(m_ObjectIDCounter++);
 		player->SetSize(OBJECT_RECT);
 
@@ -381,9 +383,13 @@ void CMainScene::PhysicsUpdate(float fTimeElapsed)
 			}
 			break;
 		}
-		
 		}
-		
+		auto pos = p->GetPos();
+		if (pos.x > 2048) pos.x = 2048;
+		else if (pos.x < -2048) pos.x = -2048;
+		if (pos.y > 2048) pos.y = 2048;
+		else if (pos.y < -2048) pos.y = -2048;
+		p->SetPos(pos);
 	}
 }
 
