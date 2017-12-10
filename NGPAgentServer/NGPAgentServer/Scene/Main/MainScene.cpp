@@ -25,6 +25,9 @@ bool CMainScene::OnCreate(std::wstring && tag, CGameWorld* pGameWorld)
 {
 	if (!Base::OnCreate(std::move(tag), pGameWorld)) return false;
 
+	std::vector<D2D_POINT_2F> vecPathes;
+	vecPathes.reserve(g_iMapSize*g_iMapSize);
+
 	int map_size_half = g_iMapSize / 2;
 	for (int i = 0; i < g_iMapSize; ++i)
 		for (int j = 0; j < g_iMapSize; ++j)
@@ -38,12 +41,15 @@ bool CMainScene::OnCreate(std::wstring && tag, CGameWorld* pGameWorld)
 				brick->SetSize(OBJECT_RECT);
 				m_vecObjects.push_back(brick);
 			}
+			else vecPathes.push_back(Point2F(
+				map_size_half + (j - map_size_half)*g_iMapSize
+				, map_size_half + (i - map_size_half)*g_iMapSize));
 		}
 
-
+	int nPathes = vecPathes.size();
 	for (int i = 0; i< 3; ++i)
 	{
-		CAgent* agent = new CAgent(Point2F(-100, 100 * i));
+		CAgent* agent = new CAgent(vecPathes[rand() % nPathes]);
 		agent->RegisterRoomInfo(m_pRoomInfo);
 		agent->SetID(ObjectID++);
 		agent->SetSize(OBJECT_RECT);
@@ -53,7 +59,7 @@ bool CMainScene::OnCreate(std::wstring && tag, CGameWorld* pGameWorld)
 
 	for (int i = 0; i< 3; ++i)
 	{
-		CPlayer* player = new CPlayer(Point2F(-100, 10));
+		CPlayer* player = new CPlayer(vecPathes[rand() % nPathes]);
 		m_vecObjects.push_back(player);
 		player->SetSize(OBJECT_RECT);
 		player->SetID(ObjectID++);

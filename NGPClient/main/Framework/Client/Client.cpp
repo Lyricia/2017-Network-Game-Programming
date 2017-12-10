@@ -125,10 +125,17 @@ bool CClient::ConnectServer()
 	printf("Waiting for start game.\n");
 
 	NGPMSG msg;
-	retval = recvn(m_MainServer.sock, (char*)&msg, sizeof(NGPMSG), 0);
-	if (retval == SOCKET_ERROR) err_quit("Connect recvn()");
-	m_Local_id = msg.header.OBJECTNO;
-	m_Room_id = msg.header.ROOMNO;
+	while (true)
+	{
+		retval = recvn(m_MainServer.sock, (char*)&msg, sizeof(NGPMSG), 0);
+		if (retval == SOCKET_ERROR) err_quit("Connect recvn()");
+		if (msg.header.MSGTYPE == MSGTYPE::MSGSTATE::ROOMCREATION)
+		{
+			m_Local_id = msg.header.OBJECTNO;
+			m_Room_id = msg.header.ROOMNO;
+			break;
+		}
+	}
 
 	m_MainServer.pMsgQueue = &m_MsgQueue;
 	m_MainServer.pCS = &m_CS;
@@ -142,8 +149,11 @@ void CClient::DisconnectServer()
 	for (auto& p : m_MsgQueue)
 		delete p;
 	m_MsgQueue.clear();
-	closesocket(m_MainServer.sock);
-	m_MainServer.sock = NULL;
+	if (m_MainServer.sock)
+	{
+		closesocket(m_MainServer.sock);
+		m_MainServer.sock = NULL;
+	}
 }
 
 void CClient::SendMsgs(char* buf, UINT buf_size)
@@ -173,8 +183,11 @@ DWORD RecvMessage(LPVOID arg)
 		main_server->pMsgQueue->push_back(msg);
 		main_server->LeaveCriticalSection();
 	}
-	if(main_server->sock)
+	if (main_server->sock)
+	{
 		closesocket(main_server->sock);
+		main_server->sock = NULL;
+	}
 	printf("[TCP 클라이언트] 서버연결 종료: IP 주소=%s, 포트 번호=%d\n",
 		inet_ntoa(main_server->addr.sin_addr), ntohs(main_server->addr.sin_port));
 

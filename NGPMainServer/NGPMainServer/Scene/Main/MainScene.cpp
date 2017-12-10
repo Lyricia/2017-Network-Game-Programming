@@ -26,6 +26,8 @@ CMainScene::~CMainScene()
 bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 {
 	if (!Base::OnCreate(std::move(tag), pGameWorld)) return false;
+	std::vector<D2D_POINT_2F> vecPathes;
+	vecPathes.reserve(g_iMapSize*g_iMapSize);
 
 	int map_size_half = g_iMapSize / 2;
 	for (int i = 0; i < g_iMapSize; ++i)
@@ -40,13 +42,16 @@ bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 				brick->SetID(m_ObjectIDCounter++);
 				brick->SetSize(OBJECT_RECT);
 			}
+			else vecPathes.push_back(Point2F(
+				  map_size_half + (j - map_size_half)*g_iMapSize
+				, map_size_half + (i - map_size_half)*g_iMapSize));
 		}
 
 	g_nBrick = m_vecObjects.size();
-
+	int nPathes = vecPathes.size();
 	for (int i = 0; i< 3; ++i)
 	{
-		CAgent* agent = new CAgent(Point2F(rand()%4000 -2000, rand() % 4000 - 2000));
+		CAgent* agent = new CAgent(vecPathes[rand() % nPathes]);
 		agent->SetID(m_ObjectIDCounter++);
 		agent->SetSize(OBJECT_RECT);
 		agent->SetAgentType(CAgent::AgentType::Bot);
@@ -56,7 +61,7 @@ bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 
 	for(auto& p: m_pRoomInfo->clientlist)
 	{
-		CPlayer* player = new CPlayer(Point2F(rand() % 4000 - 2000, rand() % 4000 - 2000));
+		CPlayer* player = new CPlayer(vecPathes[rand() % nPathes]);
 		player->SetID(m_ObjectIDCounter++);
 		player->SetSize(OBJECT_RECT);
 
@@ -71,9 +76,6 @@ bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 		send(p->sock, (char*)msg, sizeof(NGPMSG), 0);
 		delete msg;
 	}
-
-	
-
 	return true;
 }
 
@@ -94,12 +96,13 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 					, (*iter)->GetID()
 					, 0, 0, nullptr, nullptr);
 				for (auto& client : m_pRoomInfo->clientlist)
-				{
-					int retval = send(client->sock, (char*)msg, sizeof(NGPMSG), NULL);
-					if (retval == SOCKET_ERROR) {
-						//assert
+					if (client->pUserdata)
+					{
+						int retval = send(client->sock, (char*)msg, sizeof(NGPMSG), NULL);
+						if (retval == SOCKET_ERROR) {
+							//assert
+						}
 					}
-				}
 
 				// 서버에게 삭제될 오브젝트 전송
 				int retval = send(m_pRoomInfo->AgentServer->sock, (char*)msg, sizeof(NGPMSG), NULL);
@@ -109,7 +112,6 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 
 				delete msg;
 
-				int alive = 0;
 				for (auto& p : m_pRoomInfo->clientlist)
 					if (p->pUserdata)
 					{
@@ -117,9 +119,12 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 						if (client->GetID() == player->GetID())
 							p->pUserdata = nullptr;
 					}
-				for (auto& p : m_pRoomInfo->clientlist)
-					if (p->pUserdata) alive++;
-				if (alive == 1)
+				m_pRoomInfo->clientlist.remove_if([](ConnectionInfo* pClientInfo)->bool {
+					if (pClientInfo->pUserdata) return false;
+					delete pClientInfo;
+					return true;
+				});
+				if (m_pRoomInfo->clientlist.size() == 1)
 				{
 					for (auto& client : m_pRoomInfo->clientlist)
 						if (client->pUserdata)
@@ -155,12 +160,13 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 					, 0, 0, nullptr, nullptr);
 
 				for (auto& client : m_pRoomInfo->clientlist)
-				{
-					int retval = send(client->sock, (char*)msg, sizeof(NGPMSG), NULL);
-					if (retval == SOCKET_ERROR) {
-						//assert
+					if (client->pUserdata)
+					{
+						int retval = send(client->sock, (char*)msg, sizeof(NGPMSG), NULL);
+						if (retval == SOCKET_ERROR) {
+							//assert
+						}
 					}
-				}
 
 				// 에이전트 서버에게 삭제될 오브젝트 전송
 				int retval = send(m_pRoomInfo->AgentServer->sock, (char*)msg, sizeof(NGPMSG), NULL);
@@ -177,9 +183,12 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 						if (a->GetID() == agent->GetID())
 							p = nullptr;
 					}
+				m_pRoomInfo->agentlist.remove_if([](LPVOID lp)->bool {
+					if (lp) return false;
+					return true;
+				});
 				delete (*iter);
 				iter = m_vecObjects.erase(iter);
-
 			}
 			else
 				++iter;
@@ -196,12 +205,13 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 					, (*iter)->GetID()
 					, 0, 0, nullptr, nullptr);
 				for (auto& client : m_pRoomInfo->clientlist)
-				{
-					int retval = send(client->sock, (char*)msg, sizeof(NGPMSG), NULL);
-					if (retval == SOCKET_ERROR) {
-						//assert
+					if (client->pUserdata)
+					{
+						int retval = send(client->sock, (char*)msg, sizeof(NGPMSG), NULL);
+						if (retval == SOCKET_ERROR) {
+							//assert
+						}
 					}
-				}
 
 				// 에이전트 서버에게 블럭 제거 정보 전송
 				int retval = send(m_pRoomInfo->AgentServer->sock, (char*)msg, sizeof(NGPMSG), NULL);
@@ -241,27 +251,29 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 					, nullptr
 				);
 				for (auto& client : m_pRoomInfo->clientlist)
-				{
-					int retval = send(client->sock, (char*)msg, sizeof(NGPMSG), NULL);
-					if (retval == SOCKET_ERROR) {
-						//assert
+					if (client->pUserdata)
+					{
+						int retval = send(client->sock, (char*)msg, sizeof(NGPMSG), NULL);
+						if (retval == SOCKET_ERROR) {
+							//assert
+						}
 					}
-				}
 				delete msg;
 				delete objdata;
 
 				msg = CreateMSG(
-					  MSGTYPE::MSGUPDATE::DELETEOBJECT
+					MSGTYPE::MSGUPDATE::DELETEOBJECT
 					, m_pRoomInfo->RoomID
 					, grenade->GetID()
-					, 0 , 0 , nullptr , nullptr);
+					, 0, 0, nullptr, nullptr);
 				for (auto& client : m_pRoomInfo->clientlist)
-				{
-					int retval = send(client->sock, (char*)msg, sizeof(NGPMSG), NULL);
-					if (retval == SOCKET_ERROR) {
-						//assert
+					if (client->pUserdata)
+					{
+						int retval = send(client->sock, (char*)msg, sizeof(NGPMSG), NULL);
+						if (retval == SOCKET_ERROR) {
+							//assert
+						}
 					}
-				}
 
 				// 에이전트 서버에게 수류탄 제거 정보 전송
 				int retval = send(m_pRoomInfo->AgentServer->sock, (char*)msg, sizeof(NGPMSG), NULL);
@@ -278,7 +290,7 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 				++iter;
 			break;
 		}
-		
+
 		default:
 			++iter;
 			break;
@@ -432,18 +444,15 @@ void CMainScene::ProcessMsgs()
 				}
 			}
 
-			for (auto& d : m_vecObjects)
+			for (auto& p : m_pRoomInfo->agentlist)
 			{
-				if (d->GetTag() == CObject::Type::Agent)
-				{
-					CAgent* agent = static_cast<CAgent*>(d);
-					if (agent->GetID() == msg->header.OBJECTNO)
-						for (int i = 0; i < msg->header.NUM_ACTIONINFO; ++i)
-						{
-							agent->SetMoveDirection(arrActionInfo[i].MoveDirection);
-							agent->SetDirection(arrActionInfo[i].LookDirection);
-						}
-				}
+				CAgent* agent = static_cast<CAgent*>(p);
+				if (agent->GetID() == msg->header.OBJECTNO)
+					for (int i = 0; i < msg->header.NUM_ACTIONINFO; ++i)
+					{
+						agent->SetMoveDirection(arrActionInfo[i].MoveDirection);
+						agent->SetDirection(arrActionInfo[i].LookDirection);
+					}
 			}
 
 			delete[] arrActionInfo;
@@ -490,30 +499,21 @@ void CMainScene::ProcessMsgs()
 						}
 					}
 
-
-				for (auto& d : m_vecObjects)
+				for (auto& p : m_pRoomInfo->agentlist)
 				{
-					if (d->GetTag() == CObject::Type::Agent)
+					CAgent* agent = static_cast<CAgent*>(p);
+					if (agent->GetID() == msg->header.OBJECTNO)
 					{
-						CAgent* agent = static_cast<CAgent*>(d);
-						if (agent->GetID() == msg->header.OBJECTNO)
+						if (agent->GetAgentType() == CAgent::AgentType::Bot)
 						{
-							//printf("Process Shoot Msg\n");
-							//if(target) printf("Target :: %d", target->GetID());
-
-							if (agent->GetAgentType() == CAgent::AgentType::Bot)
-							{
-								agent->Shoot(m_pRoomInfo, target, hit_pos);
-							}
-							else
-							{
-								CTurret* turret = static_cast<CTurret*>(d);
-								turret->Shoot(m_pRoomInfo, target, hit_pos);
-							}
-
-
-							break;
+							agent->Shoot(m_pRoomInfo, target, hit_pos);
 						}
+						else
+						{
+							CTurret* turret = static_cast<CTurret*>(agent);
+							turret->Shoot(m_pRoomInfo, target, hit_pos);
+						}
+						break;
 					}
 				}
 
@@ -615,6 +615,7 @@ void CMainScene::ProcessMsgs()
 						}
 					}
 				m_vecObjects.push_back(turret);
+				m_pRoomInfo->agentlist.push_back((LPVOID)turret);
 
 				ObjInfo* objdata = new ObjInfo();
 				objdata->ObjectID = turret->GetID();
@@ -633,12 +634,13 @@ void CMainScene::ProcessMsgs()
 					, nullptr
 				);
 				for (auto& client : m_pRoomInfo->clientlist)
-				{
-					int retval = send(client->sock, (char*)turret_msg, sizeof(NGPMSG), NULL);
-					if (retval == SOCKET_ERROR) {
-						//assert
+					if(client->pUserdata)
+					{
+						int retval = send(client->sock, (char*)turret_msg, sizeof(NGPMSG), NULL);
+						if (retval == SOCKET_ERROR) {
+							//assert
+						}
 					}
-				}
 
 				// 에이전트 서버에게 터렛 생성 정보를 보낸다.
 				int retval = send(m_pRoomInfo->AgentServer->sock, (char*)turret_msg, sizeof(NGPMSG), NULL);
@@ -689,7 +691,6 @@ void CMainScene::SendMsgs()
 	int idx = 0;
 	int retval = 0;
 	int nGrenade = 0;
-	int nTurret = 0;
 
 	MapInfo* mapdata = new MapInfo[g_nBrick];
 
@@ -709,15 +710,6 @@ void CMainScene::SendMsgs()
 			++nGrenade;
 			break;
 		}
-		case CObject::Type::Agent:
-		{
-			CAgent* agent = static_cast<CAgent*>(obj);
-			if(agent->GetAgentType() == CAgent::AgentType::Turret)
-				++nTurret;
-			break;
-		}
-
-		
 		}
 	}
 
@@ -766,33 +758,6 @@ void CMainScene::SendMsgs()
 	);
 	delete[] Grenadedata;
 
-	ObjInfo* TurretData = new ObjInfo[nTurret];
-	idx = 0;
-	for (auto iter = m_vecObjects.rbegin();
-		iter != m_vecObjects.rend(); ++iter)
-	{
-		if ((*iter)->GetTag() == CObject::Type::Agent)
-		{
-			CAgent* agent = static_cast<CAgent*>(*iter);
-			if (agent->GetAgentType() == CAgent::AgentType::Turret )
-			{
-			ObjInfo* tmp = (ObjInfo*)(*iter)->GetObjectInfo();
-			TurretData[idx++] = *tmp;
-			delete tmp;
-			}
-		}
-	}
-	NGPMSG* turretmsg = CreateMSG(
-		MSGTYPE::MSGUPDATE::UPDATEOBJECTSTATE
-		, m_pRoomInfo->RoomID
-		, 0
-		, nTurret
-		, 0
-		, TurretData
-		, nullptr
-	);
-	delete[] TurretData;
-
 	int nMapmsg = g_nBrick / MAPINFOBUFSIZE + 1;
 	NGPMSG** mapmsg = new NGPMSG*[nMapmsg];
 	int offset = MAPINFOBUFSIZE;
@@ -812,7 +777,7 @@ void CMainScene::SendMsgs()
 	int nAgent = m_pRoomInfo->agentlist.size();
 	ObjInfo* agentdata = new ObjInfo[nAgent];
 	idx = 0;
-	for(auto& agent : m_pRoomInfo->agentlist)
+	for (auto& agent : m_pRoomInfo->agentlist)
 	{
 		if (!agent) continue;
 		CAgent* a = static_cast<CAgent*>(agent);
@@ -832,39 +797,34 @@ void CMainScene::SendMsgs()
 	);
 	delete[] agentdata;
 
-
 	for (auto & client : m_pRoomInfo->clientlist)
-	{
-		playermsg->header.OBJECTNO = client->ID;
+		if (client->pUserdata)
+		{
+			playermsg->header.OBJECTNO = client->ID;
 
-		retval = send(client->sock, (char*)playermsg, sizeof(NGPMSG), NULL);
-		if(retval == SOCKET_ERROR){
-			//assert
-		}
+			retval = send(client->sock, (char*)playermsg, sizeof(NGPMSG), NULL);
+			if (retval == SOCKET_ERROR) {
+				//assert
+			}
 
-		retval = send(client->sock, (char*)grenademsg, sizeof(NGPMSG), NULL);
-		if (retval == SOCKET_ERROR) {
-			//assert
-		}
+			retval = send(client->sock, (char*)grenademsg, sizeof(NGPMSG), NULL);
+			if (retval == SOCKET_ERROR) {
+				//assert
+			}
 
-		retval = send(client->sock, (char*)turretmsg, sizeof(NGPMSG), NULL);
-		if (retval == SOCKET_ERROR) {
-			//assert
-		}
+			for (int i = 0; i < nMapmsg; ++i) {
+				mapmsg[i]->header.OBJECTNO = client->ID;
+				retval = send(client->sock, (char*)mapmsg[i], sizeof(NGPMSG), NULL);
+				if (retval == SOCKET_ERROR) {
+					//assert
+				}
+			}
 
-		for (int i = 0; i < nMapmsg; ++i) {
-			mapmsg[i]->header.OBJECTNO = client->ID;
-			retval = send(client->sock, (char*)mapmsg[i], sizeof(NGPMSG), NULL);
+			retval = send(client->sock, (char*)agentmsg, sizeof(NGPMSG), NULL);
 			if (retval == SOCKET_ERROR) {
 				//assert
 			}
 		}
-
-		retval = send(client->sock, (char*)agentmsg, sizeof(NGPMSG), NULL);
-		if (retval == SOCKET_ERROR) {
-			//assert
-		}
-	}
 
 	// 에이전트 서버에 오브젝트 업데이트 정보 전송
 	{
@@ -875,11 +835,6 @@ void CMainScene::SendMsgs()
 		}
 
 		retval = send(m_pRoomInfo->AgentServer->sock, (char*)grenademsg, sizeof(NGPMSG), NULL);
-		if (retval == SOCKET_ERROR) {
-			//assert
-		}
-
-		retval = send(m_pRoomInfo->AgentServer->sock, (char*)turretmsg, sizeof(NGPMSG), NULL);
 		if (retval == SOCKET_ERROR) {
 			//assert
 		}
@@ -896,7 +851,6 @@ void CMainScene::SendMsgs()
 		if (retval == SOCKET_ERROR) {
 			//assert
 		}
-
 	}
 
 	delete playermsg;
@@ -904,6 +858,5 @@ void CMainScene::SendMsgs()
 	for (int i = 0; i < nMapmsg; ++i)
 		delete mapmsg[i];
 	delete[] mapmsg;
-	delete turretmsg;
 	delete agentmsg;
 }

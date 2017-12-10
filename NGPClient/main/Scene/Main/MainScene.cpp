@@ -55,6 +55,7 @@ bool CMainScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 
 bool CMainScene::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
+	if (!m_pPlayer) return false;
 	switch (nMessageID)
 	{
 	case WM_SIZE:
@@ -117,7 +118,13 @@ bool CMainScene::OnCreate(wstring && tag, CFramework * pFramework)
 	m_bmpBackGround = m_pResMng->GetImageRef(ResImgName::map_image);
 	m_bmpCrossHair = m_pResMng->GetImageRef(ResImgName::aim);
 
+	HWND consoleWindowHandle = GetConsoleWindow();
+	ShowWindow(consoleWindowHandle, SW_HIDE);
+	ShowWindow(m_hWnd, SW_NORMAL);
 	CObject::ResetIDCount();
+	
+	std::vector<D2D_POINT_2F> vecPathes;
+	vecPathes.reserve(g_iMapSize*g_iMapSize);
 
 	int map_size_half = g_iMapSize / 2;
 	for(int i = 0; i < g_iMapSize; ++i)
@@ -131,19 +138,22 @@ bool CMainScene::OnCreate(wstring && tag, CFramework * pFramework)
 				brick->RegisterResourceManager(m_pResMng);
 				m_vecObjects.push_back(brick);
 			}
-			
+			else vecPathes.push_back(Point2F(
+				map_size_half + (j - map_size_half)*g_iMapSize
+				, map_size_half + (i - map_size_half)*g_iMapSize));
 		}
 
+	int nPathes = vecPathes.size();
 	for (int i = 0; i< 3; ++i)
 	{
-		CAgent* agent = new CAgent(Point2F(-100, 100 * i));
+		CAgent* agent = new CAgent(vecPathes[rand() % nPathes]);
 		agent->RegisterResourceManager(m_pResMng);
 		m_vecObjects.push_back(agent);
 	}
 
 	for (int i=0; i< 3; ++i)
 	{
-		CPlayer* player = new CPlayer(Point2F(-100, 10));
+		CPlayer* player = new CPlayer(vecPathes[rand() % nPathes]);
 		player->RegisterResourceManager(m_pResMng);
 		m_vecObjects.push_back(player);
 	}
@@ -194,7 +204,6 @@ void CMainScene::ProcessMsgs()
 				{
 					if (msg->header.OBJECTNO == (*iter)->GetID())
 					{
-
 						switch ((*iter)->GetTag())
 						{
 						case CObject::Type::Player:
@@ -220,23 +229,24 @@ void CMainScene::ProcessMsgs()
 		case MSGTYPE::MSGSTATE::CLIENTGAMEOVER:
 		{
 			MessageBox(NULL, L"½Â¸®!", L"GAME OVER!", MB_ICONEXCLAMATION);
+			ShowWindow(m_hWnd, SW_HIDE);
+			HWND consoleWindowHandle = GetConsoleWindow();
+			SetWindowPos(
+				consoleWindowHandle,
+				HWND_TOPMOST, 0, 0, 0, 0,
+				SWP_DRAWFRAME | SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+			ShowWindow(consoleWindowHandle, SW_NORMAL);
 			char input_c[10];
 			while (true)
 			{
-				HWND consoleWindowHandle = GetConsoleWindow();
-				SetWindowPos(
-					consoleWindowHandle,
-					HWND_TOPMOST,
-					0, 0,
-					0, 0,
-					SWP_DRAWFRAME | SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
-				ShowWindow(consoleWindowHandle, SW_NORMAL);
 				printf("Restart? ( y or n ) :");
 				fgets(input_c, sizeof(input_c), stdin);
 				input_c[strlen(input_c) - 1] = '\0';
+				
 				if (strcmp(input_c, "y") == 0)
 				{
 					m_pFramework->RestartCurrScene();
+					ShowWindow(consoleWindowHandle, SW_HIDE);
 					return;
 				}
 				else if (strcmp(input_c, "n") == 0)
@@ -329,23 +339,23 @@ void CMainScene::ProcessMsgs()
 					{
 						m_pPlayer = nullptr;
 						MessageBox(NULL, L"ÆÐ¹è!", L"GAME OVER!", MB_ICONEXCLAMATION);
+						ShowWindow(m_hWnd, SW_HIDE);
+						HWND consoleWindowHandle = GetConsoleWindow();
+						SetWindowPos(
+							consoleWindowHandle,
+							HWND_TOPMOST, 0, 0, 0, 0,
+							SWP_DRAWFRAME | SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+						ShowWindow(consoleWindowHandle, SW_NORMAL);
 						char input_c[10];
 						while (true)
 						{
-							HWND consoleWindowHandle = GetConsoleWindow();
-							SetWindowPos(
-								consoleWindowHandle,
-								HWND_TOPMOST,
-								0, 0,
-								0, 0,
-								SWP_DRAWFRAME | SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
-							ShowWindow(consoleWindowHandle, SW_NORMAL);
 							printf("Restart? ( y or n ) :");
 							fgets(input_c, sizeof(input_c), stdin);
 							input_c[strlen(input_c) - 1] = '\0';
 							if (strcmp(input_c, "y") == 0) 
 							{
 								m_pFramework->RestartCurrScene();
+								ShowWindow(consoleWindowHandle, SW_HIDE);
 								return;
 							}
 							else if (strcmp(input_c, "n") == 0)
@@ -403,7 +413,7 @@ void CMainScene::ProcessMsgs()
 		msg = nullptr;
 
 		now = std::chrono::system_clock::now();
-		timeElapsed = start_time - now;
+		timeElapsed = now - start_time;
 	}
 }
 
