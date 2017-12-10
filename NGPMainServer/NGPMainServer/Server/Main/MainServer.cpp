@@ -66,8 +66,7 @@ DWORD WINAPI RecvMessage(LPVOID arg)
 	}
 	
 	closesocket(client->sock);
-	printf("[TCP 서버] 클라이언트 종료: IP 주소=%s, 포트 번호=%d\n",
-		inet_ntoa(client->addr.sin_addr), ntohs(client->addr.sin_port));
+	
 
 	return 0;
 }

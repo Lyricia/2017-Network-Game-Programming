@@ -121,6 +121,8 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 					}
 				m_pRoomInfo->clientlist.remove_if([](ConnectionInfo* pClientInfo)->bool {
 					if (pClientInfo->pUserdata) return false;
+					printf("[TCP 서버] 클라이언트 종료: IP 주소=%s, 포트 번호=%d\n",
+						inet_ntoa(pClientInfo->addr.sin_addr), ntohs(pClientInfo->addr.sin_port));
 					delete pClientInfo;
 					return true;
 				});
@@ -140,6 +142,13 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 							}
 							delete msg;
 						}
+
+					m_pRoomInfo->clientlist.remove_if([](ConnectionInfo* pClientInfo)->bool {
+						printf("[TCP 서버] 클라이언트 종료: IP 주소=%s, 포트 번호=%d\n",
+							inet_ntoa(pClientInfo->addr.sin_addr), ntohs(pClientInfo->addr.sin_port));
+						delete pClientInfo;
+						return true;
+					});
 				}
 				delete (*iter);
 				iter = m_vecObjects.erase(iter);
