@@ -7,6 +7,8 @@
 #define DIR_UP				0x04
 #define DIR_DOWN			0x08
 
+#define GAMEOVER_TIMER		1.0f
+
 class CObject;
 class CPlayer;
 
@@ -38,5 +40,8 @@ private:
 	std::vector<CObject*>			m_vecObjects;
 
 	D2D_POINT_2F					m_ptCamera;
+
+	float							m_fCheckGameOverTime;
+	bool							m_bPlayerDie;
 };
 

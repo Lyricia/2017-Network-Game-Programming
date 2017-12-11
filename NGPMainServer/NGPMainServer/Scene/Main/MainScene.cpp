@@ -14,6 +14,8 @@ UINT g_nBrick = 0;
 
 CMainScene::CMainScene()
 	: m_ObjectIDCounter(0)
+	, m_fCheckGameOverTime(0)
+	, m_bPlayerDie(false)
 {
 }
 CMainScene::~CMainScene()
@@ -99,6 +101,13 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 				for (auto& client : m_pRoomInfo->clientlist)
 					if (client->pUserdata)
 					{
+						CPlayer* p = static_cast<CPlayer*>(client->pUserdata);
+						if (p->GetID() == player->GetID())
+						{
+							client->pUserdata = nullptr;
+							m_bPlayerDie = true;
+						}
+
 						int retval = send(client->sock, (char*)msg, sizeof(NGPMSG), NULL);
 						if (retval == SOCKET_ERROR) {
 							//assert
@@ -112,45 +121,6 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 				}
 
 				delete msg;
-
-				for (auto& p : m_pRoomInfo->clientlist)
-					if (p->pUserdata)
-					{
-						CPlayer* client = static_cast<CPlayer*>(p->pUserdata);
-						if (client->GetID() == player->GetID())
-							p->pUserdata = nullptr;
-					}
-				m_pRoomInfo->clientlist.remove_if([](ConnectionInfo* pClientInfo)->bool {
-					if (pClientInfo->pUserdata) return false;
-					printf("[TCP 서버] 클라이언트 종료: IP 주소=%s, 포트 번호=%d\n",
-						inet_ntoa(pClientInfo->addr.sin_addr), ntohs(pClientInfo->addr.sin_port));
-					delete pClientInfo;
-					return true;
-				});
-				if (m_pRoomInfo->clientlist.size() == 1)
-				{
-					for (auto& client : m_pRoomInfo->clientlist)
-						if (client->pUserdata)
-						{
-							msg = CreateMSG(
-								MSGTYPE::MSGSTATE::CLIENTGAMEOVER
-								, m_pRoomInfo->RoomID
-								, client->ID
-								, 0, 0, nullptr, nullptr);
-							int retval = send(client->sock, (char*)msg, sizeof(NGPMSG), NULL);
-							if (retval == SOCKET_ERROR) {
-								//assert
-							}
-							delete msg;
-						}
-
-					m_pRoomInfo->clientlist.remove_if([](ConnectionInfo* pClientInfo)->bool {
-						printf("[TCP 서버] 클라이언트 종료: IP 주소=%s, 포트 번호=%d\n",
-							inet_ntoa(pClientInfo->addr.sin_addr), ntohs(pClientInfo->addr.sin_port));
-						delete pClientInfo;
-						return true;
-					});
-				}
 				delete (*iter);
 				iter = m_vecObjects.erase(iter);
 			}
@@ -304,6 +274,42 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 		default:
 			++iter;
 			break;
+		}
+	}
+
+	if (m_bPlayerDie)
+	{
+		m_fCheckGameOverTime += fTimeElapsed;
+		if (m_fCheckGameOverTime > GAMEOVER_TIMER)
+		{
+			m_bPlayerDie = false;
+			m_fCheckGameOverTime = 0.0f;
+
+			m_pRoomInfo->clientlist.remove_if([](ConnectionInfo* pClientInfo)->bool {
+				if (pClientInfo->pUserdata) return false;
+				printf("[TCP 서버] 클라이언트 종료: IP 주소=%s, 포트 번호=%d\n",
+					inet_ntoa(pClientInfo->addr.sin_addr), ntohs(pClientInfo->addr.sin_port));
+				delete pClientInfo;
+				return true;
+			});
+			if (m_pRoomInfo->clientlist.size() == 1)
+			{
+				for (auto& client : m_pRoomInfo->clientlist)
+					if (client->pUserdata)
+					{
+						NGPMSG* msg = CreateMSG(
+							MSGTYPE::MSGSTATE::CLIENTGAMEOVER
+							, m_pRoomInfo->RoomID
+							, client->ID
+							, 0, 0, nullptr, nullptr);
+						int retval = send(client->sock, (char*)msg, sizeof(NGPMSG), NULL);
+						if (retval == SOCKET_ERROR) {
+							//assert
+						}
+						delete msg;
+					}
+				m_bPlayerDie = true;
+			}
 		}
 	}
 }
@@ -664,32 +670,10 @@ void CMainScene::ProcessMsgs()
 			arrActionInfo = nullptr;
 			break;
 		}
-		case MSGTYPE::MSGSTATE::AIAGENTINFO:
-			break;
-		case MSGTYPE::MSGSTATE::AICREATTIONREQUEST:
-			break;
-		case MSGTYPE::MSGSTATE::CLIENTGAMEOVER:
-			break;
-		case MSGTYPE::MSGSTATE::CLIENTREADY:
-			break;
-		case MSGTYPE::MSGSTATE::ROOMCREATION:
-			break;
-		case MSGTYPE::MSGUPDATE::ADJUSTPOS:
-			break;
-		case MSGTYPE::MSGUPDATE::CREATEOBJECT:
-			break;
-		case MSGTYPE::MSGUPDATE::DELETEOBJECT:
-			break;
-		case MSGTYPE::MSGUPDATE::UPDATEOBJECTSTATE:
-			break;
 		}
-
 		delete msg;
-		//delete[] arrObjInfo;
-		//delete[] arrMapInfo;
-		//msg					= nullptr;
-		//arrObjInfo			= nullptr;
-		//arrMapInfo			= nullptr;
+		
+		
 
 		now = std::chrono::system_clock::now();
 		timeElapsed = start_time - now;
