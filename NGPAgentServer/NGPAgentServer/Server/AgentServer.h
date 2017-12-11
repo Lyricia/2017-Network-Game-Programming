@@ -49,10 +49,13 @@ struct RoomInfo {
 			::InitializeCriticalSection(&roomCs);
 		}
 		~RoomInfo() {
+			EnterCriticalSection();
 			for (auto& p : MsgQueue) delete p;
-			//for (auto& p : clientlist) delete p;
 			MsgQueue.clear();
+			LeaveCriticalSection();
+			//for (auto& p : clientlist) delete p;
 			//clientlist.clear();
+			::DeleteCriticalSection(&roomCs);
 		}
 
 		void EnterCriticalSection() { ::EnterCriticalSection(&roomCs); }

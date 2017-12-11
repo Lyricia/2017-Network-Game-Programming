@@ -177,15 +177,14 @@ LRESULT CFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM
 void CFramework::RestartCurrScene()
 {
 	auto DestroyTag = m_pCurrentScene->Tag();
-	m_pCurrentScene = nullptr;
-	m_lstScenes.remove_if([&](const unique_ptr<CScene>& s){ 
-		return s->FindByTag(DestroyTag); });
-
 	if (DestroyTag == L"Main"s)
 	{
 		m_pClient->DisconnectServer();
 		m_pClient->ConnectServer();
 	}
+	m_pCurrentScene = nullptr;
+	m_lstScenes.remove_if([&](const unique_ptr<CScene>& s){ 
+		return s->FindByTag(DestroyTag); });
 	BuildScene<CMainScene>(DestroyTag);
 }
 

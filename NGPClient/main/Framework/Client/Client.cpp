@@ -146,14 +146,15 @@ bool CClient::ConnectServer()
 void CClient::DisconnectServer()
 {	
 	//m_ServerIP = std::string();
-	for (auto& p : m_MsgQueue)
-		delete p;
+	m_MainServer.EnterCriticalSection();
+	for (auto& p : m_MsgQueue) delete p;
 	m_MsgQueue.clear();
 	if (m_MainServer.sock)
 	{
 		closesocket(m_MainServer.sock);
 		m_MainServer.sock = NULL;
 	}
+	m_MainServer.LeaveCriticalSection();
 }
 
 void CClient::SendMsgs(char* buf, UINT buf_size)

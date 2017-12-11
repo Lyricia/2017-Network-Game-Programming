@@ -284,7 +284,6 @@ void MainServer::CreateRoom()
 
 void MainServer::DeleteRoom()
 {
-
 	m_RoomList.remove_if([ &, this ](RoomInfo* pRoom )->bool {
 		if (pRoom->clientlist.empty())
 		{

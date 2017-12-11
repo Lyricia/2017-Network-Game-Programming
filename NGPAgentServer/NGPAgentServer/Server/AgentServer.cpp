@@ -93,7 +93,7 @@ DWORD WINAPI MessageDispatcher(LPVOID arg)
 
 AgentServer::AgentServer()
 {
-	
+	::InitializeCriticalSection(&ServerCs);
 }
 
 AgentServer::~AgentServer()
@@ -103,6 +103,7 @@ AgentServer::~AgentServer()
 
 	m_RoomList.clear();
 	m_MsgQueue.clear();
+	::DeleteCriticalSection(&ServerCs);
 }
 
 // 룸 정보를 받아와서 지속적인 갱신을 한다.
@@ -140,8 +141,6 @@ DWORD WINAPI RunGameWorld(LPVOID arg)
 
 void AgentServer::Run()
 {
-	::InitializeCriticalSection(&ServerCs);
-
 	AcceptMainServer();
 
 	int retval;

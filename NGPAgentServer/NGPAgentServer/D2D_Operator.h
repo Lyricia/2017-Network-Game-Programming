@@ -92,12 +92,12 @@ inline D2D_RECT_F SizeToRect(const D2D1_SIZE_F& sz)
 		, sz.width * 0.5f
 		, sz.height * 0.5f);
 }
-
 inline float Length(const D2D_POINT_2F& pt) { return sqrtf(pt.x*pt.x + pt.y*pt.y); }
 inline D2D_POINT_2F Normalize(const D2D_POINT_2F& pt)
 {
-	float revlen = 1.f / Length(pt);
-	return Point2F(pt.x * revlen, pt.y * revlen);
+	float len = Length(pt);
+	if (len < 0.000000001f && len > -0.000000001f) return Point2F();
+	return Point2F(pt.x / len, pt.y / len);
 }
 
 #define DEGREE_TO_RADIAN(x) ((x) * 0.0174532925199433)

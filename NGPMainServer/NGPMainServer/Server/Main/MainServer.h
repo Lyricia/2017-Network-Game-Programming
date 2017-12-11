@@ -19,11 +19,13 @@ struct ConnectionInfo {
 		: RecvThreadHandle(NULL)
 		, pMsgQueue(nullptr) {}
 	~ConnectionInfo() {
+		EnterCriticalSection();
 		if (RecvThreadHandle)
 		{
 			closesocket(sock);
-			//TerminateThread(RecvThreadHandle, 0);
+			TerminateThread(RecvThreadHandle, 0);
 		}
+		LeaveCriticalSection();
 	}
 
 	void EnterCriticalSection() { ::EnterCriticalSection(pCs); }
@@ -63,10 +65,9 @@ struct RoomInfo {
 		EnterCriticalSection();
 		for (auto& p : MsgQueue) delete p;
 		MsgQueue.clear();
-		LeaveCriticalSection();
-
 		for (auto& p : clientlist) delete p;
 		clientlist.clear();
+		LeaveCriticalSection();
 	}
 };
 

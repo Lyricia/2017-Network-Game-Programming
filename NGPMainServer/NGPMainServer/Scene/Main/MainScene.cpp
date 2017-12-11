@@ -88,6 +88,7 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 		case CObject::Type::Player:
 		{
 			CPlayer* player = static_cast<CPlayer*>((*iter));
+
 			if (player->IsDie())
 			{
 				NGPMSG* msg = CreateMSG(
@@ -152,6 +153,7 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 				}
 				delete (*iter);
 				iter = m_vecObjects.erase(iter);
+		printf("id:%d -pos %.2f, %.2f\n", player->GetID(), player->GetPos().x, player->GetPos().y);
 			}
 			else
 				++iter;
@@ -732,6 +734,7 @@ void CMainScene::SendMsgs()
 			ObjInfo* tmp = (ObjInfo*)p->GetObjectInfo();
 			playerdata[idx++] = *tmp;
 			delete tmp;
+			printf("id: %d - pos %.2f, %.2f\n", p->GetID(), p->GetPos().x, p->GetPos().y);
 		}
 	NGPMSG* playermsg = CreateMSG(
 		MSGTYPE::MSGUPDATE::UPDATEOBJECTSTATE
