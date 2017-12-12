@@ -10,7 +10,6 @@
 #include "MainScene.h"
 
 #define OBJECT_RECT RectF(-32, -32, 32, 32)
-UINT g_nBrick = 0;
 
 CMainScene::CMainScene()
 	: m_ObjectIDCounter(0)

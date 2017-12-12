@@ -62,7 +62,7 @@ DWORD WINAPI RecvMessage(LPVOID arg)
 		client->EnterCriticalSection();
 		client->pMsgQueue->push_back(msg);
 		client->LeaveCriticalSection();
-
+		msg = nullptr;
 	}
 	
 	closesocket(client->sock);
@@ -76,8 +76,8 @@ DWORD AgentServerMessageReceiver(LPVOID arg)
 	MainServer* Server = (MainServer*)arg;
 	NGPMSG* msg = nullptr;
 
-	while (Server->GetConnectionAgentServerInfo()->sock) {
-
+	while (Server->GetConnectionAgentServerInfo()->sock)
+	{
 		msg = new NGPMSG();
 
 		// 데이터 받기(고정 길이)
@@ -92,15 +92,6 @@ DWORD AgentServerMessageReceiver(LPVOID arg)
 
 		switch (msg->header.MSGTYPE)
 		{
-		case MSGTYPE::ROOMCREATION:
-		case MSGTYPE::CLIENTREADY:
-		case MSGTYPE::CLIENTGAMEOVER:
-		case MSGTYPE::AICREATTIONREQUEST:
-		case MSGTYPE::AIAGENTINFO:
-		{
-			delete msg;
-			break;
-		}
 		case MSGTYPE::MOVE:
 		case MSGTYPE::STOP:
 		case MSGTYPE::SHOOT:
@@ -118,15 +109,10 @@ DWORD AgentServerMessageReceiver(LPVOID arg)
 		}
 		default:
 			delete msg;
+			msg = nullptr;
 			break;
-
 		}
 	}
-
-
-
-
-	
 	return 0;
 }
 
@@ -174,6 +160,7 @@ void MainServer::Run()
 		newclient->addr = clientaddr;
 		newclient->sock = client_sock;
 		m_WaitingClientList.push_back(newclient);
+		newclient = nullptr;
 
 		if (m_WaitingClientList.size() >= 3)
 		{
@@ -284,7 +271,7 @@ void MainServer::CreateRoom()
 
 void MainServer::DeleteRoom()
 {
-	m_RoomList.remove_if([ &, this ](RoomInfo* pRoom )->bool {
+	m_RoomList.remove_if([](RoomInfo* pRoom )->bool {
 		if (pRoom->clientlist.empty())
 		{
 			delete pRoom;

@@ -7,7 +7,7 @@
 #define DIR_UP				0x04
 #define DIR_DOWN			0x08
 
-#define GAMEOVER_TIMER		1.0f
+#define GAMEOVER_TIMER		2.0f
 
 class CObject;
 class CPlayer;
@@ -36,6 +36,7 @@ public:
 private:
 	RoomInfo*						m_pRoomInfo;
 	UINT							m_ObjectIDCounter;
+	UINT							m_nBrick;
 
 	std::vector<CObject*>			m_vecObjects;
 

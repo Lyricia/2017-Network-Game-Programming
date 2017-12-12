@@ -10,10 +10,10 @@
 #include "MainScene.h"
 
 #define OBJECT_RECT RectF(-32, -32, 32, 32)
-UINT g_nBrick = 0;
 
 CMainScene::CMainScene()
 	: m_ObjectIDCounter(0)
+	, m_nBrick(0)
 	, m_fCheckGameOverTime(0)
 	, m_bPlayerDie(false)
 {
@@ -49,7 +49,7 @@ bool CMainScene::OnCreate(wstring && tag, CGameWorld* pGameWorld)
 				, map_size_half + (i - map_size_half)*g_iMapSize));
 		}
 
-	g_nBrick = m_vecObjects.size();
+	m_nBrick = m_vecObjects.size();
 	int nPathes = vecPathes.size();
 	for (int i = 0; i< 3; ++i)
 	{
@@ -203,7 +203,7 @@ void CMainScene::PreprocessingUpdate(float fTimeElapsed)
 
 				delete (*iter);
 				iter = m_vecObjects.erase(iter);
-				g_nBrick--;
+				m_nBrick--;
 			}
 			else
 				++iter;
@@ -672,8 +672,6 @@ void CMainScene::ProcessMsgs()
 		}
 		}
 		delete msg;
-		
-		
 
 		now = std::chrono::system_clock::now();
 		timeElapsed = start_time - now;
@@ -686,8 +684,8 @@ void CMainScene::SendMsgs()
 	int retval = 0;
 	int nGrenade = 0;
 
-	MapInfo* mapdata = new MapInfo[g_nBrick];
-
+	MapInfo* mapdata = new MapInfo[m_nBrick];
+	
 	for (auto &obj : m_vecObjects)
 	{
 		switch (obj->GetTag())
@@ -706,6 +704,21 @@ void CMainScene::SendMsgs()
 		}
 		}
 	}
+	int nMapmsg = (m_nBrick / MAPINFOBUFSIZE) + 1;
+	NGPMSG** mapmsg = new NGPMSG*[nMapmsg];
+	int offset = MAPINFOBUFSIZE;
+	MapInfo* ptr = mapdata;
+	for (int i = 0; i < nMapmsg; ++i)
+	{
+		mapmsg[i] = CreateMSG(
+			MSGTYPE::MSGUPDATE::UPDATEMAPSTATE
+			, m_pRoomInfo->RoomID
+			, 0
+			, (i == nMapmsg - 1) ? m_nBrick % MAPINFOBUFSIZE : MAPINFOBUFSIZE
+			, ptr + offset * i
+		);
+	}
+	delete[] mapdata;
 
 	int nPlayer = m_pRoomInfo->clientlist.size();
 	ObjInfo* playerdata = new ObjInfo[nPlayer];
@@ -751,22 +764,6 @@ void CMainScene::SendMsgs()
 		, nullptr
 	);
 	delete[] Grenadedata;
-
-	int nMapmsg = g_nBrick / MAPINFOBUFSIZE + 1;
-	NGPMSG** mapmsg = new NGPMSG*[nMapmsg];
-	int offset = MAPINFOBUFSIZE;
-
-	for (int i = 0; i < nMapmsg; ++i)
-	{
-		mapmsg[i] = CreateMSG(
-			MSGTYPE::MSGUPDATE::UPDATEMAPSTATE
-			, m_pRoomInfo->RoomID
-			, 0
-			, (i == nMapmsg - 1) ? g_nBrick % MAPINFOBUFSIZE : MAPINFOBUFSIZE
-			, mapdata + offset * i
-		);
-	}
-	delete[] mapdata;
 
 	int nAgent = m_pRoomInfo->agentlist.size();
 	ObjInfo* agentdata = new ObjInfo[nAgent];

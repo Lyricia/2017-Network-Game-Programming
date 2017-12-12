@@ -24,6 +24,7 @@ struct ConnectionInfo {
 		{
 			closesocket(sock);
 			TerminateThread(RecvThreadHandle, 0);
+			RecvThreadHandle = NULL;
 		}
 		LeaveCriticalSection();
 	}
@@ -35,7 +36,6 @@ struct ConnectionInfo {
 
 struct RoomInfo {
 	UCHAR					RoomID;
-	ConnectionInfo			*serverinfo;
 	list<ConnectionInfo*>	clientlist;
 	list<LPVOID>			agentlist;
 
@@ -95,7 +95,7 @@ public:
 	ConnectionInfo* GetConnectionAgentServerInfo() { return m_AgentServer; }
 	void TrySendMsgToRoom(NGPMSG* msg)
 	{
-		bool success_Send_msg_to_room = false;
+		bool ValidMsg = false;
 		for (auto&d : m_RoomList)
 		{
 			if (d->RoomID == msg->header.ROOMNO)
@@ -105,14 +105,11 @@ public:
 				d->EnterCriticalSection();
 				d->MsgQueue.push_back(msg);
 				d->LeaveCriticalSection();
-				success_Send_msg_to_room = true;
+				ValidMsg = true;
 				break;
 			}
 		}
-
-		if (!success_Send_msg_to_room)
-			delete msg;
-	
+		if (!ValidMsg) delete msg;
 	}
 };
 
