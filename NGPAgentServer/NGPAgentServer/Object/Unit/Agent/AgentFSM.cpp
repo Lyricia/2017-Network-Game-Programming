@@ -95,9 +95,9 @@ void ChangeDirection::Execute(CAgent * agent, float fTimeElapsed, RoomInfo* pRoo
 
 	NGPMSG* msg = CreateMSG(type, roomNo, objNo, 0, 1, NULL, &action_info);
 	
-	std::cout <<"ROOM - " << pRoomInfo->RoomID 
-		<<"Agent No"<< objNo <<
-		"SendMessage Change Direction" << std::endl;
+	//std::cout <<"ROOM - " << pRoomInfo->RoomID 
+	//	<<"Agent No"<< objNo <<
+	//	"SendMessage Change Direction" << std::endl;
 
 	pRoomInfo->SendMsgs((char*)msg, sizeof(NGPMSG));
 	delete msg;
@@ -170,10 +170,10 @@ void Shooting::Execute(CAgent * agent, float fTimeElapsed, RoomInfo* pRoomInfo)
 
 		delete msg;
 
-		std::cout << "ROOM - " << pRoomInfo->RoomID
-			<< "Agent No" << objNo <<
-			"SendMessage Shoot " << std::endl;
-		if (agent->GetTarget()) std::cout << "Target No :: " << agent->GetTarget()->GetID() << std::endl;
+		//std::cout << "ROOM - " << pRoomInfo->RoomID
+		//	<< "Agent No" << objNo <<
+		//	"SendMessage Shoot " << std::endl;
+		//if (agent->GetTarget()) std::cout << "Target No :: " << agent->GetTarget()->GetID() << std::endl;
 	}
 
 	

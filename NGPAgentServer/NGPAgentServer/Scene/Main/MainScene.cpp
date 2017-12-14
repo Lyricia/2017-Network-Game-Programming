@@ -155,6 +155,7 @@ void CMainScene::ProcessMsgs()
 			break;
 		}
 		case MSGTYPE::MSGSTATE::CLIENTGAMEOVER:
+			m_pGameWorld->Stop();
 			break;
 		case MSGTYPE::MSGSTATE::CLIENTREADY:
 			break;
@@ -180,7 +181,7 @@ void CMainScene::ProcessMsgs()
 				}
 				case OBJECTTYPE::Grenade:
 				{
-					std::cout << "Room" << m_pRoomInfo->RoomID << "Granada!" << std::endl;
+					//std::cout << "Room" << m_pRoomInfo->RoomID << "Granada!" << std::endl;
 					CGrenade* grenade = new CGrenade(arrObjInfo[i].Position);
 					for (auto iter = m_vecObjects.rbegin();
 						iter != m_vecObjects.rend(); ++iter)
@@ -196,7 +197,7 @@ void CMainScene::ProcessMsgs()
 				}
 				case OBJECTTYPE::Turret:
 				{
-					std::cout << "Room" << m_pRoomInfo->RoomID << "Deploy Turret!" << std::endl;
+					//std::cout << "Room" << m_pRoomInfo->RoomID << "Deploy Turret!" << std::endl;
 					CTurret* turret = new CTurret(arrObjInfo[i].Position);
 					for (auto iter = m_vecObjects.rbegin();
 						iter != m_vecObjects.rend(); ++iter)
@@ -221,7 +222,7 @@ void CMainScene::ProcessMsgs()
 		}
 		case MSGTYPE::MSGUPDATE::DELETEOBJECT:
 		{
-			std::cout << "Room" << m_pRoomInfo->RoomID << "DeleteObject!" << std::endl;
+			//std::cout << "Room" << m_pRoomInfo->RoomID << "DeleteObject!" << std::endl;
 			DispatchMSG(msg, arrActionInfo, arrObjInfo);
 			for (auto& iter = m_vecObjects.begin(); iter != m_vecObjects.end();)
 			{
